@@ -20,7 +20,7 @@ def create_lang_task(with_apertium):
         .with_gha('build', GithubAction("Eijebong/divvun-actions/lang/build", {"fst": "hfst"}))
         .with_prep_gha_tasks()
         .with_named_artifacts("spellers", "./build/tools/spellcheckers/*.zhfst")
-        .find_or_create("build.linux_x64.%s" % CONFIG.tree_hash())
+        .find_or_create("build.linux_x64.%s" % CONFIG.git_sha)
     )
 
 
@@ -35,14 +35,14 @@ def create_bundle_task(os, type_, lang_task_id):
             .with_gha("version", GithubAction("Eijebong/divvun-actions/version", {"speller-manifest": True, "nightly": "develop, test-ci"}).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN"))
             .with_gha("bundle", GithubAction("Eijebong/divvun-actions/speller/bundle", {"speller-type": type_, "speller-manifest-path": "manifest.toml"}).with_mapped_output("speller-paths", "build", "speller-paths", task_id=lang_task_id).with_mapped_output("version", "version", "version"))
             .with_prep_gha_tasks()
-            .find_or_create("bundle.%s_x64_%s.%s" % (os, type_, CONFIG.tree_hash()))
+            .find_or_create("bundle.%s_x64_%s.%s" % (os, type_, CONFIG.git_sha))
         )
     elif os == "macos-latest":
         return
         return (
             macos_task("Bundle lang: %s %s" % (os, type_))
             .with_curl_artifact_script(lang_task_id, "spellcheckers.bundle.tar.gz")
-            .find_or_create("bundle.%s_x64_%s.%s" % (os, type_, CONFIG.tree_hash()))
+            .find_or_create("bundle.%s_x64_%s.%s" % (os, type_, CONFIG.git_sha))
         )
     else:
         raise NotImplemented

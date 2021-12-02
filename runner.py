@@ -11,6 +11,7 @@ import decisionlib
 
 SECRETS = set()
 OUTPUTS = defaultdict(lambda: {})
+EXTRA_PATH = []
 _ORIG_PRINT = print
 
 def filtered_print(*args):
@@ -71,6 +72,9 @@ def process_command(step_name, line):
         name, value = output.split('::', 1)
         name = name.split('=')[1]
         OUTPUTS[step_name][name] = value
+    if line.startswith('::add-path::'):
+        secret = line[len('::add-path::'):]
+        EXTRA_PATH.append(secret)
 
     return True
 
@@ -120,6 +124,9 @@ def get_env_for(step_name, step):
 
     env["GITHUB_ACTION"] = step_name
     env["TASKCLUSTER_PROXY_URL"] = "http://taskcluster"
+
+    # TODO: This is windows only
+    env["PATH"] = env["PATH"] + ';' + ";".join(EXTRA_PATH)
 
     return env
 

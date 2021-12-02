@@ -1,5 +1,3 @@
-# coding: utf8
-
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
@@ -8,7 +6,7 @@ import os
 import os.path
 import decisionlib
 from decisionlib import CONFIG, SHARED
-from tasks import create_lang_task, create_bundle_task
+from tasks import create_lang_task, create_bundle_task, create_kbd_task
 
 
 def tasks(task_for):
@@ -37,6 +35,9 @@ def tasks(task_for):
         #lang_task_id=None
         for os_, type_ in (("macos-latest", "speller-macos"), ("macos-latest", "speller-mobile"), ("windows-latest", "speller-windows")):
             create_bundle_task(os_, type_, lang_task_id)
+    if repo_name.startswith("keyboard-"):
+        for os_ in {"windows-latest", "macos-latest"}:
+            create_kbd_task(os_)
 
 
 build_dependencies_artifacts_expire_in = "1 month"

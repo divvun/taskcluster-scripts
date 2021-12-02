@@ -40,7 +40,7 @@ class GithubAction:
             }
         elif platform == 'win':
             return {
-                "RUNNER_TEMP": "_temp",
+                "RUNNER_TEMP": "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\_temp",
                 "GITHUB_WORKSPACE": "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\",
             }
         else:
