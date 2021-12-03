@@ -63,7 +63,7 @@ def gather_secrets():
             pass
 
 
-def process_command(step_name, line):
+async def process_command(step_name, line):
     if line.startswith('::add-mask::'):
         secret = line[len('::add-mask::'):]
         SECRETS.add(secret)
@@ -72,16 +72,22 @@ def process_command(step_name, line):
         name, value = output.split('::', 1)
         name = name.split('=')[1]
         OUTPUTS[step_name][name] = value
-    if line.startswith('::add-path::'):
+    elif line.startswith('::add-path::'):
         secret = line[len('::add-path::'):]
         EXTRA_PATH.append(secret)
+    elif line.startswith('::create-artifact'):
+        output = line[len('::create-artifact'):]
+        name, path = output.split('::', 1)
+        name = name.split('=')[1]
+        with open(path, 'rb') as fd:
+            await decisionlib.create_extra_artifact_async(name, fd.read(), public=True)
 
     return True
 
 
-def process_line(step_name: str, line: str):
+async def process_line(step_name: str, line: str):
     if line.startswith('::'):
-        if not process_command(step_name, line):
+        if not await process_command(step_name, line):
             return None
 
 
@@ -137,8 +143,8 @@ def write_outputs():
 
 async def run_step(step_name, step):
     env = get_env_for(step_name, step)
-    process = await asyncio.subprocess.create_subprocess_shell(step["script"], env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,)
 
+    process = await asyncio.subprocess.create_subprocess_shell(step["script"], env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,)
     decoder = codecs.getincrementaldecoder('utf-8')(errors='replace')
     while True:
         line = await process.stdout.readline()
@@ -146,7 +152,7 @@ async def run_step(step_name, step):
             break
 
         line = decoder.decode(line).strip().lstrip()
-        process_line(step_name, line)
+        await process_line(step_name, line)
 
     await process.wait()
 
@@ -165,5 +171,5 @@ async def main():
         await run_step(name, step)
 
 
-asyncio.get_event_loop().run_until_complete(main())
+asyncio.run(main())
 write_outputs()

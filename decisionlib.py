@@ -13,6 +13,7 @@
 Project-independent library for Taskcluster decision tasks
 """
 
+import asyncio
 import collections
 import contextlib
 import datetime
@@ -38,10 +39,13 @@ __all__ = [
     "make_repo_bundle",
 ]
 
-
-def create_extra_artifact(path, content):
-    from taskcluster import upload, helper
-    path = "private/" + path
+async def create_extra_artifact_async(path, content, public=False):
+    from taskcluster import helper
+    from taskcluster.aio import upload
+    if public:
+        path = "public/" + path
+    else:
+        path = "private/" + path
 
     queue = helper.TaskclusterConfig().get_service("queue")
 
@@ -60,7 +64,7 @@ def create_extra_artifact(path, content):
         {"credentials": ret["credentials"], "rootUrl": CONFIG.tc_root_url}
     )
 
-    upload.uploadFromBuf(
+    await upload.uploadFromBuf(
         projectId=ret["projectId"],
         name=ret["name"],
         contentType="plain/text",
@@ -74,6 +78,15 @@ def create_extra_artifact(path, content):
     queue.finishArtifact(
         CONFIG.decision_task_id, CONFIG.run_id, path, {"uploadId": ret["uploadId"]}
     )
+
+
+def create_extra_artifact(path, content, public=False):
+    coro = create_extra_artifact_async(path, content, public)
+    asyncio.set_event_loop(asyncio.new_event_loop())
+    loop = asyncio.get_event_loop()
+    result = loop.run_until_complete(coro)
+    loop.close()
+    return result
 
 
 class Config:
