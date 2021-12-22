@@ -47,7 +47,7 @@ CONFIG.task_name_template = "Divvun: %s"
 CONFIG.docker_images_expire_in = build_dependencies_artifacts_expire_in
 CONFIG.repacked_msi_files_expire_in = build_dependencies_artifacts_expire_in
 CONFIG.index_prefix = "project.divvun"
-CONFIG.default_provisioner_id = "test"
+CONFIG.default_provisioner_id = "divvun"
 CONFIG.docker_image_build_worker_type = "docker"
 
 task_for = os.environ["TASK_FOR"]

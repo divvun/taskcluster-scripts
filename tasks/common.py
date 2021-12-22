@@ -12,7 +12,7 @@ linux_build_env = {
 
 
 def linux_task(name):
-    return decisionlib.DockerWorkerTask(name).with_worker_type("linux")
+    return decisionlib.DockerWorkerTask(name).with_worker_type("linux").with_provisioner_id("divvun")
 
 
 def linux_build_task(name, bundle_dest="repo"):
