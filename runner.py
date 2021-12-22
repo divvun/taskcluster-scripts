@@ -132,6 +132,7 @@ def get_env_for(step_name, step):
     env["GITHUB_ACTION"] = step_name
     if platform.system() == 'Darwin':
         env["TASKCLUSTER_PROXY_URL"] = "http://taskcluster:8080"
+        env["PATH"] = env["PATH"] + ":/opt/homebrew/bin"
     else:
         env["TASKCLUSTER_PROXY_URL"] = "http://taskcluster"
 
