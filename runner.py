@@ -5,7 +5,7 @@ from taskcluster import helper
 import codecs
 import json
 import os
-import shlex
+import platform
 import subprocess
 import decisionlib
 
@@ -129,10 +129,15 @@ def get_env_for(step_name, step):
             env[name] = OUTPUTS[mapping['from']['action']][mapping['from']['output']]
 
     env["GITHUB_ACTION"] = step_name
-    env["TASKCLUSTER_PROXY_URL"] = "http://taskcluster"
+    if platform.system() == 'Darwin':
+        env["TASKCLUSTER_PROXY_URL"] = "http://taskcluster:8080"
+    else:
+        env["TASKCLUSTER_PROXY_URL"] = "http://taskcluster"
 
-    # TODO: This is windows only
-    env["PATH"] = env["PATH"] + ';' + ";".join(EXTRA_PATH)
+    if platform.system() == 'Windows':
+        env["PATH"] = env["PATH"] + ';' + ";".join(EXTRA_PATH)
+    else:
+        env["PATH"] = env["PATH"] + ':' + ":".join(EXTRA_PATH)
 
     return env
 
