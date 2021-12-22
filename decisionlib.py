@@ -39,11 +39,6 @@ __all__ = [
     "make_repo_bundle",
 ]
 
-def get_proxy_url(pf_name):
-    if pf_name == 'macos':
-        return 'http://taskcluster:8080'
-    return os.environ['TASKCLUSTER_PROXY_URL']
-
 
 async def create_extra_artifact_async(path, content, public=False):
     from taskcluster import helper
@@ -242,6 +237,9 @@ class Task:
     with_early_prescript = chaining(prepend_to_attr, "prescripts")
     with_env = chaining(update_attr, "env")
 
+    def get_proxy_url(self):
+        return os.environ['TASKCLUSTER_PROXY_URL']
+
     def with_script(self, *script, pre=False):
         if pre:
             return self.with_prescript(*script)
@@ -396,9 +394,9 @@ class Task:
         )
 
     def with_curl_artifact_script(
-        self, task_id, artifact_name, out_directory="", directory="public", pre=False, rename=None, extract=False, platform=None
+        self, task_id, artifact_name, out_directory="", directory="public", pre=False, rename=None, extract=False
     ):
-        queue_service = get_proxy_url(platform) + "/api/queue"
+        queue_service = self.get_proxy_url() + "/api/queue"
         ret = self.with_dependencies(task_id).with_curl_script(
             queue_service
             + "/v1/task/%s/artifacts/%s/%s" % (task_id, directory, artifact_name),
@@ -825,6 +823,9 @@ class MacOsGenericWorkerTask(UnixTaskMixin, GenericWorkerTask):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    def get_proxy_url(self):
+        return 'http://taskcluster:8080'
+
     def build_command(self):
         # generic-worker accepts multiple commands, but unlike on Windows
         # the current directory and environment variables
@@ -867,8 +868,8 @@ class MacOsGenericWorkerTask(UnixTaskMixin, GenericWorkerTask):
         for gha in self.gh_actions.values():
             for out in gha.output_mappings:
                 if out.task_id:
-                    self.with_curl_artifact_script(out.task_id, 'outputs.json', '$HOME/$TASK_ID/', 'private', rename=out.task_id + '.json', platform='macos')
-        return self.with_curl_artifact_script(CONFIG.decision_task_id, '$TASK_ID.json', f"/$HOME/$TASK_ID/", 'private', platform='macos').with_script("python3 -u $HOME/$TASK_ID/ci/runner.py /$HOME/$TASK_ID/$TASK_ID.json")
+                    self.with_curl_artifact_script(out.task_id, 'outputs.json', '$HOME/$TASK_ID/', 'private', rename=out.task_id + '.json')
+        return self.with_curl_artifact_script(CONFIG.decision_task_id, '$TASK_ID.json', f"/$HOME/$TASK_ID/", 'private').with_script("python3 -u $HOME/$TASK_ID/ci/runner.py /$HOME/$TASK_ID/$TASK_ID.json")
 
 class DockerWorkerTask(UnixTaskMixin, Task):
     """
