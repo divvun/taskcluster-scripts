@@ -857,6 +857,12 @@ class MacOsGenericWorkerTask(UnixTaskMixin, GenericWorkerTask):
     def gen_gha_payload(self, name: str):
         return self._gen_gha_payload('macos', name)
 
+    def with_prep_gha_tasks(self):
+        for gha in self.gh_actions.values():
+            for out in gha.output_mappings:
+                if out.task_id:
+                    self.with_curl_artifact_script(out.task_id, 'outputs.json', '$HOME/$TASK_ID/', 'private', rename=out.task_id + '.json')
+        return self.with_curl_artifact_script(CONFIG.decision_task_id, '$TASK_ID.json', f"/$HOME/$TASK_ID/", 'private').with_script("python3 -u $HOME/$TASK_ID/ci/runner.py /$HOME/$TASK_ID/$TASK_ID.json")
 
 class DockerWorkerTask(UnixTaskMixin, Task):
     """
