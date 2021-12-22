@@ -854,6 +854,9 @@ class MacOsGenericWorkerTask(UnixTaskMixin, GenericWorkerTask):
         """
         )
 
+    def gen_gha_payload(self, name: str):
+        return self._gen_gha_payload('macos', name)
+
 
 class DockerWorkerTask(UnixTaskMixin, Task):
     """

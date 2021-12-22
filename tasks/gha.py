@@ -38,6 +38,11 @@ class GithubAction:
                 "RUNNER_TEMP": "$HOME/$TASK_ID/_temp",
                 "GITHUB_WORKSPACE": "$HOME/$TASK_ID",
             }
+        elif platform == 'macos':
+            return {
+                "RUNNER_TEMP": "$HOME/$TASK_ID/_temp",
+                "GITHUB_WORKSPACE": "$HOME/$TASK_ID",
+            }
         elif platform == 'win':
             return {
                 "RUNNER_TEMP": "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\_temp",
@@ -81,23 +86,9 @@ class GithubAction:
     def script_path(self):
         return self.action_path + "/index.js"
 
-    def gen_script_win(self):
-        script = "node {}/{}".format(self.repo_name, self.script_path)
 
-        return script
-
-    def gen_script_linux(self):
-        script = "node {}/{}".format(self.repo_name, self.script_path)
-
-        return script
-
-    def gen_script(self, platform):
-        if platform == 'linux':
-            return self.gen_script_linux()
-        elif platform == 'win':
-            return self.gen_script_win()
-        else:
-            raise NotImplementedError
+    def gen_script(self, _platform):
+        return "node {}/{}".format(self.repo_name, self.script_path)
 
     def output_mapping(self):
         return [output.to_dict() for output in self.output_mappings]
