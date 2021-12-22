@@ -134,13 +134,15 @@ def get_env_for(step_name, step):
         env["TASKCLUSTER_PROXY_URL"] = "http://taskcluster:8080"
         env["PATH"] = env["PATH"] + ":/opt/homebrew/bin"
         env["LC_ALL"] = "en_US.UTF-8"
+        env["LANG"] = "en_US.UTF-8"
     else:
         env["TASKCLUSTER_PROXY_URL"] = "http://taskcluster"
 
-    if platform.system() == 'Windows':
-        env["PATH"] = env["PATH"] + ';' + ";".join(EXTRA_PATH)
-    else:
-        env["PATH"] = env["PATH"] + ':' + ":".join(EXTRA_PATH)
+    if EXTRA_PATH:
+        if platform.system() == 'Windows':
+            env["PATH"] = env["PATH"] + ';' + ";".join(EXTRA_PATH)
+        else:
+            env["PATH"] = env["PATH"] + ':' + ":".join(EXTRA_PATH)
 
     return env
 
