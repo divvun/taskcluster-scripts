@@ -839,7 +839,7 @@ class MacOsGenericWorkerTask(UnixTaskMixin, GenericWorkerTask):
                 "-o",
                 "pipefail",
                 "-c",
-                deindent("\n".join(self.scripts)),
+                "({}) && {}".format(deindent("\n".join(self.prescripts)), deindent("\n".join(self.scripts))),
             ]
         ]
 
