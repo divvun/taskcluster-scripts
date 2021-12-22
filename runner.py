@@ -8,6 +8,7 @@ import os
 import platform
 import subprocess
 import decisionlib
+import shutil
 
 SECRETS = set()
 OUTPUTS = defaultdict(lambda: {})
@@ -176,5 +177,11 @@ async def main():
         await run_step(name, step)
 
 
-asyncio.run(main())
+try:
+    asyncio.run(main())
+finally:
+    # Cleanup on macos
+    if platform.system() == 'Darwin':
+        shutil.rmtree(os.environ['GITHUB_WORKSPACE'])
+
 write_outputs()
