@@ -137,6 +137,7 @@ def get_env_for(step_name, step):
         env["LANG"] = "en_US.UTF-8"
     else:
         env["TASKCLUSTER_PROXY_URL"] = "http://taskcluster"
+    env["BUILD_DIR"] = env["GITHUB_WORKSPACE"]
 
     if EXTRA_PATH:
         if platform.system() == 'Windows':
