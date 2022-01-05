@@ -409,10 +409,10 @@ class Task:
 
     def with_repo_bundle(self, name, dest, *, pre=False, **kwargs):
         return self.with_curl_artifact_script(
-            CONFIG.decision_task_id, f"{name}.bundle", "$HOME/$TASK_ID", pre=True
+            CONFIG.decision_task_id, f"{name}.bundle", "$HOME/tasks/$TASK_ID", pre=True
         ).with_repo(
-            "$HOME/$TASK_ID/" + dest,
-            f"$HOME/$TASK_ID/{name}.bundle",
+            "$HOME/tasks/$TASK_ID/" + dest,
+            f"$HOME/tasks/$TASK_ID/{name}.bundle",
             CONFIG.git_bundle_shallow_ref,
             "FETCH_HEAD",
             **kwargs,
@@ -868,8 +868,8 @@ class MacOsGenericWorkerTask(UnixTaskMixin, GenericWorkerTask):
         for gha in self.gh_actions.values():
             for out in gha.output_mappings:
                 if out.task_id:
-                    self.with_curl_artifact_script(out.task_id, 'outputs.json', '$HOME/$TASK_ID/', 'private', rename=out.task_id + '.json')
-        return self.with_curl_artifact_script(CONFIG.decision_task_id, '$TASK_ID.json', f"/$HOME/$TASK_ID/", 'private').with_script("python3 -u $HOME/$TASK_ID/ci/runner.py /$HOME/$TASK_ID/$TASK_ID.json")
+                    self.with_curl_artifact_script(out.task_id, 'outputs.json', '$HOME/tasks/$TASK_ID/', 'private', rename=out.task_id + '.json')
+        return self.with_curl_artifact_script(CONFIG.decision_task_id, '$TASK_ID.json', f"/$HOME/tasks/$TASK_ID/", 'private').with_script("python3 -u $HOME/tasks/$TASK_ID/ci/runner.py /$HOME/tasks/$TASK_ID/$TASK_ID.json")
 
 class DockerWorkerTask(UnixTaskMixin, Task):
     """
@@ -897,8 +897,8 @@ class DockerWorkerTask(UnixTaskMixin, Task):
         for gha in self.gh_actions.values():
             for out in gha.output_mappings:
                 if out.task_id:
-                    self.with_curl_artifact_script(out.task_id, 'outputs.json', '$HOME/$TASK_ID/', 'private', rename=out.task_id + '.json')
-        return self.with_curl_artifact_script(CONFIG.decision_task_id, '$TASK_ID.json', f"/$HOME/$TASK_ID/", 'private').with_script("python3 -u $HOME/$TASK_ID/ci/runner.py /$HOME/$TASK_ID/$TASK_ID.json")
+                    self.with_curl_artifact_script(out.task_id, 'outputs.json', '$HOME/tasks/$TASK_ID/', 'private', rename=out.task_id + '.json')
+        return self.with_curl_artifact_script(CONFIG.decision_task_id, '$TASK_ID.json', f"/$HOME/tasks/$TASK_ID/", 'private').with_script("python3 -u $HOME/tasks/$TASK_ID/ci/runner.py /$HOME/tasks/$TASK_ID/$TASK_ID.json")
 
     def build_worker_payload(self):
         """

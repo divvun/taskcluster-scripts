@@ -35,13 +35,13 @@ class GithubAction:
     def env_variables(self, platform):
         if platform == 'linux':
             return {
-                "RUNNER_TEMP": "$HOME/$TASK_ID/_temp",
-                "GITHUB_WORKSPACE": "$HOME/$TASK_ID",
+                "RUNNER_TEMP": "$HOME/tasks/$TASK_ID/_temp",
+                "GITHUB_WORKSPACE": "$HOME/tasks/$TASK_ID",
             }
         elif platform == 'macos':
             return {
-                "RUNNER_TEMP": "$HOME/$TASK_ID/_temp",
-                "GITHUB_WORKSPACE": "$HOME/$TASK_ID",
+                "RUNNER_TEMP": "$HOME/tasks/$TASK_ID/_temp",
+                "GITHUB_WORKSPACE": "$HOME/tasks/$TASK_ID",
             }
         elif platform == 'win':
             return {
