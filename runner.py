@@ -184,8 +184,9 @@ async def main():
 try:
     asyncio.run(main())
 finally:
+    pass
     # Cleanup on macos
-    if platform.system() == 'Darwin':
-        shutil.rmtree(os.environ['GITHUB_WORKSPACE'])
+    #if platform.system() == 'Darwin':
+    #shutil.rmtree(os.environ['GITHUB_WORKSPACE'])
 
 write_outputs()
