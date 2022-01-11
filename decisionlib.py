@@ -61,6 +61,8 @@ async def create_extra_artifact_async(path, content, public=False):
         },
     )
 
+    print(ret)
+
     objectService = taskcluster.Object(
         {"credentials": ret["credentials"], "rootUrl": CONFIG.tc_root_url}
     )
