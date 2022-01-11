@@ -61,22 +61,28 @@ async def create_extra_artifact_async(path, content, public=False):
         },
     )
 
-    print(ret)
-
     objectService = taskcluster.Object(
         {"credentials": ret["credentials"], "rootUrl": CONFIG.tc_root_url}
     )
 
-    await upload.uploadFromBuf(
-        projectId=ret["projectId"],
-        name=ret["name"],
-        contentType="plain/text",
-        contentLength=len(content),
-        expires=ret["expires"],
-        data=content,
-        objectService=objectService,
-        uploadId=ret["uploadId"],
-    )
+    retries = 0
+
+    while retries <= 3:
+        try:
+            await upload.uploadFromBuf(
+                projectId=ret["projectId"],
+                name=ret["name"],
+                contentType="plain/text",
+                contentLength=len(content),
+                expires=ret["expires"],
+                data=content,
+                objectService=objectService,
+                uploadId=ret["uploadId"],
+            )
+            break
+        except:
+            retries += 1
+
 
     queue.finishArtifact(
         CONFIG.decision_task_id, CONFIG.run_id, path, {"uploadId": ret["uploadId"]}
