@@ -40,7 +40,7 @@ def create_bundle_task(os, type_, lang_task_id):
     elif os == "macos-latest":
         return (
             macos_task("Bundle lang: %s %s" % (os, type_))
-            .with_curl_artifact_script(lang_task_id, "spellers.tar.gz")
+            .with_curl_artifact_script(lang_task_id, "spellers.tar.gz", extract=True)
             .with_gha("init", GithubAction("Eijebong/divvun-actions/pahkat/init", {"repo": "https://pahkat.uit.no/devtools/", "channel": "nightly", "packages": "pahkat-uploader, divvun-bundler, thfst-tools, xcnotary" }))
             .with_gha("setup", GithubAction("Eijebong/divvun-actions/setup", {}).with_secret_input("key", "divvun", "DIVVUN_KEY"))
             .with_gha("version", GithubAction("Eijebong/divvun-actions/version", {"speller-manifest": True, "nightly": "develop, test-ci"}).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN"))
