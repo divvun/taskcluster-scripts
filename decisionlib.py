@@ -61,13 +61,11 @@ async def create_extra_artifact_async(path, content, public=False):
         },
     )
 
-    objectService = taskcluster.Object(
-        {"credentials": ret["credentials"], "rootUrl": CONFIG.tc_root_url}
-    )
+    objectService = helper.TaskclusterConfig().get_service("object")
 
     retries = 0
 
-    while retries <= 3:
+    while True:
         try:
             await upload.uploadFromBuf(
                 projectId=ret["projectId"],
@@ -81,6 +79,8 @@ async def create_extra_artifact_async(path, content, public=False):
             )
             break
         except:
+            if retries >= 3:
+                raise
             retries += 1
 
 
@@ -317,6 +317,7 @@ class Task:
             "taskGroupId": CONFIG.decision_task_id,
             "dependencies": dedup([CONFIG.decision_task_id] + self.dependencies),
             "schedulerId": self.scheduler_id,
+            "projectId": "divvun",
             "provisionerId": self.provisioner_id,
             "workerType": self.worker_type,
             "created": SHARED.from_now_json(""),
