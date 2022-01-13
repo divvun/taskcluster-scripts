@@ -1,5 +1,5 @@
 from .common import linux_build_task, macos_task, windows_task
-from .gha import GithubAction
+from gha import GithubAction
 from decisionlib import CONFIG
 import os.path
 

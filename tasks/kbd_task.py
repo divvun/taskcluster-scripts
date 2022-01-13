@@ -1,5 +1,5 @@
 from .common import macos_task, windows_task
-from .gha import GithubAction
+from gha import GithubAction
 from decisionlib import CONFIG
 
 def create_kbd_task(os):

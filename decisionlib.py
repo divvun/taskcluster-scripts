@@ -1,5 +1,3 @@
-# coding: utf8
-
 # Copyright 2018 The Servo Project Developers. See the COPYRIGHT
 # file at the top-level directory of this distribution.
 #
@@ -10,21 +8,25 @@
 # except according to those terms.
 
 """
-Project-independent library for Taskcluster decision tasks
+This file contains helpers to create taskcluster tasks. It is heavily inspired
+by servo's decisionlib and reuses some of its code. Note that unlike servo's
+decisionlib, this is very much targetted at divvun's usage and running github
+actions on taskcluster instead of being generic.
 """
 
 import asyncio
 import collections
 import contextlib
 import datetime
-import hashlib
 import json
 import os
 import re
 import subprocess
 import sys
 import taskcluster
-from taskcluster.generated import queue
+from typing import Dict, List, Set, Optional, Tuple
+import gha
+import utils
 
 
 # Public API
@@ -40,83 +42,23 @@ __all__ = [
 ]
 
 
-async def create_extra_artifact_async(path, content, public=False):
-    from taskcluster import helper
-    from taskcluster.aio import upload
-    if public:
-        path = "public/" + path
-    else:
-        path = "private/" + path
-
-    queue = helper.TaskclusterConfig().get_service("queue")
-
-    ret = queue.createArtifact(
-        CONFIG.decision_task_id,
-        CONFIG.run_id,
-        path,
-        {
-            "contentType": "plain/text",
-            "expires": taskcluster.fromNow("1 hour"),
-            "storageType": "object",
-        },
-    )
-
-    objectService = helper.TaskclusterConfig().get_service("object")
-
-    retries = 0
-
-    while True:
-        try:
-            await upload.uploadFromBuf(
-                projectId=ret["projectId"],
-                name=ret["name"],
-                contentType="plain/text",
-                contentLength=len(content),
-                expires=ret["expires"],
-                data=content,
-                objectService=objectService,
-                uploadId=ret["uploadId"],
-            )
-            break
-        except:
-            if retries >= 3:
-                raise
-            retries += 1
-
-
-    queue.finishArtifact(
-        CONFIG.decision_task_id, CONFIG.run_id, path, {"uploadId": ret["uploadId"]}
-    )
-
-
-def create_extra_artifact(path, content, public=False):
-    coro = create_extra_artifact_async(path, content, public)
-    asyncio.set_event_loop(asyncio.new_event_loop())
-    loop = asyncio.get_event_loop()
-    result = loop.run_until_complete(coro)
-    loop.close()
-    return result
-
-
 class Config:
     """
     Global configuration, for users of the library to modify.
     """
 
     def __init__(self):
-        self.task_name_template = "%s"
-        self.index_prefix = "garbage.divvun-decisionlib"
+        self.task_name_template = "Divvun: %s"
+        self.index_prefix = "project.divvun"
         self.index_read_only = False
-        self.scopes_for_all_subtasks = []
-        self.routes_for_all_subtasks = []
-        self.docker_image_build_worker_type = None
-        self.docker_images_expire_in = "1 month"
+        self.scopes_for_all_subtasks: List[str] = []
+        self.routes_for_all_subtasks: List[str] = []
         self.repacked_msi_files_expire_in = "1 month"
 
         # Set by docker-worker:
         # https://docs.taskcluster.net/docs/reference/workers/docker-worker/docs/environment
-        self.decision_task_id = os.environ.get("TASK_ID")
-        self.run_id = os.environ.get("RUN_ID")
+        self.decision_task_id = os.environ["TASK_ID"]
+        self.run_id = os.environ["RUN_ID"]
 
         # Set in the decision task’s payload, such as defined in .taskcluster.yml
         self.task_owner = os.environ.get("TASK_OWNER")
@@ -127,9 +69,9 @@ class Config:
         self.git_bundle_shallow_ref = "refs/heads/shallow"
 
         self.tc_root_url = os.environ.get("TASKCLUSTER_ROOT_URL")
-        self.default_provisioner_id = "proj-example"
+        self.default_provisioner_id = "divvun"
 
-    def tree_hash(self):
+    def tree_hash(self) -> str:
         if not hasattr(self, "_tree_hash"):
             # Use the SHA-1 hash of the git "tree" object rather than the commit.
             # A `@bors-servo retry` command creates a new merge commit with a different commit hash
@@ -152,7 +94,7 @@ class Shared:
 
     def __init__(self):
         self.now = datetime.datetime.utcnow()
-        self.found_or_created_indexed_tasks = {}
+        self.found_or_created_indexed_tasks: Dict[str, str] = {}
 
         options = {"rootUrl": os.environ["TASKCLUSTER_PROXY_URL"]}
         self.queue_service = taskcluster.Queue(options)
@@ -199,7 +141,7 @@ class Task:
     This is an abstract class that needs to be specialized for different worker implementations.
     """
 
-    def __init__(self, name):
+    def __init__(self, name: str):
         self.name = name
         self.description = ""
         self.scheduler_id = "taskcluster-github"
@@ -208,20 +150,19 @@ class Task:
         self.deadline_in = "1 day"
         self.expires_in = "1 year"
         self.index_and_artifacts_expire_in = self.expires_in
-        self.dependencies = []
-        self.scopes = []
-        self.routes = []
-        self.extra = {}
-        self.priority = None  # Defaults to 'lowest'
-        self.artifacts = []
+        self.dependencies: List[str] = []
+        self.scopes: List[str] = []
+        self.routes: List[str] = []
+        self.extra: Dict[str, Dict[str, str]] = {}
+        self.priority: Optional[str] = None  # Defaults to 'lowest'
+        self.artifacts: List[Tuple[str, str]] = []
         self.env = {
             "GITHUB_ACTIONS": "true",
             "GITHUB_REPOSITORY": os.environ["REPO_FULL_NAME"]
         }
-        self.scripts = []
-        self.prescripts = []  # Those scripts will be ran before we try to filter secrets
-        self.action_paths = set()
-        self.gh_actions = collections.OrderedDict()
+        self.scripts: List[str] = []
+        self.action_paths: Set[str] = set()
+        self.gh_actions: collections.OrderedDict[str, gha.GithubAction] = collections.OrderedDict()
 
     # All `with_*` methods return `self`, so multiple method calls can be chained.
     with_description = chaining(setattr, "description")
@@ -240,33 +181,24 @@ class Task:
     with_routes = chaining(append_to_attr, "routes")
 
     with_extra = chaining(update_attr, "extra")
-
-    with_prescript = chaining(append_to_attr, "prescripts")
-    with_early_prescript = chaining(prepend_to_attr, "prescripts")
     with_env = chaining(update_attr, "env")
 
-    def get_proxy_url(self):
+    def get_proxy_url(self) -> str:
         return os.environ['TASKCLUSTER_PROXY_URL']
 
-    def with_script(self, *script, pre=False):
-        if pre:
-            return self.with_prescript(*script)
-
+    def with_script(self, *script: str):
         self.scripts.extend(script)
         return self
 
-    def with_early_script(self, *script, pre=False):
-        if pre:
-            return self.with_early_prescript(*script)
-
+    def with_early_script(self, *script: str):
         self.scripts[0:0] = list(script)
         return self
 
-    def with_index_at(self, index_path):
+    def with_index_at(self, index_path: str):
         self.routes.append("index.%s.%s" % (CONFIG.index_prefix, index_path))
         return self
 
-    def with_artifacts(self, *paths, type="file"):
+    def with_artifacts(self, *paths: str, type: str="file"):
         """
         Add each path in `paths` as a task artifact
         that expires in `self.index_and_artifacts_expire_in`.
@@ -278,10 +210,10 @@ class Task:
         for path in paths:
             if (type, path) in self.artifacts:
                 raise ValueError("Duplicate artifact: " + path)  # pragma: no cover
-            self.artifacts.append(tuple((type, path)))
+            self.artifacts.append((type, path))
         return self
 
-    def with_named_artifacts(self, name, path):
+    def with_named_artifacts(self, name: str, path: str):
         raise NotImplementedError
 
     def build_worker_payload(self):  # pragma: no cover
@@ -294,7 +226,7 @@ class Task:
         """
         raise NotImplementedError
 
-    def create(self):
+    def create(self) -> str:
         """
         Call the Queue’s `createTask` API to schedule a new task, and return its ID.
 
@@ -350,13 +282,13 @@ class Task:
         return task_id
 
     @staticmethod
-    def find(index_path):
+    def find(index_path: str) -> str:
         full_index_path = "%s.%s" % (CONFIG.index_prefix, index_path)
         task_id = SHARED.index_service.findTask(full_index_path)["taskId"]
         print("Found task %s indexed at %s" % (task_id, full_index_path))
         return task_id
 
-    def find_or_create(self, index_path):
+    def find_or_create(self, index_path: str) -> str:
         """
         Try to find a task in the Index and return its ID.
 
@@ -385,7 +317,7 @@ class Task:
         SHARED.found_or_created_indexed_tasks[index_path] = task_id
         return task_id
 
-    def with_additional_repo(self, repo_url, target):
+    def with_additional_repo(self, repo_url: str, target: str):
         return self.with_script(
             """
             git clone --depth=1 %s %s
@@ -394,41 +326,40 @@ class Task:
         )
 
 
-    def with_curl_script(self, url, file_path, *, pre=False):
+    def with_curl_script(self, url: str, file_path: str):
         return self.with_script(
             """
             curl --compressed --ssl-no-revoke --retry 5 --connect-timeout 10 -Lf "%s" -o "%s"
         """
-            % (url, file_path), pre=pre
+            % (url, file_path)
         )
 
     def with_curl_artifact_script(
-        self, task_id, artifact_name, out_directory="", directory="public", pre=False, rename=None, extract=False
+        self, task_id: str, artifact_name: str, out_directory="", directory="public", rename=None, extract=False
     ):
         queue_service = self.get_proxy_url() + "/api/queue"
         ret = self.with_dependencies(task_id).with_curl_script(
             queue_service
             + "/v1/task/%s/artifacts/%s/%s" % (task_id, directory, artifact_name),
-            os.path.join(out_directory, rename or url_basename(artifact_name)), pre=pre
+            os.path.join(out_directory, rename or url_basename(artifact_name))
         )
         if extract:
             ret = self.with_script("tar xvf %s" % os.path.join(out_directory, rename or url_basename(artifact_name)))
 
         return ret
 
-    def with_repo_bundle(self, name, dest, *, pre=False, **kwargs):
+    def with_repo_bundle(self, name, dest, **kwargs):
         return self.with_curl_artifact_script(
-            CONFIG.decision_task_id, f"{name}.bundle", "$HOME/tasks/$TASK_ID", pre=True
+            CONFIG.decision_task_id, f"{name}.bundle", "$HOME/tasks/$TASK_ID"
         ).with_repo(
             "$HOME/tasks/$TASK_ID/" + dest,
             f"$HOME/tasks/$TASK_ID/{name}.bundle",
             CONFIG.git_bundle_shallow_ref,
             "FETCH_HEAD",
-            **kwargs,
-            pre=pre
+            **kwargs
         )
 
-    def with_gha(self, name, gha):
+    def with_gha(self, name: str, gha: gha.GithubAction):
         if gha.git_fetch_url not in self.action_paths:
             self.with_additional_repo(gha.git_fetch_url, gha.repo_name)
             self.action_paths.add(gha.git_fetch_url)
@@ -442,7 +373,7 @@ class Task:
         for name, gha in self.gh_actions.items():
             script = gha.gen_script(platform)
             payload[name] = {"script": script, "mapping": gha.output_mapping(), "env": gha.env_variables(platform), "inputs": gha.args, "secret_inputs": gha.secret_inputs}
-        create_extra_artifact(payload_name, json.dumps(payload).encode())
+        utils.create_extra_artifact(payload_name, json.dumps(payload).encode())
 
     def gen_gha_payload(self, name: str):
         raise NotImplementedError
@@ -463,8 +394,8 @@ class GenericWorkerTask(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.max_run_time_minutes = 30
-        self.features = {}
-        self.mounts = []
+        self.features: Dict[str, bool] = {}
+        self.mounts: List[Dict[str, str]] = []
 
     with_max_run_time_minutes = chaining(setattr, "max_run_time_minutes")
     with_mounts = chaining(append_to_attr, "mounts")
@@ -509,7 +440,7 @@ class GenericWorkerTask(Task):
             ],
         )
 
-    def with_features(self, *names):
+    def with_features(self, *names: str):
         """
         Enable the given `generic-worker` features.
 
@@ -518,7 +449,7 @@ class GenericWorkerTask(Task):
         self.features.update({name: True for name in names})
         return self
 
-    def _mount_content(self, url_or_artifact_name, task_id, sha256):
+    def _mount_content(self, url_or_artifact_name: str, task_id: str, sha256: str):
         if task_id:
             content = {"taskId": task_id, "artifact": url_or_artifact_name}
         else:
@@ -528,7 +459,7 @@ class GenericWorkerTask(Task):
         return content
 
     def with_file_mount(
-        self, url_or_artifact_name, task_id=None, sha256=None, path=None
+        self, url_or_artifact_name: str, task_id=None, sha256=None, path=None
     ):
         """
         Make `generic-worker` download a file before the task starts
@@ -548,7 +479,7 @@ class GenericWorkerTask(Task):
         )
 
     def with_directory_mount(
-        self, url_or_artifact_name, task_id=None, sha256=None, path=None
+        self, url_or_artifact_name: str, task_id=None, sha256=None, path=None
     ):
         """
         Make `generic-worker` download an archive before the task starts,
@@ -589,11 +520,6 @@ class WindowsGenericWorkerTask(GenericWorkerTask):
 
     Scripts are written as `.bat` files executed with `cmd.exe`.
     """
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.rdp_info_artifact_name = None
-
     def with_prep_gha_tasks(self):
         for gha in self.gh_actions.values():
             for out in gha.output_mappings:
@@ -602,51 +528,32 @@ class WindowsGenericWorkerTask(GenericWorkerTask):
         return self.with_curl_artifact_script(CONFIG.decision_task_id, '%TASK_ID%.json', "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\", 'private').with_script("python -u %HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\ci\\runner.py %HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\%TASK_ID%.json")
 
     def build_worker_payload(self):
-        if self.rdp_info_artifact_name:
-            rdp_scope = "generic-worker:allow-rdp:%s/%s" % (
-                self.provisioner_id,
-                self.worker_type,
-            )
-            self.scopes.append(rdp_scope)
         self.scopes.append("generic-worker:os-group:divvun/windows/Administrators")
         self.scopes.append("generic-worker:run-as-administrator:divvun/windows")
         self.with_features("runAsAdministrator")
         return dict_update_if_truthy(
             super().build_worker_payload(),
-            rdpInfo=self.rdp_info_artifact_name,
             osGroups=["Administrators"],
         )
 
     def build_command(self):
-        return ["cmd.exe /C \"({}) && {}\"".format(deindent("\n".join(self.prescripts)), deindent("\n".join(self.scripts)))]
+        return ["cmd.exe /C \"{}\"".format(deindent("\n".join(self.scripts)))]
 
-    def with_path_from_homedir(self, *paths, pre=False):
+    def with_path_from_homedir(self, *paths: str):
         """
         Interpret each path in `paths` as relative to the task’s home directory,
         and add it to the `PATH` environment variable.
         """
         for p in paths:
             self.with_early_script(
-                "set \"PATH=%HOMEDRIVE%%HOMEPATH%\\{};%PATH%\"".format(p), pre=pre
+                "set \"PATH=%HOMEDRIVE%%HOMEPATH%\\{};%PATH%\"".format(p)
             )
             self.with_early_script(
-                "set \"PATH=%HOMEDRIVE%%HOMEPATH%\\{};%PATH%\"".format(p), pre=pre
+                "set \"PATH=%HOMEDRIVE%%HOMEPATH%\\{};%PATH%\"".format(p)
             )
         return self
 
-    def with_repo_bundle(self, name, dest, *, pre=False, **kwargs):
-        return self.with_curl_artifact_script(
-            CONFIG.decision_task_id, f"{name}.bundle", "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%", pre=pre
-        ).with_repo(
-            "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\" + dest,
-            f"%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\{name}.bundle",
-            CONFIG.git_bundle_shallow_ref,
-            "FETCH_HEAD",
-            pre=pre,
-            **kwargs,
-        )
-
-    def with_repo(self, path, fetch_url, fetch_ref, checkout_sha, sparse_checkout=None, pre=False):
+    def with_repo(self, path, fetch_url, fetch_ref, checkout_sha, sparse_checkout=None):
         """
         Make a clone the git repository at the start of the task.
         This uses `CONFIG.git_url`, `CONFIG.git_ref`, and `CONFIG.git_sha`,
@@ -680,26 +587,37 @@ class WindowsGenericWorkerTask(GenericWorkerTask):
             assert_truthy(fetch_ref),
             assert_truthy(checkout_sha),
         )
-        return self.with_git(pre=pre).with_script(git, pre=pre)
+        return self.with_git().with_script(git)
 
-    def with_git(self, pre=False):
+    def with_repo_bundle(self, name: str, dest: str, **kwargs):
+        return self.with_curl_artifact_script(
+            CONFIG.decision_task_id, f"{name}.bundle", "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%"
+        ).with_repo(
+            "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\" + dest,
+            f"%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\{name}.bundle",
+            CONFIG.git_bundle_shallow_ref,
+            "FETCH_HEAD",
+            **kwargs,
+        )
+
+    def with_git(self):
         """
         Make the task download `git-for-windows` and make it available for `git` commands.
 
         This is implied by `with_repo`.
         """
-        return self.with_path_from_homedir("git\\cmd", pre=pre).with_path_from_homedir("git\\bin", pre=pre).with_path_from_homedir("git\\mingw64\\bin").with_directory_mount(
+        return self.with_path_from_homedir("git\\cmd").with_path_from_homedir("git\\bin").with_path_from_homedir("git\\mingw64\\bin").with_directory_mount(
             "https://github.com/git-for-windows/git/releases/download/v2.34.1.windows.1/Git-2.34.1-64-bit.tar.bz2",
             path="git",
         )
 
-    def with_curl_script(self, url, file_path, *, pre=False):
-        self.with_curl(pre=pre)
-        return super().with_curl_script(url, file_path, pre=pre)
+    def with_curl_script(self, url, file_path):
+        self.with_curl()
+        return super().with_curl_script(url, file_path)
 
-    def with_curl(self, *, pre=False):
+    def with_curl(self):
         return self.with_path_from_homedir(
-            "curl\\curl-7.79.1-win64-mingw\\bin", pre=pre
+            "curl\\curl-7.79.1-win64-mingw\\bin"
         ).with_directory_mount(
             "https://curl.se/windows/dl-7.79.1_4/curl-7.79.1_4-win64-mingw.zip",
             path="curl",
@@ -718,52 +636,7 @@ class WindowsGenericWorkerTask(GenericWorkerTask):
             .with_file_mount("https://win.rustup.rs/x86_64", path="rustup-init.exe")
         )
 
-    def with_repacked_msi(self, url, sha256, path):
-        """
-        Download an MSI file from `url`, extract the files in it with `lessmsi`,
-        and make them available in the directory at `path` (relative to the task’s home directory).
-
-        `sha256` is required and the MSI file must have that hash.
-
-        The file extraction (and recompression in a ZIP file) is done in a separate task,
-        wich is indexed based on `sha256` and cached for `CONFIG.repacked_msi_files_expire_in`.
-
-        <https://github.com/activescott/lessmsi>
-        """
-        repack_task = (
-            WindowsGenericWorkerTask("MSI repack: " + url)
-            .with_worker_type(self.worker_type)
-            .with_max_run_time_minutes(20)
-            .with_file_mount(url, sha256=sha256, path="input.msi")
-            .with_directory_mount(
-                "https://github.com/activescott/lessmsi/releases/download/"
-                + "v1.6.1/lessmsi-v1.6.1.zip",
-                sha256="540b8801e08ec39ba26a100c855898f455410cecbae4991afae7bb2b4df026c7",
-                path="lessmsi",
-            )
-            .with_directory_mount(
-                "https://www.7-zip.org/a/7za920.zip",
-                sha256="2a3afe19c180f8373fa02ff00254d5394fec0349f5804e0ad2f6067854ff28ac",
-                path="7zip",
-            )
-            .with_path_from_homedir("lessmsi", "7zip")
-            .with_script(
-                """
-                lessmsi x input.msi extracted\\
-                cd extracted\\SourceDir
-                7za a repacked.zip *
-            """
-            )
-            .with_artifacts("extracted/SourceDir/repacked.zip")
-            .with_index_and_artifacts_expire_in(CONFIG.repacked_msi_files_expire_in)
-            .find_or_create("repacked-msi." + sha256)
-        )
-        return self.with_dependencies(repack_task).with_directory_mount(
-            "public/repacked.zip", task_id=repack_task, path=path
-        )
-
-
-    def with_python3(self, pre=False):
+    def with_python3(self):
         """
         For Python 3, use `with_directory_mount` and the "embeddable zip file" distribution
         from python.org.
@@ -774,13 +647,11 @@ class WindowsGenericWorkerTask(GenericWorkerTask):
             self.with_curl_script(
                 "https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe",
                 "do-the-python.exe",
-                pre=pre
             )
             .with_script(
                 "start /wait do-the-python.exe /quiet TargetDir=%HOMEDRIVE%%HOMEPATH%\\python3 InstallAllUsers=0 InstallLauncherAllUsers=0 /log C:\\log",
-                pre=pre
             )
-            .with_path_from_homedir("python3", "python3\\Scripts", pre=pre)
+            .with_path_from_homedir("python3", "python3\\Scripts")
         )
 
     def gen_gha_payload(self, name: str):
@@ -788,7 +659,7 @@ class WindowsGenericWorkerTask(GenericWorkerTask):
 
 class UnixTaskMixin(Task):
     def with_repo(
-        self, name, fetch_url, fetch_ref, checkout_sha, alternate_object_dir="", pre=False
+        self, name, fetch_url, fetch_ref, checkout_sha, alternate_object_dir=""
     ):
         """
         Make a clone the git repository at the start of the task.
@@ -818,7 +689,7 @@ class UnixTaskMixin(Task):
                 assert_truthy(fetch_ref),
                 assert_truthy(checkout_sha),
                 alternate=alternate_object_dir,
-            ), pre=pre
+            )
         )
 
 
@@ -828,11 +699,10 @@ class MacOsGenericWorkerTask(UnixTaskMixin, GenericWorkerTask):
 
     Scripts are interpreted with `bash`.
     """
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def get_proxy_url(self):
+    def get_proxy_url(self) -> str:
+        """
+        Mac workers don't run as root so the proxy can't listen on :80
+        """
         return 'http://taskcluster:8080'
 
     def build_command(self):
@@ -849,7 +719,7 @@ class MacOsGenericWorkerTask(UnixTaskMixin, GenericWorkerTask):
                 "-o",
                 "pipefail",
                 "-c",
-                "({}) && {}".format(deindent("\n".join(self.prescripts)), deindent("\n".join(self.scripts))),
+                "{}".format(deindent("\n".join(self.scripts))),
             ]
         ]
 
@@ -879,6 +749,7 @@ class MacOsGenericWorkerTask(UnixTaskMixin, GenericWorkerTask):
                 if out.task_id:
                     self.with_curl_artifact_script(out.task_id, 'outputs.json', '$HOME/tasks/$TASK_ID/', 'private', rename=out.task_id + '.json')
         return self.with_curl_artifact_script(CONFIG.decision_task_id, '$TASK_ID.json', f"/$HOME/tasks/$TASK_ID/", 'private').with_script("python3 -u $HOME/tasks/$TASK_ID/ci/runner.py /$HOME/tasks/$TASK_ID/$TASK_ID.json")
+
 
 class DockerWorkerTask(UnixTaskMixin, Task):
     """
@@ -926,7 +797,7 @@ class DockerWorkerTask(UnixTaskMixin, Task):
                 "-o",
                 "pipefail",
                 "-c",
-                "({}) && {}".format(deindent("\n".join(self.prescripts)), deindent("\n".join(self.scripts))),
+                "{}".format(deindent("\n".join(self.scripts))),
             ],
         }
         return dict_update_if_truthy(
@@ -946,7 +817,7 @@ class DockerWorkerTask(UnixTaskMixin, Task):
             },
         )
 
-    def with_features(self, *names):
+    def with_features(self, *names: str):
         """
         Enable the given `docker-worker` features.
 
@@ -955,81 +826,30 @@ class DockerWorkerTask(UnixTaskMixin, Task):
         self.features.update({name: True for name in names})
         return self
 
-    def with_dockerfile(self, dockerfile):
-        """
-        Build a Docker image based on the given `Dockerfile`, and use it for this task.
-
-        `dockerfile` is a path in the filesystem where this code is running.
-        Some non-standard syntax is supported, see `expand_dockerfile`.
-
-        The image is indexed based on a hash of the expanded `Dockerfile`,
-        and cached for `CONFIG.docker_images_expire_in`.
-
-        Images are built without any *context*.
-        <https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#understand-build-context>
-        """
-        basename = os.path.basename(dockerfile)
-        suffix = ".dockerfile"
-        assert basename.endswith(suffix)
-        image_name = basename[: -len(suffix)]
-
-        dockerfile_contents = expand_dockerfile(dockerfile)
-        digest = hashlib.sha256(dockerfile_contents).hexdigest()
-
-        image_build_task = (
-            DockerWorkerTask("Docker image: " + image_name)
-            .with_worker_type(CONFIG.docker_image_build_worker_type or self.worker_type)
-            .with_max_run_time_minutes(30)
-            .with_index_and_artifacts_expire_in(CONFIG.docker_images_expire_in)
-            .with_features("dind")
-            .with_env(DOCKERFILE=dockerfile_contents)
-            .with_artifacts("/image.tar.lz4")
-            .with_script(
-                """
-                echo "$DOCKERFILE" | docker build -t taskcluster-built -
-                docker save taskcluster-built | lz4 > /image.tar.lz4
-            """
-            )
-            .with_docker_image(
-                # https://github.com/servo/taskcluster-bootstrap-docker-images#image-builder
-                "servobrowser/taskcluster-bootstrap:image-builder@sha256:"
-                "0a7d012ce444d62ffb9e7f06f0c52fedc24b68c2060711b313263367f7272d9d"
-            )
-            .find_or_create("docker-image." + digest)
-        )
-
-        return self.with_dependencies(image_build_task).with_docker_image(
-            {
-                "type": "task-image",
-                "path": "public/image.tar.lz4",
-                "taskId": image_build_task,
-            }
-        )
-
-    def with_apt_update(self, *, pre=False):
+    def with_apt_update(self):
         return self.with_script(
             """
             apt update
-        """, pre=pre
+        """
         )
 
-    def with_apt_install(self, *pkgnames, pre=False):
+    def with_apt_install(self, *pkgnames: str):
         return self.with_script(
             """
             DEBIAN_FRONTEND=noninteractive apt install -y %s
         """
-            % " ".join(pkgnames), pre=pre
+            % " ".join(pkgnames)
         )
 
-    def with_pip_install(self, *pkgnames, pre=False):
+    def with_pip_install(self, *pkgnames: str):
         return self.with_script(
             """
             pip install %s
         """
-            % " ".join(pkgnames), pre=pre
+            % " ".join(pkgnames)
         )
 
-    def with_named_artifacts(self, name, path):
+    def with_named_artifacts(self, name: str, path: str):
         assert '/' not in name
         targz = name + ".tar.gz"
         basedir = os.path.dirname(path)
@@ -1040,24 +860,6 @@ class DockerWorkerTask(UnixTaskMixin, Task):
 
     def gen_gha_payload(self, name: str):
         return self._gen_gha_payload('linux', name)
-
-
-def expand_dockerfile(dockerfile):
-    """
-    Read the file at path `dockerfile`,
-    and transitively expand the non-standard `% include` header if it is present.
-    """
-    with open(dockerfile, "rb") as f:
-        dockerfile_contents = f.read()
-
-    include_marker = b"% include"
-    if not dockerfile_contents.startswith(include_marker):
-        return dockerfile_contents
-
-    include_line, _, rest = dockerfile_contents.partition(b"\n")
-    included = include_line[len(include_marker) :].strip().decode("utf8")
-    path = os.path.join(os.path.dirname(dockerfile), included)
-    return b"\n".join([expand_dockerfile(path), rest])
 
 
 def assert_truthy(x):
@@ -1072,11 +874,11 @@ def dict_update_if_truthy(d, **kwargs):
     return d
 
 
-def deindent(string):
+def deindent(string: str) -> str:
     return re.sub("\n +", "\n ", string).strip()
 
 
-def url_basename(url):
+def url_basename(url: str) -> str:
     return url.rpartition("/")[-1]
 
 

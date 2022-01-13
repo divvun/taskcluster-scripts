@@ -71,7 +71,7 @@ import json
 import os
 import platform
 import subprocess
-import decisionlib
+import utils
 import shutil
 from typing import Set, Dict, List, Any
 
@@ -165,7 +165,7 @@ async def process_command(step_name: str, line: str) -> bool:
         name, path = output.split('::', 1)
         name = name.split('=')[1]
         with open(path, 'rb') as fd:
-            await decisionlib.create_extra_artifact_async(name, fd.read(), public=True)
+            await utils.create_extra_artifact_async(name, fd.read(), public=True)
 
     return True
 
@@ -247,7 +247,7 @@ def write_outputs():
     needed by other tasks. Note that those are private artifacts in case
     secrets creep up in them
     """
-    decisionlib.create_extra_artifact("outputs.json", json.dumps(OUTPUTS).encode())
+    utils.create_extra_artifact("outputs.json", json.dumps(OUTPUTS).encode())
 
 
 async def run_action(action_name: str, action: Dict[str, Any]):
