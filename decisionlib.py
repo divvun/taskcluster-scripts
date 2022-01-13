@@ -14,7 +14,6 @@ decisionlib, this is very much targetted at divvun's usage and running github
 actions on taskcluster instead of being generic.
 """
 
-import asyncio
 import collections
 import contextlib
 import datetime
@@ -23,8 +22,8 @@ import os
 import re
 import subprocess
 import sys
-import taskcluster
 from typing import Dict, List, Set, Optional, Tuple
+import taskcluster
 import gha
 import utils
 
@@ -70,9 +69,10 @@ class Config:
 
         self.tc_root_url = os.environ.get("TASKCLUSTER_ROOT_URL")
         self.default_provisioner_id = "divvun"
+        self._tree_hash = None
 
     def tree_hash(self) -> str:
-        if not hasattr(self, "_tree_hash"):
+        if self._tree_hash is None:
             # Use the SHA-1 hash of the git "tree" object rather than the commit.
             # A `@bors-servo retry` command creates a new merge commit with a different commit hash
             # but with the same tree hash.
@@ -158,11 +158,13 @@ class Task:
         self.artifacts: List[Tuple[str, str]] = []
         self.env = {
             "GITHUB_ACTIONS": "true",
-            "GITHUB_REPOSITORY": os.environ["REPO_FULL_NAME"]
+            "GITHUB_REPOSITORY": os.environ["REPO_FULL_NAME"],
         }
         self.scripts: List[str] = []
         self.action_paths: Set[str] = set()
-        self.gh_actions: collections.OrderedDict[str, gha.GithubAction] = collections.OrderedDict()
+        self.gh_actions: collections.OrderedDict[
+            str, gha.GithubAction
+        ] = collections.OrderedDict()
 
     # All `with_*` methods return `self`, so multiple method calls can be chained.
     with_description = chaining(setattr, "description")
@@ -184,7 +186,7 @@ class Task:
     with_env = chaining(update_attr, "env")
 
     def get_proxy_url(self) -> str:
-        return os.environ['TASKCLUSTER_PROXY_URL']
+        return os.environ["TASKCLUSTER_PROXY_URL"]
 
     def with_script(self, *script: str):
         self.scripts.extend(script)
@@ -198,7 +200,7 @@ class Task:
         self.routes.append("index.%s.%s" % (CONFIG.index_prefix, index_path))
         return self
 
-    def with_artifacts(self, *paths: str, type: str="file"):
+    def with_artifacts(self, *paths: str, type: str = "file"):
         """
         Add each path in `paths` as a task artifact
         that expires in `self.index_and_artifacts_expire_in`.
@@ -325,7 +327,6 @@ class Task:
             % (repo_url, target)
         )
 
-
     def with_curl_script(self, url: str, file_path: str):
         return self.with_script(
             """
@@ -335,16 +336,25 @@ class Task:
         )
 
     def with_curl_artifact_script(
-        self, task_id: str, artifact_name: str, out_directory="", directory="public", rename=None, extract=False
+        self,
+        task_id: str,
+        artifact_name: str,
+        out_directory="",
+        directory="public",
+        rename=None,
+        extract=False,
     ):
         queue_service = self.get_proxy_url() + "/api/queue"
         ret = self.with_dependencies(task_id).with_curl_script(
             queue_service
             + "/v1/task/%s/artifacts/%s/%s" % (task_id, directory, artifact_name),
-            os.path.join(out_directory, rename or url_basename(artifact_name))
+            os.path.join(out_directory, rename or url_basename(artifact_name)),
         )
         if extract:
-            ret = self.with_script("tar xvf %s" % os.path.join(out_directory, rename or url_basename(artifact_name)))
+            ret = self.with_script(
+                "tar xvf %s"
+                % os.path.join(out_directory, rename or url_basename(artifact_name))
+            )
 
         return ret
 
@@ -356,7 +366,7 @@ class Task:
             f"$HOME/tasks/$TASK_ID/{name}.bundle",
             CONFIG.git_bundle_shallow_ref,
             "FETCH_HEAD",
-            **kwargs
+            **kwargs,
         )
 
     def with_gha(self, name: str, gha: gha.GithubAction):
@@ -372,7 +382,13 @@ class Task:
 
         for name, gha in self.gh_actions.items():
             script = gha.gen_script(platform)
-            payload[name] = {"script": script, "mapping": gha.output_mapping(), "env": gha.env_variables(platform), "inputs": gha.args, "secret_inputs": gha.secret_inputs}
+            payload[name] = {
+                "script": script,
+                "mapping": gha.output_mapping(),
+                "env": gha.env_variables(platform),
+                "inputs": gha.args,
+                "secret_inputs": gha.secret_inputs,
+            }
         utils.create_extra_artifact(payload_name, json.dumps(payload).encode())
 
     def gen_gha_payload(self, name: str):
@@ -420,9 +436,9 @@ class GenericWorkerTask(Task):
         mounts = []
         seen = set()
         for m in self.mounts:
-            if m['directory'] not in seen:
+            if m["directory"] not in seen:
                 mounts.append(m)
-                seen.add(m['directory'])
+                seen.add(m["directory"])
 
         return dict_update_if_truthy(
             worker_payload,
@@ -520,12 +536,26 @@ class WindowsGenericWorkerTask(GenericWorkerTask):
 
     Scripts are written as `.bat` files executed with `cmd.exe`.
     """
+
     def with_prep_gha_tasks(self):
         for gha in self.gh_actions.values():
             for out in gha.output_mappings:
                 if out.task_id:
-                    self.with_curl_artifact_script(out.task_id, 'outputs.json', "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\", 'private', rename=out.task_id + '.json')
-        return self.with_curl_artifact_script(CONFIG.decision_task_id, '%TASK_ID%.json', "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\", 'private').with_script("python -u %HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\ci\\runner.py %HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\%TASK_ID%.json")
+                    self.with_curl_artifact_script(
+                        out.task_id,
+                        "outputs.json",
+                        "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\",
+                        "private",
+                        rename=out.task_id + ".json",
+                    )
+        return self.with_curl_artifact_script(
+            CONFIG.decision_task_id,
+            "%TASK_ID%.json",
+            "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\",
+            "private",
+        ).with_script(
+            "python -u %HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\ci\\runner.py %HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\%TASK_ID%.json"
+        )
 
     def build_worker_payload(self):
         self.scopes.append("generic-worker:os-group:divvun/windows/Administrators")
@@ -537,7 +567,7 @@ class WindowsGenericWorkerTask(GenericWorkerTask):
         )
 
     def build_command(self):
-        return ["cmd.exe /C \"{}\"".format(deindent("\n".join(self.scripts)))]
+        return ['cmd.exe /C "{}"'.format(deindent("\n".join(self.scripts)))]
 
     def with_path_from_homedir(self, *paths: str):
         """
@@ -546,10 +576,10 @@ class WindowsGenericWorkerTask(GenericWorkerTask):
         """
         for p in paths:
             self.with_early_script(
-                "set \"PATH=%HOMEDRIVE%%HOMEPATH%\\{};%PATH%\"".format(p)
+                'set "PATH=%HOMEDRIVE%%HOMEPATH%\\{};%PATH%"'.format(p)
             )
             self.with_early_script(
-                "set \"PATH=%HOMEDRIVE%%HOMEPATH%\\{};%PATH%\"".format(p)
+                'set "PATH=%HOMEDRIVE%%HOMEPATH%\\{};%PATH%"'.format(p)
             )
         return self
 
@@ -591,7 +621,9 @@ class WindowsGenericWorkerTask(GenericWorkerTask):
 
     def with_repo_bundle(self, name: str, dest: str, **kwargs):
         return self.with_curl_artifact_script(
-            CONFIG.decision_task_id, f"{name}.bundle", "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%"
+            CONFIG.decision_task_id,
+            f"{name}.bundle",
+            "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%",
         ).with_repo(
             "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\" + dest,
             f"%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\{name}.bundle",
@@ -606,9 +638,14 @@ class WindowsGenericWorkerTask(GenericWorkerTask):
 
         This is implied by `with_repo`.
         """
-        return self.with_path_from_homedir("git\\cmd").with_path_from_homedir("git\\bin").with_path_from_homedir("git\\mingw64\\bin").with_directory_mount(
-            "https://github.com/git-for-windows/git/releases/download/v2.34.1.windows.1/Git-2.34.1-64-bit.tar.bz2",
-            path="git",
+        return (
+            self.with_path_from_homedir("git\\cmd")
+            .with_path_from_homedir("git\\bin")
+            .with_path_from_homedir("git\\mingw64\\bin")
+            .with_directory_mount(
+                "https://github.com/git-for-windows/git/releases/download/v2.34.1.windows.1/Git-2.34.1-64-bit.tar.bz2",
+                path="git",
+            )
         )
 
     def with_curl_script(self, url, file_path):
@@ -655,7 +692,8 @@ class WindowsGenericWorkerTask(GenericWorkerTask):
         )
 
     def gen_gha_payload(self, name: str):
-        return self._gen_gha_payload('win', name)
+        return self._gen_gha_payload("win", name)
+
 
 class UnixTaskMixin(Task):
     def with_repo(
@@ -699,11 +737,12 @@ class MacOsGenericWorkerTask(UnixTaskMixin, GenericWorkerTask):
 
     Scripts are interpreted with `bash`.
     """
+
     def get_proxy_url(self) -> str:
         """
         Mac workers don't run as root so the proxy can't listen on :80
         """
-        return 'http://taskcluster:8080'
+        return "http://taskcluster:8080"
 
     def build_command(self):
         # generic-worker accepts multiple commands, but unlike on Windows
@@ -741,14 +780,27 @@ class MacOsGenericWorkerTask(UnixTaskMixin, GenericWorkerTask):
         )
 
     def gen_gha_payload(self, name: str):
-        return self._gen_gha_payload('macos', name)
+        return self._gen_gha_payload("macos", name)
 
     def with_prep_gha_tasks(self):
         for gha in self.gh_actions.values():
             for out in gha.output_mappings:
                 if out.task_id:
-                    self.with_curl_artifact_script(out.task_id, 'outputs.json', '$HOME/tasks/$TASK_ID/', 'private', rename=out.task_id + '.json')
-        return self.with_curl_artifact_script(CONFIG.decision_task_id, '$TASK_ID.json', f"/$HOME/tasks/$TASK_ID/", 'private').with_script("python3 -u $HOME/tasks/$TASK_ID/ci/runner.py /$HOME/tasks/$TASK_ID/$TASK_ID.json")
+                    self.with_curl_artifact_script(
+                        out.task_id,
+                        "outputs.json",
+                        "$HOME/tasks/$TASK_ID/",
+                        "private",
+                        rename=out.task_id + ".json",
+                    )
+        return self.with_curl_artifact_script(
+            CONFIG.decision_task_id,
+            "$TASK_ID.json",
+            f"/$HOME/tasks/$TASK_ID/",
+            "private",
+        ).with_script(
+            "python3 -u $HOME/tasks/$TASK_ID/ci/runner.py /$HOME/tasks/$TASK_ID/$TASK_ID.json"
+        )
 
 
 class DockerWorkerTask(UnixTaskMixin, Task):
@@ -777,8 +829,21 @@ class DockerWorkerTask(UnixTaskMixin, Task):
         for gha in self.gh_actions.values():
             for out in gha.output_mappings:
                 if out.task_id:
-                    self.with_curl_artifact_script(out.task_id, 'outputs.json', '$HOME/tasks/$TASK_ID/', 'private', rename=out.task_id + '.json')
-        return self.with_curl_artifact_script(CONFIG.decision_task_id, '$TASK_ID.json', f"/$HOME/tasks/$TASK_ID/", 'private').with_script("python3 -u $HOME/tasks/$TASK_ID/ci/runner.py /$HOME/tasks/$TASK_ID/$TASK_ID.json")
+                    self.with_curl_artifact_script(
+                        out.task_id,
+                        "outputs.json",
+                        "$HOME/tasks/$TASK_ID/",
+                        "private",
+                        rename=out.task_id + ".json",
+                    )
+        return self.with_curl_artifact_script(
+            CONFIG.decision_task_id,
+            "$TASK_ID.json",
+            f"/$HOME/tasks/$TASK_ID/",
+            "private",
+        ).with_script(
+            "python3 -u $HOME/tasks/$TASK_ID/ci/runner.py /$HOME/tasks/$TASK_ID/$TASK_ID.json"
+        )
 
     def build_worker_payload(self):
         """
@@ -850,16 +915,18 @@ class DockerWorkerTask(UnixTaskMixin, Task):
         )
 
     def with_named_artifacts(self, name: str, path: str):
-        assert '/' not in name
+        assert "/" not in name
         targz = name + ".tar.gz"
         basedir = os.path.dirname(path)
         files = os.path.basename(path)
-        return self.with_script(f"""
+        return self.with_script(
+            f"""
             find {basedir} -wholename "{files}" -exec tar --xform="s#{basedir}/##" -rvf /{targz} {{}} \\;
-        """).with_artifacts("/" + targz)
+        """
+        ).with_artifacts("/" + targz)
 
     def gen_gha_payload(self, name: str):
-        return self._gen_gha_payload('linux', name)
+        return self._gen_gha_payload("linux", name)
 
 
 def assert_truthy(x):
@@ -888,9 +955,7 @@ def make_repo_bundle(path: str, bundle_name: str, sha: str):
     os.chdir(path)
     subprocess.check_call(["git", "config", "user.name", "Decision task"])
     subprocess.check_call(["git", "config", "user.email", "nobody@divvun.no"])
-    tree = subprocess.check_output(
-        ["git", "show", sha, "--pretty=%T", "--no-patch"]
-    )
+    tree = subprocess.check_output(["git", "show", sha, "--pretty=%T", "--no-patch"])
     message = "Shallow version of commit " + sha
     commit = subprocess.check_output(
         ["git", "commit-tree", tree.strip(), "-m", message]

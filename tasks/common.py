@@ -1,12 +1,11 @@
 import decisionlib
 
-build_artifacts_expire_in = "1 week"
+BUILD_ARTIFACTS_EXPIRE_IN = "1 week"
 
 
 def linux_build_task(name, bundle_dest="repo"):
     task = (
-        decisionlib
-        .DockerWorkerTask(name)
+        decisionlib.DockerWorkerTask(name)
         .with_worker_type("linux")
         .with_provisioner_id("divvun")
         .with_docker_image("ubuntu:hirsute")
@@ -24,7 +23,7 @@ def linux_build_task(name, bundle_dest="repo"):
                 "divvun-rustup": "/root/.rustup",
             }
         )
-        .with_index_and_artifacts_expire_in(build_artifacts_expire_in)
+        .with_index_and_artifacts_expire_in(BUILD_ARTIFACTS_EXPIRE_IN)
         .with_max_run_time_minutes(60)
         .with_script("mkdir -p $HOME/tasks/$TASK_ID")
         .with_script("mkdir -p $HOME/tasks/$TASK_ID/_temp")
@@ -47,7 +46,7 @@ def macos_task(name):
         .with_scopes("queue:get-artifact:public/*")
         .with_scopes("object:upload:divvun:*")
         .with_scopes("secrets:get:divvun")
-        .with_index_and_artifacts_expire_in(build_artifacts_expire_in)
+        .with_index_and_artifacts_expire_in(BUILD_ARTIFACTS_EXPIRE_IN)
         .with_max_run_time_minutes(60)
         .with_provisioner_id("divvun")
         .with_features("taskclusterProxy")
@@ -55,7 +54,7 @@ def macos_task(name):
         .with_script("mkdir -p $HOME/tasks/$TASK_ID/_temp")
         .with_repo_bundle("ci", "ci")
         .with_repo_bundle("repo", "repo")
-        .with_script(f"cd $HOME/tasks/$TASK_ID/repo")
+        .with_script("cd $HOME/tasks/$TASK_ID/repo")
     )
 
 
@@ -68,7 +67,7 @@ def windows_task(name):
         .with_scopes("queue:get-artifact:public/*")
         .with_scopes("object:upload:divvun:*")
         .with_scopes("secrets:get:divvun")
-        .with_index_and_artifacts_expire_in(build_artifacts_expire_in)
+        .with_index_and_artifacts_expire_in(BUILD_ARTIFACTS_EXPIRE_IN)
         .with_max_run_time_minutes(60)
         .with_script("mkdir %HOMEDRIVE%%HOMEPATH%\\%TASK_ID%")
         .with_script("mkdir %HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\_temp")

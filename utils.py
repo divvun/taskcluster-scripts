@@ -4,6 +4,7 @@ import taskcluster
 from taskcluster import helper
 from taskcluster.aio import upload
 
+
 async def create_extra_artifact_async(path: str, content: bytes, public=False):
     """
     Function used to create extra artifacts that were not defined in the task
@@ -29,7 +30,7 @@ async def create_extra_artifact_async(path: str, content: bytes, public=False):
         },
     )
 
-    objectService = helper.TaskclusterConfig().get_service("object")
+    object_service = helper.TaskclusterConfig().get_service("object")
 
     retries = 0
 
@@ -42,7 +43,7 @@ async def create_extra_artifact_async(path: str, content: bytes, public=False):
                 contentLength=len(content),
                 expires=ret["expires"],
                 data=content,
-                objectService=objectService,
+                objectService=object_service,
                 uploadId=ret["uploadId"],
             )
             break
@@ -50,7 +51,6 @@ async def create_extra_artifact_async(path: str, content: bytes, public=False):
             if retries >= 3:
                 raise
             retries += 1
-
 
     queue.finishArtifact(
         os.environ["TASK_ID"], os.environ["RUN_ID"], path, {"uploadId": ret["uploadId"]}
@@ -69,6 +69,3 @@ def create_extra_artifact(path: str, content: bytes, public=False):
     result = loop.run_until_complete(coro)
     loop.close()
     return result
-
-
-

@@ -29,7 +29,8 @@ def tasks(task_for: str):
         # them here if needed. Keep in mind that said task should not have
         # access to any secrets.
         return
-    elif task_for == "daily":
+
+    if task_for == "daily":
         # Put any daily task here.
         return
 
@@ -37,7 +38,11 @@ def tasks(task_for: str):
 
     if repo_name.startswith("lang-"):
         lang_task_id = create_lang_task(repo_name.endswith("apertium"))
-        for os_, type_ in (("macos-latest", "speller-macos"), ("macos-latest", "speller-mobile"), ("windows-latest", "speller-windows")):
+        for os_, type_ in [
+            ("macos-latest", "speller-macos"),
+            ("macos-latest", "speller-mobile"),
+            ("windows-latest", "speller-windows"),
+        ]:
             create_bundle_task(os_, type_, lang_task_id)
 
     if repo_name.startswith("keyboard-"):
@@ -46,7 +51,7 @@ def tasks(task_for: str):
 
 
 task_for = os.environ["TASK_FOR"]
-with decisionlib.make_repo_bundle("/ci", "ci.bundle", 'HEAD'):
+with decisionlib.make_repo_bundle("/ci", "ci.bundle", "HEAD"):
     assert CONFIG.git_sha, "Unknown git sha for current repo"
     with decisionlib.make_repo_bundle("/repo", "repo.bundle", CONFIG.git_sha):
         tasks(task_for)

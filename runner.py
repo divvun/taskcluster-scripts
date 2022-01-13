@@ -62,23 +62,26 @@ Action description format:
     - script: The script to run. This is usually `node path/to/action.js` but could be anything.
 """
 
-from collections import defaultdict
 import sys
 import asyncio
-from taskcluster import helper
 import codecs
 import json
 import os
 import platform
 import subprocess
-import utils
 import shutil
+
+from collections import defaultdict
 from typing import Set, Dict, List, Any
+from taskcluster import helper
+
+import utils
 
 SECRETS: Set[str] = set()
 OUTPUTS: defaultdict[str, Dict[str, str]] = defaultdict(lambda: {})
 EXTRA_PATH: List[str] = []
 _ORIG_PRINT = print
+
 
 def filtered_print(*args):
     """
@@ -93,7 +96,9 @@ def filtered_print(*args):
         filtered.append(arg)
     _ORIG_PRINT(*filtered)
 
+
 print = filtered_print
+
 
 def gather_secrets():
     """
@@ -111,12 +116,12 @@ def gather_secrets():
         out = set()
 
         def flatten(x):
-            if type(x) is dict:
+            if isinstance(x, dict):
                 for value in x.values():
                     flatten(value)
-            elif type(x) is list:
-                for a in x:
-                    flatten(a)
+            elif isinstance(x, list):
+                for value in x:
+                    flatten(value)
             else:
                 out.add(x)
 
@@ -126,15 +131,15 @@ def gather_secrets():
     continuation = None
     while True:
         res = secrets_service.list(continuationToken=continuation)
-        secret_names.update(set(res['secrets']))
-        if not res.get('continuationToken'):
+        secret_names.update(set(res["secrets"]))
+        if not res.get("continuationToken"):
             break
-        continuation = res['continuationToken']
+        continuation = res["continuationToken"]
 
     for name in secret_names:
         try:
             res = secrets_service.get(name)
-            SECRETS.update(get_values_from_json(res['secret']))
+            SECRETS.update(get_values_from_json(res["secret"]))
         except:
             # This happens when we're not allowed to read the secret. Unfortunately
             # there's no way of filtering out secrets we can't read from the
@@ -148,23 +153,24 @@ async def process_command(step_name: str, line: str) -> bool:
     Return True to keep the line in the logs, False to hide it
     """
 
-    if line.startswith('::add-mask::'):
-        secret = line[len('::add-mask::'):]
+    if line.startswith("::add-mask::"):
+        secret = line[len("::add-mask::") :]
         SECRETS.add(secret)
         return False
-    elif line.startswith('::set-output'):
-        output = line[len('::set-output'):]
-        name, value = output.split('::', 1)
-        name = name.split('=')[1]
+
+    if line.startswith("::set-output"):
+        output = line[len("::set-output") :]
+        name, value = output.split("::", 1)
+        name = name.split("=")[1]
         OUTPUTS[step_name][name] = value
-    elif line.startswith('::add-path::'):
-        secret = line[len('::add-path::'):]
+    elif line.startswith("::add-path::"):
+        secret = line[len("::add-path::") :]
         EXTRA_PATH.append(secret)
-    elif line.startswith('::create-artifact'):
-        output = line[len('::create-artifact'):]
-        name, path = output.split('::', 1)
-        name = name.split('=')[1]
-        with open(path, 'rb') as fd:
+    elif line.startswith("::create-artifact"):
+        output = line[len("::create-artifact") :]
+        name, path = output.split("::", 1)
+        name = name.split("=")[1]
+        with open(path, "rb") as fd:
             await utils.create_extra_artifact_async(name, fd.read(), public=True)
 
     return True
@@ -176,7 +182,7 @@ async def process_line(step_name: str, line: str):
     not, process that and then print the line on stdout. Note that since we've
     overridden the print command, secrets are filtered out
     """
-    if line.startswith('::'):
+    if line.startswith("::"):
         if not await process_command(step_name, line):
             return None
 
@@ -193,7 +199,7 @@ def get_env_for(step_name: str, step: Dict[str, Any]):
 
     def to_string(value):
         if isinstance(value, bool):
-            return 'true' if value else 'false'
+            return "true" if value else "false"
         return value
 
     env = os.environ
@@ -208,21 +214,25 @@ def get_env_for(step_name: str, step: Dict[str, Any]):
 
     for input_name, secret in step["secret_inputs"].items():
         name = "INPUT_" + input_name.upper()
-        res = secrets_service.get(secret['secret'])['secret'][secret['name']]
+        res = secrets_service.get(secret["secret"])["secret"][secret["name"]]
         env[name] = to_string(res)
 
-    for mapping in step['mapping']:
-        name = "INPUT_" + mapping['input'].upper()
-        if mapping['task_id']:
-            with open(os.path.join(os.environ["GITHUB_WORKSPACE"], mapping['task_id'] + '.json')) as fd:
+    for mapping in step["mapping"]:
+        name = "INPUT_" + mapping["input"].upper()
+        if mapping["task_id"]:
+            with open(
+                os.path.join(
+                    os.environ["GITHUB_WORKSPACE"], mapping["task_id"] + ".json"
+                )
+            ) as fd:
                 values = json.loads(fd.read())
             print(values)
-            env[name] = values[mapping['from']['action']][mapping['from']['output']]
+            env[name] = values[mapping["from"]["action"]][mapping["from"]["output"]]
         else:
-            env[name] = OUTPUTS[mapping['from']['action']][mapping['from']['output']]
+            env[name] = OUTPUTS[mapping["from"]["action"]][mapping["from"]["output"]]
 
     env["GITHUB_ACTION"] = step_name
-    if platform.system() == 'Darwin':
+    if platform.system() == "Darwin":
         # Macos builders don't run as root so the proxy listens on :8080 instead of :80
         env["TASKCLUSTER_PROXY_URL"] = "http://taskcluster:8080"
         env["PATH"] = env["PATH"] + ":/opt/homebrew/bin"
@@ -233,10 +243,10 @@ def get_env_for(step_name: str, step: Dict[str, Any]):
     env["BUILD_DIR"] = env["GITHUB_WORKSPACE"]
 
     if EXTRA_PATH:
-        if platform.system() == 'Windows':
-            env["PATH"] = env["PATH"] + ';' + ";".join(EXTRA_PATH)
+        if platform.system() == "Windows":
+            env["PATH"] = env["PATH"] + ";" + ";".join(EXTRA_PATH)
         else:
-            env["PATH"] = env["PATH"] + ':' + ":".join(EXTRA_PATH)
+            env["PATH"] = env["PATH"] + ":" + ":".join(EXTRA_PATH)
 
     return env
 
@@ -253,10 +263,15 @@ def write_outputs():
 async def run_action(action_name: str, action: Dict[str, Any]):
     env = get_env_for(action_name, action)
 
-    process = await asyncio.subprocess.create_subprocess_shell(action["script"], env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,)
+    process = await asyncio.subprocess.create_subprocess_shell(
+        action["script"],
+        env=env,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+    )
     assert process.stdout
 
-    decoder = codecs.getincrementaldecoder('utf-8')(errors='replace')
+    decoder = codecs.getincrementaldecoder("utf-8")(errors="replace")
     while True:
         line = await process.stdout.readline()
         if not line:
@@ -286,7 +301,7 @@ try:
     asyncio.run(main())
 finally:
     # Cleanup on macos since it's the only runner not entirely stateless.
-    if platform.system() == 'Darwin':
-        shutil.rmtree(os.environ['GITHUB_WORKSPACE'])
+    if platform.system() == "Darwin":
+        shutil.rmtree(os.environ["GITHUB_WORKSPACE"])
 
 write_outputs()

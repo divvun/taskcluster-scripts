@@ -3,7 +3,9 @@ import yaml
 
 
 class OutputMapping:
-    def __init__(self, input_name, mapped_output_action, mapped_output_name, from_task_id=None):
+    def __init__(
+        self, input_name, mapped_output_action, mapped_output_name, from_task_id=None
+    ):
         self.input_name = input_name
         self.mapped_output_action = mapped_output_action
         self.mapped_output_name = mapped_output_name
@@ -12,8 +14,11 @@ class OutputMapping:
     def to_dict(self):
         mapping = {
             "input": self.input_name,
-            "from": {"action": self.mapped_output_action, "output": self.mapped_output_name},
-            "task_id": self.task_id
+            "from": {
+                "action": self.mapped_output_action,
+                "output": self.mapped_output_name,
+            },
+            "task_id": self.task_id,
         }
 
         return mapping
@@ -33,50 +38,57 @@ class GithubAction:
         self.secret_inputs = {}
 
     def env_variables(self, platform):
-        if platform == 'linux':
+        if platform == "linux":
             return {
                 "RUNNER_TEMP": "$HOME/tasks/$TASK_ID/_temp",
                 "GITHUB_WORKSPACE": "$HOME/tasks/$TASK_ID",
             }
-        elif platform == 'macos':
+
+        if platform == "macos":
             return {
                 "RUNNER_TEMP": "$HOME/tasks/$TASK_ID/_temp",
                 "GITHUB_WORKSPACE": "$HOME/tasks/$TASK_ID",
             }
-        elif platform == 'win':
+
+        if platform == "win":
             return {
                 "RUNNER_TEMP": "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\_temp",
                 "GITHUB_WORKSPACE": "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\",
             }
-        else:
-            raise NotImplementedError
 
+        raise NotImplementedError
 
     def parse_config(self):
-        url = 'https://raw.githubusercontent.com/' + self.repo_name + '/master/' + self.action_path + '/action.yml'
+        url = (
+            "https://raw.githubusercontent.com/"
+            + self.repo_name
+            + "/master/"
+            + self.action_path
+            + "/action.yml"
+        )
         config = requests.get(url).text
         config = yaml.full_load(config)
-        for name, content in config.get('inputs', {}).items():
+        for name, content in config.get("inputs", {}).items():
             if "default" in content:
                 self.args[name] = content["default"]
 
     @property
     def repo_name(self):
-        parts = self.path.split('/')
+        parts = self.path.split("/")
         assert len(parts) > 1
 
         if parts[0] == "actions":
             raise NotImplementedError
-        else:
-            return '/'.join(parts[:2])
+
+        return "/".join(parts[:2])
 
     @property
     def action_path(self):
-        parts = self.path.split('/')
+        parts = self.path.split("/")
         if parts[0] == "actions":
             raise NotImplementedError
-        else:
-            return '/'.join(parts[2:])
+
+        return "/".join(parts[2:])
 
     @property
     def git_fetch_url(self):
@@ -86,16 +98,16 @@ class GithubAction:
     def script_path(self):
         return self.action_path + "/index.js"
 
-
     def gen_script(self, _platform):
-        return "node {}/{}".format(self.repo_name, self.script_path)
+        return f"node {self.repo_name}/{self.script_path}"
 
     def output_mapping(self):
         return [output.to_dict() for output in self.output_mappings]
 
-
     def with_mapped_output(self, name, source_step, source_name, task_id=None):
-        self.output_mappings.append(OutputMapping(name, source_step, source_name, task_id))
+        self.output_mappings.append(
+            OutputMapping(name, source_step, source_name, task_id)
+        )
         return self
 
     def with_secret_input(self, input_name, secret, name):
