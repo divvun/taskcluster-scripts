@@ -57,7 +57,11 @@ def tasks(task_for: str):
     if repo_name == "pahkat-reposrv":
         build_task_id = create_pahkat_task(is_tag) # TODO: check if is tag
         if is_tag:
-            create_pahkat_release_task(build_task_id, tag_name)
+            release_task_id = create_pahkat_release_task(build_task_id, tag_name)
+            create_ansible_task(["pahkat-reposrv"], depends_on=release_task_id)
+
+    if repo_name == "ansible-playbooks":
+        create_ansible_task(["setup", "pahkat-reposrv"])
 
 
 task_for = os.environ["TASK_FOR"]
