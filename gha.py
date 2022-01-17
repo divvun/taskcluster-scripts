@@ -32,6 +32,7 @@ class GithubAction:
         """
         self.path = path
         self.args = {}
+        self.run_path = "index.js"
         self.parse_config()
         self.args.update(args)
         self.output_mappings = []
@@ -72,6 +73,10 @@ class GithubAction:
             if "default" in content:
                 self.args[name] = content["default"]
 
+        run_path = config.get('runs', {}).get('main')
+        if run_path:
+            self.run_path = run_path
+
     @property
     def repo_name(self):
         parts = self.path.split("/")
@@ -96,7 +101,7 @@ class GithubAction:
 
     @property
     def script_path(self):
-        return self.action_path + "/index.js"
+        return self.action_path + "/" + self.run_path
 
     def gen_script(self, _platform):
         return f"node {self.repo_name}/{self.script_path}"
