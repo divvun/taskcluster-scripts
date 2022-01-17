@@ -120,7 +120,7 @@ def chaining(op, attr):
 
 
 def append_to_attr(self, attr, *args):
-    getattr(self, attr).extend(args)
+    getattr(self, attr).extend([arg for arg in args if arg])
 
 
 def prepend_to_attr(self, attr, *args):

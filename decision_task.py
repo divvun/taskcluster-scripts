@@ -8,7 +8,7 @@ import os
 import os.path
 import decisionlib
 from decisionlib import CONFIG
-from tasks import create_lang_task, create_bundle_task, create_kbd_task
+from tasks import *
 
 
 def tasks(task_for: str):
@@ -36,6 +36,11 @@ def tasks(task_for: str):
 
     repo_name = os.environ["REPO_NAME"]
 
+    is_tag = False
+    if CONFIG.git_ref.startswith("refs/tags/"):
+        tag_name = CONFIG.git_ref[len("refs/tags/"):]
+        is_tag = True
+
     if repo_name.startswith("lang-"):
         lang_task_id = create_lang_task(repo_name.endswith("apertium"))
         for os_, type_ in [
@@ -48,6 +53,11 @@ def tasks(task_for: str):
     if repo_name.startswith("keyboard-"):
         for os_ in {"windows-latest", "macos-latest"}:
             create_kbd_task(os_)
+
+    if repo_name == "pahkat-reposrv":
+        build_task_id = create_pahkat_task(is_tag) # TODO: check if is tag
+        if is_tag:
+            create_pahkat_release_task(build_task_id, tag_name)
 
 
 task_for = os.environ["TASK_FOR"]

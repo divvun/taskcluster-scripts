@@ -214,7 +214,10 @@ def get_env_for(step_name: str, step: Dict[str, Any]):
 
     for input_name, secret in step["secret_inputs"].items():
         name = "INPUT_" + input_name.upper()
-        res = secrets_service.get(secret["secret"])["secret"][secret["name"]]
+        res = secrets_service.get(secret["secret"])["secret"]
+        parts = secret["name"].split('.')
+        for part in parts:
+            res = res[part]
         env[name] = to_string(res)
 
     for mapping in step["mapping"]:

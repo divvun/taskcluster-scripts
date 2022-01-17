@@ -3,7 +3,7 @@ import decisionlib
 BUILD_ARTIFACTS_EXPIRE_IN = "1 week"
 
 
-def linux_build_task(name, bundle_dest="repo"):
+def linux_build_task(name, bundle_dest="repo", with_secrets=True):
     task = (
         decisionlib.DockerWorkerTask(name)
         .with_worker_type("linux")
@@ -14,7 +14,7 @@ def linux_build_task(name, bundle_dest="repo"):
         .with_scopes("queue:get-artifact:private/*")
         .with_scopes("queue:get-artifact:public/*")
         .with_scopes("object:upload:divvun:*")
-        .with_scopes("secrets:get:divvun")
+        .with_scopes("secrets:get:divvun" * with_secrets)
         .with_features("taskclusterProxy")
         .with_caches(
             **{
