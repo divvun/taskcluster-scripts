@@ -6,7 +6,9 @@ from .common import linux_build_task
 def create_ansible_task(roles: List[str], depends_on=None):
     task = (linux_build_task("Ansible playbooks deployment: {}".format(",".join(roles)), with_secrets=False)
         .with_scopes("secrets:get:divvun-deploy")
-        .with_script("`python3 ../ci/setup_ansible_secrets.py divvun-deploy`")
+        .with_additional_repo("https://github.com/divvun/ansible-playbooks.git", "playbooks")
+        .with_script("cd playbooks")
+        .with_script("`python3 ../../ci/setup_ansible_secrets.py divvun-deploy`")
         .with_script("chmod 700 tmp/id_ed25519")
         .with_script("apt-get install -y ansible")
         .with_env(ANSIBLE_HOST_KEY_CHECKING="false")
