@@ -19,4 +19,7 @@ with open("tmp/id_ed25519", "w") as fd:
 with open("tmp/id_ed25519.pub", "w") as fd:
     fd.write(secret['secret']['SSH_PUBLIC_KEY'])
 
+with open("tmp/vars.yml", "w") as fd:
+    fd.write(json.dumps(secret['secret']))
+
 print('export HOST=%s' % secret['secret']['HOST'])
