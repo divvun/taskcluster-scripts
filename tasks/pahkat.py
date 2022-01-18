@@ -4,7 +4,7 @@ from gha import GithubAction
 from .common import linux_build_task
 
 
-def create_pahkat_task(is_tag: bool):
+def create_pahkat_task(tag_name: str):
     task = (linux_build_task("Pahkat reposrv build", with_secrets=False)
         .with_gha(
             "Install rust",
@@ -15,18 +15,19 @@ def create_pahkat_task(is_tag: bool):
         .with_gha(
             "Build pahkat reposrv",
             GithubAction(
-                "actions-rs/cargo", {"command": "build" if is_tag else "check", "args": "--release" if is_tag else ""}
+                "actions-rs/cargo", {"command": "build" if tag_name else "check", "args": "--release" if tag_name else ""}
             ),
         )
         .with_prep_gha_tasks()
     )
 
-    if is_tag:
+    if tag_name:
         task = (task
             .with_script("cp ./target/release/pahkat-reposrv /")
             .with_artifacts("/pahkat-reposrv")
         )
 
+        return task.find_or_create(f"build.linux_x64.{tag_name}")
     return task.find_or_create(f"build.linux_x64.{CONFIG.git_sha}")
 
 def create_pahkat_release_task(build_task_id: str, tag_name: str):

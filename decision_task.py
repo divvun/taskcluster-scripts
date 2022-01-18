@@ -37,6 +37,7 @@ def tasks(task_for: str):
     repo_name = os.environ["REPO_NAME"]
 
     is_tag = False
+    tag_name = ""
     if CONFIG.git_ref.startswith("refs/tags/"):
         tag_name = CONFIG.git_ref[len("refs/tags/"):]
         is_tag = True
@@ -55,7 +56,7 @@ def tasks(task_for: str):
             create_kbd_task(os_)
 
     if repo_name == "pahkat-reposrv":
-        build_task_id = create_pahkat_task(is_tag) # TODO: check if is tag
+        build_task_id = create_pahkat_task(tag_name) # TODO: check if is tag
         if is_tag:
             release_task_id = create_pahkat_release_task(build_task_id, tag_name)
             create_ansible_task(["pahkat-reposrv"], depends_on=release_task_id)
