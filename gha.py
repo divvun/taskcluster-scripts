@@ -60,6 +60,9 @@ class GithubAction:
         raise NotImplementedError
 
     def parse_config(self):
+        if not self.path:
+            return
+
         url = (
             "https://raw.githubusercontent.com/"
             + self.repo_name
