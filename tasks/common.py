@@ -1,6 +1,9 @@
 import decisionlib
+from gha import GithubAction
+from typing import List
 
 BUILD_ARTIFACTS_EXPIRE_IN = "1 week"
+PAHKAT_REPO = "https://pahkat.thetc.se"
 
 
 def linux_build_task(name, bundle_dest="repo", with_secrets=True):
@@ -78,3 +81,18 @@ def windows_task(name):
         .with_script("pip install --user taskcluster")
         .with_script("cd %HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\repo")
     )
+
+def gha_setup():
+    return GithubAction("Eijebong/divvun-actions/setup", {}).with_secret_input(
+        "key", "divvun", "DIVVUN_KEY"
+    )
+
+def gha_pahkat(packages: List[str]):
+    return GithubAction(
+        "Eijebong/divvun-actions/pahkat/init",
+        {
+            "repo": "https://pahkat.uit.no/devtools/",
+            "channel": "nightly",
+            "packages": ",".join(packages),
+        },
+    ),

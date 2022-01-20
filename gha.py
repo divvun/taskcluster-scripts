@@ -118,3 +118,16 @@ class GithubAction:
     def with_secret_input(self, input_name, secret, name):
         self.secret_inputs[input_name] = {"secret": secret, "name": name}
         return self
+
+
+class GithubActionScript(GithubAction):
+    def __init__(self, script):
+        super().__init__(None, {})
+        self.script = script
+
+    def gen_script(self):
+        return self.script
+
+    @property
+    def git_fetch_url(self):
+        return None

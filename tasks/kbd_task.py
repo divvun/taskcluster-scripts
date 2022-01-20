@@ -1,6 +1,6 @@
 from gha import GithubAction
 from decisionlib import CONFIG
-from .common import macos_task, windows_task
+from .common import macos_task, windows_task, gha_setup, gha_pahkat
 
 
 def create_kbd_task(os_name):
@@ -8,23 +8,8 @@ def create_kbd_task(os_name):
         return (
             windows_task(f"Build keyboard: {os_name}")
             .with_git()
-            .with_gha(
-                "setup",
-                GithubAction("Eijebong/divvun-actions/setup", {}).with_secret_input(
-                    "key", "divvun", "DIVVUN_KEY"
-                ),
-            )
-            .with_gha(
-                "init",
-                GithubAction(
-                    "Eijebong/divvun-actions/pahkat/init",
-                    {
-                        "repo": "https://pahkat.uit.no/devtools/",
-                        "channel": "nightly",
-                        "packages": "pahkat-uploader, kbdgen",
-                    },
-                ),
-            )
+            .with_gha("setup", gha_setup())
+            .with_gha("init", gha_pahkat(["pahkat-uploader", "kbdgen"]))
             .with_gha(
                 "build",
                 GithubAction(
@@ -50,22 +35,9 @@ def create_kbd_task(os_name):
     if os_name == "macos-latest":
         return (
             macos_task(f"Build keyboard: {os_name}")
+            .with_gha("setup", gha_setup())
             .with_gha(
-                "setup",
-                GithubAction("Eijebong/divvun-actions/setup", {}).with_secret_input(
-                    "key", "divvun", "DIVVUN_KEY"
-                ),
-            )
-            .with_gha(
-                "init",
-                GithubAction(
-                    "Eijebong/divvun-actions/pahkat/init",
-                    {
-                        "repo": "https://pahkat.uit.no/devtools/",
-                        "channel": "nightly",
-                        "packages": "pahkat-uploader, kbdgen@2.0.0-nightly.20210622T210632Z, xcnotary",
-                    },
-                ),
+                "init", gha_pahkat(["pahkat-uploader", "kbdgen@2.0.0-nightly.20210622T210632Z", "xcnotary"])
             )
             .with_gha(
                 "build",

@@ -1,43 +1,62 @@
 from decisionlib import CONFIG
-from gha import GithubAction
+from gha import GithubAction, GithubActionScript
+from .common import macos_task, windows_task, linux_build_task, gha_setup, gha_pahkat, PAHKAT_REPO
 
-from .common import linux_build_task
+def create_pahkat_tasks():
+    for os_ in ("macos", "windows", "linux"):
+        create_pahkat_uploader_task(os_)
 
 
-def create_pahkat_task(tag_name: str):
-    task = (linux_build_task("Pahkat reposrv build", with_secrets=False)
-        .with_gha(
-            "Install rust",
+def create_pahkat_uploader_task(os_):
+    env = {"RUST_VERSION": "stable", "CARGO_INCREMENTAL": 0, "RUSTUP_MAX_RETRIES": 10, "CARGO_NET_RETRY": 10, "RUST_BACKTRACE": "full",  "LZMA_API_STATIC": 1}
+
+    if os_ == "windows":
+        task_new = windows_task
+        install_rust = GithubAction("actions-rs/toolchain", {"toolchain": "stable", "profile": "minimal", "override": "true", "components": "rustfmt", "target": "i686-pc-windows-msvc"})
+        build = GithubAction("actions-rs/cargo", {"command": "build", "args": "--release --manifest-path pahkat-uploader/Cargo.toml", "target": "i686-pc-windows-msvc"})
+        dist = GithubActionScript("mkdir -p dist/bin && mv pahkat-uploader/target/i686-pc-windows-msvc/release/pahkat-uploader.exe dist/bin/pahkat-uploader.exe")
+        sign = GithubAction("Eijebong/divvun-actions/codesign", {"path": "dist/bin/pahkat-uploader.exe"})
+        deploy = GithubAction("Eijebong/divvun-actions/deploy", {"package-id": "pahkat-uploader", "type": "TarballPackage", "platform": "windows", "arch": "i686", "repo": PAHKAT_REPO})
+    elif os_ == "macos":
+        task_new = macos_task
+        install_rust = GithubAction("actions-rs/toolchain", {"toolchain": "stable", "profile": "minimal", "override": "true", "components": "rustfmt"})
+        build = GithubAction("actions-rs/cargo", {"command": "build", "args": "--release --manifest-path pahkat-uploader/Cargo.toml"})
+        dist = GithubActionScript("mkdir -p dist/bin && mv pahkat-uploader/target/release/pahkat-uploader dist/bin/pahkat-uploader")
+        sign = GithubAction("Eijebong/divvun-actions/codesign", {"path": "dist/bin/pahkat-uploader"})
+        deploy = GithubAction("Eijebong/divvun-actions/deploy", {"package-id": "pahkat-uploader", "type": "TarballPackage", "platform": "macos", "arch": "x86_64", "repo": PAHKAT_REPO})
+    elif os_ == "linux":
+        task_new = lambda name: linux_build_task(name).with_gha(GithubActionScript("apt install -y musl musl-tools"))
+        install_rust = GithubAction("actions-rs/toolchain", {"toolchain": "stable", "profile": "minimal", "override": "true", "components": "rustfmt", "target": "x86_64-unknown-linux-musl"})
+        build = GithubAction("actions-rs/cargo", {"command": "build", "args": "--release --manifest-path pahkat-uploader/Cargo.toml"})
+        dist = GithubActionScript("mkdir -p dist/bin && mv pahkat-uploader/target/release/pahkat-uploader dist/bin/pahkat-uploader")
+        sign = GithubActionScript("echo \"No code signing on linux\"")
+        deploy = GithubAction("Eijebong/divvun-actions/deploy", {"package-id": "pahkat-uploader", "type": "TarballPackage", "platform": "linux", "arch": "x86_64", "repo": PAHKAT_REPO})
+    else:
+        raise NotImplementedError
+
+    return (task_new(f"Pahkat uploader: {os_}")
+        .with_env(**env)
+        .with_gha("setup", gha_setup())
+        .with_gha("version",
             GithubAction(
-                "actions-rs/toolchain", {"components": "rustfmt", "toolchain": "stable", "override": True}
-            ),
+                "Eijebong/divvun-actions/version",
+                {"cargo": "pahkat-uploader/Cargo.toml", "nightly": ["main", "develop"]},
+            ).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN")
         )
-        .with_gha(
-            "Build pahkat reposrv",
-            GithubAction(
-                "actions-rs/cargo", {"command": "build" if tag_name else "check", "args": "--release" if tag_name else ""}
-            ),
+        .with_gha("install_build_deps", gha_pahkat(["pahkat-uploader"]))
+        .with_gha("install_rust", install_rust)
+        .with_gha("build", build)
+        .with_gha("dist", dist)
+        .with_gha("sign", sign)
+        .with_gha("tarball",
+                GithubAction("Eijebong/divvun-actions/create-txz", {"path": "dist"}))
+        .with_gha("deploy",
+            deploy
+            .with_mapped_output("version", "version", "version")
+            .with_mapped_output("channel", "version", "channel")
+            .with_mapped_output("payload-path", "tarball", "txz-path")
+            .with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN")
         )
-        .with_prep_gha_tasks()
+        .find_or_create(f"build.pahkat.{os_}.{CONFIG.git_sha}")
     )
 
-    if tag_name:
-        task = (task
-            .with_script("cp ./target/release/pahkat-reposrv /")
-            .with_artifacts("/pahkat-reposrv")
-        )
-
-        return task.find_or_create(f"build.linux_x64.{tag_name}")
-    return task.find_or_create(f"build.linux_x64.{CONFIG.git_sha}")
-
-def create_pahkat_release_task(build_task_id: str, tag_name: str):
-    return (linux_build_task("Pahkat reposrv release")
-        .with_curl_artifact_script(build_task_id, "pahkat-reposrv")
-        .with_gha(
-            "Release pahkat reposrv",
-            GithubAction(
-                "softprops/action-gh-release", {"tag_name": tag_name, "files": "pahkat-reposrv"}
-            ).with_secret_input("token", "divvun", "github.token")
-        )
-        .with_prep_gha_tasks()
-        .find_or_create(f"release.linux_x64.{CONFIG.git_sha}"))

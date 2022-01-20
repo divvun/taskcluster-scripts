@@ -42,6 +42,8 @@ def tasks(task_for: str):
         tag_name = CONFIG.git_ref[len("refs/tags/"):]
         is_tag = True
 
+
+    # Lang repositories common tasks
     if repo_name.startswith("lang-"):
         lang_task_id = create_lang_task(repo_name.endswith("apertium"))
         for os_, type_ in [
@@ -51,16 +53,22 @@ def tasks(task_for: str):
         ]:
             create_bundle_task(os_, type_, lang_task_id)
 
+    # Keyboard repositories common tasks
     if repo_name.startswith("keyboard-"):
         for os_ in {"windows-latest", "macos-latest"}:
             create_kbd_task(os_)
 
+    # pahkat-reposrv tasks
     if repo_name == "pahkat-reposrv":
-        build_task_id = create_pahkat_task(tag_name) # TODO: check if is tag
+        build_task_id = create_pahkat_reposrv_task(tag_name) # TODO: check if is tag
         if is_tag:
-            release_task_id = create_pahkat_release_task(build_task_id, tag_name)
+            release_task_id = create_pahkat_reposrv_release_task(build_task_id, tag_name)
             create_ansible_task(["pahkat-reposrv"], depends_on=release_task_id)
 
+    if repo_name == "pahkat":
+        create_pahkat_tasks()
+
+    # Deployment tasks
     if repo_name == "ansible-playbooks":
         create_ansible_task(["setup", "pahkat-reposrv"])
 
