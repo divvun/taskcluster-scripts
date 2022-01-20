@@ -40,7 +40,7 @@ def create_pahkat_uploader_task(os_):
         .with_gha("version",
             GithubAction(
                 "Eijebong/divvun-actions/version",
-                {"cargo": "pahkat-uploader/Cargo.toml", "nightly": ["main", "develop"]},
+                {"cargo": "pahkat-uploader/Cargo.toml", "nightly": "main, develop"},
             ).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN")
         )
         .with_gha("install_build_deps", gha_pahkat(["pahkat-uploader"]))
