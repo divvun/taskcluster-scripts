@@ -32,6 +32,17 @@ def create_kbd_task(os_name):
                     {"keyboard-type": "keyboard-windows"},
                 ),
             )
+            .with_gha(
+                "upload",
+                GithubAction(
+                    "Eijebong/divvun-actions/keyboard/deploy",
+                    {"keyboard-type": "keyboard-windows"},
+                ).with_mapped_output(
+                    "payload-path", "build", "payload-path"
+                ).with_mapped_output(
+                    "channel", "build", "channel"
+                ),
+            )
             .with_prep_gha_tasks()
             .find_or_create(f"kbdgen.{os_name}_x64.{CONFIG.git_sha}")
         )
