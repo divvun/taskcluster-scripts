@@ -8,7 +8,7 @@ def create_pahkat_tasks():
 
 
 def create_pahkat_uploader_task(os_):
-    env = {"RUST_VERSION": "stable", "CARGO_INCREMENTAL": 0, "RUSTUP_MAX_RETRIES": 10, "CARGO_NET_RETRY": 10, "RUST_BACKTRACE": "full",  "LZMA_API_STATIC": 1}
+    env = {"RUST_VERSION": "stable", "CARGO_INCREMENTAL": "0", "RUSTUP_MAX_RETRIES": "10", "CARGO_NET_RETRY": "10", "RUST_BACKTRACE": "full",  "LZMA_API_STATIC": "1"}
 
     if os_ == "windows":
         task_new = windows_task
@@ -57,6 +57,7 @@ def create_pahkat_uploader_task(os_):
             .with_mapped_output("payload-path", "tarball", "txz-path")
             .with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN")
         )
+        .with_prep_gha_tasks()
         .find_or_create(f"build.pahkat.{os_}.{CONFIG.git_sha}")
     )
 
