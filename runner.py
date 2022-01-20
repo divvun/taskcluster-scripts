@@ -265,6 +265,9 @@ def write_outputs():
 
 async def run_action(action_name: str, action: Dict[str, Any]):
     env = get_env_for(action_name, action)
+    print(env)
+    print("===")
+    print(os.environ)
 
     process = await asyncio.subprocess.create_subprocess_shell(
         action["script"],
