@@ -95,4 +95,4 @@ def gha_pahkat(packages: List[str]):
             "channel": "nightly",
             "packages": ",".join(packages),
         },
-    ),
+    )
