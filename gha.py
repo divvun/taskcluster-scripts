@@ -128,7 +128,7 @@ class GithubActionScript(GithubAction):
         super().__init__(None, {})
         self.script = script
 
-    def gen_script(self):
+    def gen_script(self, _platform):
         return self.script
 
     @property
