@@ -25,7 +25,7 @@ def create_pahkat_uploader_task(os_):
         sign = GithubAction("Eijebong/divvun-actions/codesign", {"path": "dist/bin/pahkat-uploader"})
         deploy = GithubAction("Eijebong/divvun-actions/deploy", {"package-id": "pahkat-uploader", "type": "TarballPackage", "platform": "macos", "arch": "x86_64", "repo": PAHKAT_REPO})
     elif os_ == "linux":
-        task_new = lambda name: linux_build_task(name).with_gha(GithubActionScript("apt install -y musl musl-tools"))
+        task_new = lambda name: linux_build_task(name).with_gha("setup_linux", GithubActionScript("apt install -y musl musl-tools"))
         install_rust = GithubAction("actions-rs/toolchain", {"toolchain": "stable", "profile": "minimal", "override": "true", "components": "rustfmt", "target": "x86_64-unknown-linux-musl"})
         build = GithubAction("actions-rs/cargo", {"command": "build", "args": "--release --manifest-path pahkat-uploader/Cargo.toml"})
         dist = GithubActionScript("mkdir -p dist/bin && mv pahkat-uploader/target/release/pahkat-uploader dist/bin/pahkat-uploader")
