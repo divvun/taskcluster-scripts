@@ -281,7 +281,7 @@ async def run_action(action_name: str, action: Dict[str, Any]):
     )
     assert process.stdout
 
-    decoder = codecs.getincrementaldecoder("utf-8")(errors="replace")
+    decoder = codecs.getincrementaldecoder(sys.stdout.encoding)(errors="replace")
     while True:
         line = await process.stdout.readline()
         if not line:
