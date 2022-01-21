@@ -371,7 +371,7 @@ class Task:
 
     def with_gha(self, name: str, gha: gha.GithubAction, enabled=True):
         if not enabled:
-            return
+            return self
 
         if gha.git_fetch_url and gha.git_fetch_url not in self.action_paths:
             self.with_additional_repo(gha.git_fetch_url, gha.repo_name)
