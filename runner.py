@@ -265,15 +265,19 @@ def write_outputs():
 
 async def run_action(action_name: str, action: Dict[str, Any]):
     env = get_env_for(action_name, action)
-    print(env)
-    print("===")
-    print(os.environ)
+
+    extra_args = {}
+
+    if platform.system() == 'Linux':
+        # Ubuntu uses dash as its /bin/sh which breaks env variables with dashes in them
+        extra_args['executable'] = '/bin/bash'
 
     process = await asyncio.subprocess.create_subprocess_shell(
         action["script"],
         env=env,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
+        **extra_args
     )
     assert process.stdout
 
