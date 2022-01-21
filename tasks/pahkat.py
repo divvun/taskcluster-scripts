@@ -14,7 +14,7 @@ def create_pahkat_uploader_task(os_):
         task_new = windows_task
         install_rust = GithubAction("actions-rs/toolchain", {"toolchain": "stable", "profile": "minimal", "override": "true", "components": "rustfmt", "target": "i686-pc-windows-msvc"})
         build = GithubAction("actions-rs/cargo", {"command": "build", "args": "--release --manifest-path pahkat-uploader/Cargo.toml", "target": "i686-pc-windows-msvc"})
-        dist = GithubActionScript("mkdir -p dist/bin && mv pahkat-uploader/target/i686-pc-windows-msvc/release/pahkat-uploader.exe dist/bin/pahkat-uploader.exe")
+        dist = GithubActionScript("dir && dir pahkat-uploader && dir pahkat-uploader\\target && mkdir dist\\bin && move pahkat-uploader\\target\\i686-pc-windows-msvc\\release\\pahkat-uploader.exe dist\\bin\\pahkat-uploader.exe")
         sign = GithubAction("Eijebong/divvun-actions/codesign", {"path": "dist/bin/pahkat-uploader.exe"})
         deploy = GithubAction("Eijebong/divvun-actions/deploy", {"package-id": "pahkat-uploader", "type": "TarballPackage", "platform": "windows", "arch": "i686", "repo": PAHKAT_REPO + 'devtools/'})
     elif os_ == "macos":
@@ -36,6 +36,7 @@ def create_pahkat_uploader_task(os_):
 
     return (task_new(f"Pahkat uploader: {os_}")
         .with_env(**env)
+        .with_script(r'call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7\Tools\VsDevCmd.bat"')
         .with_gha("setup", gha_setup())
         # The actions-rs action is broken on windows
         .with_gha("install_rustup", GithubActionScript("choco install -y --force rustup.install && echo ::add-path::%HOMEDRIVE%%HOMEPATH%\\.cargo\\bin"), enabled=(os_=="windows"))
