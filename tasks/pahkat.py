@@ -45,13 +45,13 @@ def create_pahkat_uploader_task(os_):
                 {"cargo": "pahkat-uploader/Cargo.toml", "nightly": "main, develop"},
             ).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN")
         )
-        .with_gha("install_build_deps", gha_pahkat(["pahkat-uploader"]))
         .with_gha("install_rust", install_rust)
         .with_gha("build", build)
         .with_gha("dist", dist)
         .with_gha("sign", sign)
         .with_gha("tarball",
                 GithubAction("Eijebong/divvun-actions/create-txz", {"path": "dist"}))
+        .with_gha("add_uploader_to_path", GithubActionScript("echo \"::add-path::dist/bin\""))
         .with_gha("deploy",
             deploy
             .with_mapped_output("version", "version", "version")

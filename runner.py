@@ -164,8 +164,8 @@ async def process_command(step_name: str, line: str) -> bool:
         name = name.split("=")[1]
         OUTPUTS[step_name][name] = value
     elif line.startswith("::add-path::"):
-        secret = line[len("::add-path::") :]
-        EXTRA_PATH.append(secret)
+        path = line[len("::add-path::") :]
+        EXTRA_PATH.append(path)
     elif line.startswith("::create-artifact"):
         output = line[len("::create-artifact") :]
         name, path = output.split("::", 1)
