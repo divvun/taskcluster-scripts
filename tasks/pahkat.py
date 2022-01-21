@@ -38,7 +38,7 @@ def create_pahkat_uploader_task(os_):
         .with_env(**env)
         .with_gha("setup", gha_setup())
         # The actions-rs action is broken on windows
-        .with_gha("install_rustup", GithubActionScript("choco install -y --force rustup.install; refreshenv"), enabled=(os_=="windows"))
+        .with_gha("install_rustup", GithubActionScript("choco install -y --force rustup.install && refreshenv"), enabled=(os_=="windows"))
         .with_gha("version",
             GithubAction(
                 "Eijebong/divvun-actions/version",
