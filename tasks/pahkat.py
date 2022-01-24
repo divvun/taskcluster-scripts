@@ -1,5 +1,5 @@
 from decisionlib import CONFIG
-from gha import GithubAction, GithubActionScript
+from gha import GithubAction, GithubActionScript, ActionOutput
 from .common import macos_task, windows_task, linux_build_task, gha_setup, gha_pahkat, PAHKAT_REPO
 
 def create_pahkat_tasks():
@@ -64,3 +64,27 @@ def create_pahkat_uploader_task(os_):
         .find_or_create(f"build.pahkat.{os_}.{CONFIG.git_sha}")
     )
 
+
+def create_pahkat_service_windows_task():
+    return (windows_task("Pahkat service (Windows)")
+        .with_gha("setup", gha_setup())
+        .with_gha("version", GithubAction("Eijebong/divvun-actions/version", {"cargo": "pahkat-rpc/Cargo.toml", "stable-channel": "beta"}).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN"))
+        .with_gha("pahkat_setup", gha_pahkat(["pahkat-uploader"]))
+        .with_gha("install_rust", GithubAction("actions-rs/toolchain", {"toolchain": "stable", "profile": "minimal", "override": "true", "components": "rustfmt", "target": "i686-pc-windows-msvc"}))
+        .with_gha("self_update_channel", GithubActionScript("echo ::set-output name=channel::nightly", run_if=ActionOutput("version", "channel").eq("nightly")))
+        .with_gha("rpc_dll",
+            GithubAction("actions-rs/cargo", {"command": "build", "args": "--bin winsvc --features windows--release --manifest-path pahkat-rpc/Cargo.toml"})
+            .with_env(**{"RUSTC_BOOTSTRAP": 1})
+            .with_mapped_output("self_update_channel", "channel", as_env=True)
+        )
+        .with_gha("rpc_client",
+            GithubAction("actions-rs/cargo", {"command": "build", "args": "--bin client --features windows --release --manifest-path pahkat-rpc/Cargo.toml"})
+            .with_env(**{"RUSTC_BOOTSTRAP": 1})
+            .with_mapped_output("self_update_channel", "channel", as_env=True)
+        )
+        .with_gha("create_dist",
+            GithubActionScript("mkdir dist && move target\\release\\winsvc.exe dist\\pahkat-service.exe && move target\\release\\client.exe dist\\pahkatc.exe && mkdir dist-lib\\bin && move target\\release\\pahkat_rpc.dll dist-lib\\bin\\pahkat_rpc.dll"))
+        .with_gha("sign_code_server", GithubAction("Eijebong/divvun-actions/codesign", {"path": "dist/pahkat-service.exe"}))
+        .with_gha("sign_code_client", GithubAction("Eijebong/divvun-actions/codesign", {"path": "dist/pahkatc.exe"}))
+        .with_gh("create_installer", GithubAction("Eijebong/divvun-actions/inno-setup", {"path": "pahkat-rpc/resources/instal.iss"}))
+    )

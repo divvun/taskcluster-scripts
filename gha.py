@@ -4,12 +4,13 @@ import yaml
 
 class OutputMapping:
     def __init__(
-        self, input_name, mapped_output_action, mapped_output_name, from_task_id=None
+        self, input_name, mapped_output_action, mapped_output_name, from_task_id=None, as_env=False
     ):
         self.input_name = input_name
         self.mapped_output_action = mapped_output_action
         self.mapped_output_name = mapped_output_name
         self.task_id = from_task_id
+        self.as_env = as_env
 
     def to_dict(self):
         mapping = {
@@ -19,13 +20,14 @@ class OutputMapping:
                 "output": self.mapped_output_name,
             },
             "task_id": self.task_id,
+            "as_env": self.as_env,
         }
 
         return mapping
 
 
 class GithubAction:
-    def __init__(self, path, args):
+    def __init__(self, path, args, run_if=None):
         """
         Path here is the github path to an actions which is {org}/{repo}/{action_path_in_repo}
         Args will all be put in the env as INPUT_{key} = {value}
@@ -37,6 +39,8 @@ class GithubAction:
         self.args.update(args)
         self.output_mappings = []
         self.secret_inputs = {}
+        self.condition = run_if
+        self.env = {}
 
     def env_variables(self, platform):
         if platform == "linux":
@@ -112,9 +116,9 @@ class GithubAction:
     def output_mapping(self):
         return [output.to_dict() for output in self.output_mappings]
 
-    def with_mapped_output(self, name, source_step, source_name, task_id=None):
+    def with_mapped_output(self, name, source_step, source_name, task_id=None, as_env=False):
         self.output_mappings.append(
-            OutputMapping(name, source_step, source_name, task_id)
+            OutputMapping(name, source_step, source_name, task_id, as_env)
         )
         return self
 
@@ -122,10 +126,14 @@ class GithubAction:
         self.secret_inputs[input_name] = {"secret": secret, "name": name}
         return self
 
+    def with_env(self, key, value):
+        self.env[key] = value
+        return self
+
 
 class GithubActionScript(GithubAction):
-    def __init__(self, script):
-        super().__init__(None, {})
+    def __init__(self, script, run_if=None):
+        super().__init__(None, {}, run_if)
         self.script = script
 
     def gen_script(self, _platform):
@@ -134,3 +142,18 @@ class GithubActionScript(GithubAction):
     @property
     def git_fetch_url(self):
         return None
+
+
+class ActionOutput:
+    def __init__(self, action_name, output_name):
+        self.action_name = action_name
+        self.output_name = output_name
+        self._value = None
+        self._operator = None
+
+    def eq(self, value):
+        self._value = value
+        self._operator = "eq"
+
+    def to_dict(self):
+        return { "action": self.action_name, "output": self.output_name, "operator": self._operator, "cmp": self._value }

@@ -392,6 +392,10 @@ class Task:
                 "inputs": gha.args,
                 "secret_inputs": gha.secret_inputs,
             }
+
+            if gha.condition is not None:
+                payload[name]['condition'] = gha.condition
+
         utils.create_extra_artifact(payload_name, json.dumps(payload).encode())
 
     def gen_gha_payload(self, name: str):

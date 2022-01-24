@@ -221,7 +221,10 @@ def get_env_for(step_name: str, step: Dict[str, Any]):
         env[name] = to_string(res)
 
     for mapping in step["mapping"]:
-        name = "INPUT_" + mapping["input"].upper()
+        if mapping["as_env"]:
+            name = mapping["input"]
+        else:
+            name = "INPUT_" + mapping["input"].upper()
         if mapping["task_id"]:
             with open(
                 os.path.join(
@@ -230,9 +233,9 @@ def get_env_for(step_name: str, step: Dict[str, Any]):
             ) as fd:
                 values = json.loads(fd.read())
             print(values)
-            env[name] = values[mapping["from"]["action"]][mapping["from"]["output"]]
+            env[name] = values.get(mapping["from"]["action"], {}).get(mapping["from"]["output"], "")
         else:
-            env[name] = OUTPUTS[mapping["from"]["action"]][mapping["from"]["output"]]
+            env[name] = OUTPUTS.get(mapping["from"]["action"], {}).get(mapping["from"]["output"], "")
 
     env["GITHUB_ACTION"] = step_name
     if platform.system() == "Darwin":
@@ -297,6 +300,16 @@ async def run_action(action_name: str, action: Dict[str, Any]):
         raise SystemError()
 
 
+def should_run(condition):
+    current_value = OUTPUTS[condition['action']].get(condition['output'])
+    if condition['operator'] == 'eq':
+        if current_value is None:
+            return False
+        return current_value == condition['value']
+    else:
+        raise NotImplementedError
+
+
 async def main():
     gather_secrets()
     file = sys.argv[1]
@@ -304,6 +317,10 @@ async def main():
         actions = json.loads(fd.read())
 
     for name, action in actions.items():
+        if 'condition' in action:
+            if should_run(action['condition']):
+                print("Ignoring {} because condition was false".format(name))
+                continue
         await run_action(name, action)
 
 
