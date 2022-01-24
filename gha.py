@@ -1,5 +1,6 @@
 import requests
 import yaml
+import posixpath
 
 
 class OutputMapping:
@@ -108,7 +109,7 @@ class GithubAction:
 
     @property
     def script_path(self):
-        return self.action_path + "/" + self.run_path
+        return posixpath.join(self.action_path, self.run_path)
 
     def gen_script(self, _platform):
         return f"node {self.repo_name}/{self.script_path}"
