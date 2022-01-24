@@ -82,10 +82,12 @@ def windows_task(name):
         .with_script("cd %HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\repo")
     )
 
+
 def gha_setup():
     return GithubAction("Eijebong/divvun-actions/setup", {}).with_secret_input(
         "key", "divvun", "DIVVUN_KEY"
     )
+
 
 def gha_pahkat(packages: List[str]):
     return GithubAction(

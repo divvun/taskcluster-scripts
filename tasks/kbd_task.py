@@ -21,11 +21,11 @@ def create_kbd_task(os_name):
                 "upload",
                 GithubAction(
                     "Eijebong/divvun-actions/keyboard/deploy",
-                    {"keyboard-type": "keyboard-windows"},
-                ).with_mapped_output(
-                    "payload-path", "build", "payload-path"
-                ).with_mapped_output(
-                    "channel", "build", "channel"
+                    {
+                        "keyboard-type": "keyboard-windows",
+                        "payload-path": "${{ steps.build.outputs['payload-path'] }}",
+                        "channel": "${{ steps.build.outputs.channel }}",
+                    },
                 ),
             )
             .with_prep_gha_tasks()
@@ -37,7 +37,14 @@ def create_kbd_task(os_name):
             macos_task(f"Build keyboard: {os_name}")
             .with_gha("setup", gha_setup())
             .with_gha(
-                "init", gha_pahkat(["pahkat-uploader", "kbdgen@2.0.0-nightly.20210622T210632Z", "xcnotary"])
+                "init",
+                gha_pahkat(
+                    [
+                        "pahkat-uploader",
+                        "kbdgen@2.0.0-nightly.20210622T210632Z",
+                        "xcnotary",
+                    ]
+                ),
             )
             .with_gha(
                 "build",

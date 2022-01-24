@@ -39,9 +39,8 @@ def tasks(task_for: str):
     is_tag = False
     tag_name = ""
     if CONFIG.git_ref.startswith("refs/tags/"):
-        tag_name = CONFIG.git_ref[len("refs/tags/"):]
+        tag_name = CONFIG.git_ref[len("refs/tags/") :]
         is_tag = True
-
 
     # Lang repositories common tasks
     if repo_name.startswith("lang-"):
@@ -60,9 +59,11 @@ def tasks(task_for: str):
 
     # pahkat-reposrv tasks
     if repo_name == "pahkat-reposrv":
-        build_task_id = create_pahkat_reposrv_task(tag_name) # TODO: check if is tag
+        build_task_id = create_pahkat_reposrv_task(tag_name)  # TODO: check if is tag
         if is_tag:
-            release_task_id = create_pahkat_reposrv_release_task(build_task_id, tag_name)
+            release_task_id = create_pahkat_reposrv_release_task(
+                build_task_id, tag_name
+            )
             create_ansible_task(["pahkat-reposrv"], depends_on=release_task_id)
 
     if repo_name == "pahkat":

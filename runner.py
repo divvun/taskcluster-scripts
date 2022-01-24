@@ -37,7 +37,7 @@ Action description format:
         "env": {"name": "value", ...},
         "inputs": {"name": "value", ...},
         "secret_inputs": {"name": {"secret": "tc-secret", "name": "foo"}, ...},
-        "mapping": [{"input": "name", "from": {"task": "task_id", "action": "action_name", "output": "output_name}}, ...],
+        "outputs_from": ["task_id_1", ...],
         "script": ""
     }
     ```
@@ -52,13 +52,7 @@ Action description format:
       name. That's what the `secret` key is for. Then we index that JSON with
       `name` and put the stringified value into `INPUT_{name.upper()}` just
       like a normal input.
-    - mapping: This is to map an output from another task as an input for this
-      one. It's a list of mapping object defined as this:
-      - input: The name of the input the value will be put into.
-      - from:
-        - task: The takscluster task id to take outputs from
-        - action_name: The action name from that task to get outputs from
-        - output: The output name from that task to take the value from
+    - outputs_from: A list of actions to get outputs from
     - script: The script to run. This is usually `node path/to/action.js` but could be anything.
 """
 
@@ -204,38 +198,29 @@ def get_env_for(step_name: str, step: Dict[str, Any]):
 
     env = os.environ
     secrets_service = helper.TaskclusterConfig().get_service("secrets")
+    all_outputs = OUTPUTS
+    for output in step["outputs_from"]:
+        with open(os.path.join(os.environ["GITHUB_WORKSPACE"], output + ".json")) as fd:
+            values = json.loads(fd.read())
+        all_outputs.update(values)
+
     for name, value in step["env"].items():
-        env[name] = os.path.expandvars(value)
+        env[name] = parse_value_from(os.path.expandvars(value), all_outputs)
         os.environ = env
 
     for name, value in step["inputs"].items():
-        env["INPUT_" + name.upper()] = os.path.expandvars(to_string(value))
+        env["INPUT_" + name.upper()] = parse_value_from(
+            os.path.expandvars(to_string(value)), all_outputs
+        )
         os.environ = env
 
     for input_name, secret in step["secret_inputs"].items():
         name = "INPUT_" + input_name.upper()
         res = secrets_service.get(secret["secret"])["secret"]
-        parts = secret["name"].split('.')
+        parts = secret["name"].split(".")
         for part in parts:
             res = res[part]
         env[name] = to_string(res)
-
-    for mapping in step["mapping"]:
-        if mapping["as_env"]:
-            name = mapping["input"]
-        else:
-            name = "INPUT_" + mapping["input"].upper()
-        if mapping["task_id"]:
-            with open(
-                os.path.join(
-                    os.environ["GITHUB_WORKSPACE"], mapping["task_id"] + ".json"
-                )
-            ) as fd:
-                values = json.loads(fd.read())
-            print(values)
-            env[name] = values.get(mapping["from"]["action"], {}).get(mapping["from"]["output"], "")
-        else:
-            env[name] = OUTPUTS.get(mapping["from"]["action"], {}).get(mapping["from"]["output"], "")
 
     env["GITHUB_ACTION"] = step_name
     if platform.system() == "Darwin":
@@ -271,16 +256,16 @@ async def run_action(action_name: str, action: Dict[str, Any]):
 
     extra_args = {}
 
-    if platform.system() == 'Linux':
+    if platform.system() == "Linux":
         # Ubuntu uses dash as its /bin/sh which breaks env variables with dashes in them
-        extra_args['executable'] = '/bin/bash'
+        extra_args["executable"] = "/bin/bash"
 
     process = await asyncio.subprocess.create_subprocess_shell(
         action["script"],
         env=env,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
-        **extra_args
+        **extra_args,
     )
     assert process.stdout
 
@@ -301,13 +286,165 @@ async def run_action(action_name: str, action: Dict[str, Any]):
 
 
 def should_run(condition):
-    current_value = OUTPUTS[condition['action']].get(condition['output'])
-    if condition['operator'] == 'eq':
+    current_value = OUTPUTS[condition["action"]].get(condition["output"])
+    if condition["operator"] == "eq":
         if current_value is None:
             return False
-        return current_value == condition['value']
+        return current_value == condition["value"]
     else:
         raise NotImplementedError
+
+
+def parse_value_from(s, outputs):
+    remainder = s
+    out = ""
+
+    while remainder:
+        start_index = remainder.find("${{")
+        if start_index == -1:
+            out += remainder
+            return out
+
+        end_index = remainder.find("}}")
+        if end_index == -1:
+            raise ValueError(f"Parse error on variable in {remainder}")
+
+        out += remainder[:start_index]
+        variable = remainder[start_index + 3 : end_index].strip().lstrip()
+        parts = variable.split()
+        # ${{ steps.step_name.outputs.foo }} or ${{ steps.step_name.outputs['foo'] }}
+        if len(parts) == 1:
+            var_name = parts[0].split(".")
+            if var_name[0] != "steps":
+                raise ValueError(f"Unsupported operation in {remainder}")
+
+            if len(var_name) == 3:
+                # ${{ steps.step_name.outputs['foo'] }}
+                value_name_start_index = var_name[2].find("['")
+                value_name_end_index = var_name[2].find("']")
+                if value_name_start_index == -1 or value_name_end_index == -1:
+                    raise ValueError(f"Error while parsing variable in {remainder}")
+                output_name = var_name[2][
+                    value_name_start_index + 2 : value_name_end_index
+                ]
+                step_name = var_name[1]
+            elif len(var_name) == 4:
+                # ${{ steps.step_name.outputs.foo }}
+                if var_name[2] != "outputs":
+                    raise ValueError(
+                        f"Unsupported operation {var_name[2]} in {remainder}"
+                    )
+
+                step_name, output_name = var_name[1], var_name[3]
+                if step_name not in outputs:
+                    raise ValueError(f"Step {step_name} not found")
+                if output_name not in outputs[step_name]:
+                    raise ValueError(f"Output {output_name} not found in {step_name}")
+            else:
+                raise ValueError(f"Error while parsing variable in {remainder}")
+
+            out += outputs[step_name][output_name]
+        else:
+            if out:
+                raise ValueError("Conditions can't be concatenated")
+            return parse_condition(variable, outputs, 0)
+
+        remainder = remainder[end_index + 2 :]
+    return out
+
+
+def parse_condition(condition, outputs, depth):
+    condition = condition.strip().lstrip()
+
+    parens_start = condition.find("(")
+    if parens_start != -1:
+        parens_depth = 1
+        parens_end = None
+        # Find matching parens
+        for index, c in enumerate(condition[parens_start + 1 :]):
+            if c == "(":
+                parens_depth += 1
+            if c == ")":
+                parens_depth -= 1
+                if parens_depth == 0:
+                    parens_end = index + parens_start
+                    break
+        if not parens_end:
+            raise ValueError(f"Syntax error in {condition}, missing `)`")
+
+        inner = parse_condition(
+            condition[parens_start + 1 : parens_end + 1], outputs, depth + 1
+        )
+
+        condition = condition[:parens_start] + str(inner) + condition[parens_end + 2 :]
+        return parse_condition(condition, outputs, depth + 1)
+
+    def to_py(value):
+        if value == "false":
+            return False
+        if value == "true":
+            return True
+        return value
+
+    def eq(left, right):
+        left = to_py(left)
+        right = to_py(right)
+        return str(left == right).lower()
+
+    def and_(left, right):
+        left = to_py(left)
+        right = to_py(right)
+        return str(left and right).lower()
+
+    def or_(left, right):
+        left = to_py(left)
+        right = to_py(right)
+        return str(left or right).lower()
+
+    ops = {
+        "&&": and_,
+        "||": or_,
+        "==": eq,
+    }
+
+    for op, func in ops.items():
+        op_start = condition.find(op)
+        if op_start != -1:
+            left_start = 0
+            for idx, c in enumerate(reversed(condition[:op_start])):
+                # Search for the previous operator
+                if c in ("&", "|", "(", ")"):
+                    left_start = op_start - idx
+                    break
+
+            right_end = len(condition)
+            for idx, c in enumerate(condition[op_start + len(op) :]):
+                # Search for the next operator
+                if c in ("&", "|", "(", ")"):
+                    right_end = op_start + idx
+                    break
+
+            left = parse_condition(condition[left_start:op_start], outputs, depth + 1)
+            right = parse_condition(
+                condition[op_start + len(op) : right_end], outputs, depth + 1
+            )
+            inner = func(left, right)
+            condition = condition[:left_start] + str(inner) + condition[right_end:]
+            return parse_condition(condition, outputs, depth + 1)
+
+    if condition in ("null", "true", "false"):
+        return condition
+
+    if condition.startswith('"') and condition.endswith('"'):
+        return condition[1:-1]
+
+    if condition.startswith("'") and condition.endswith("'"):
+        return condition[1:-1]
+
+    if not condition:
+        raise ValueError("Parsing error")
+    # If we end up here, we are out of normal types, it's a variable that comes fromn outputs
+    return parse_value_from("${{ " + condition + " }}", outputs)
 
 
 async def main():
@@ -317,18 +454,19 @@ async def main():
         actions = json.loads(fd.read())
 
     for name, action in actions.items():
-        if 'condition' in action:
-            if should_run(action['condition']):
+        if "condition" in action:
+            if should_run(action["condition"]):
                 print("Ignoring {} because condition was false".format(name))
                 continue
         await run_action(name, action)
 
 
-try:
-    asyncio.run(main())
-finally:
-    # Cleanup on macos since it's the only runner not entirely stateless.
-    if platform.system() == "Darwin":
-        shutil.rmtree(os.environ["GITHUB_WORKSPACE"])
+if __name__ == "__main__":
+    try:
+        asyncio.run(main())
+    finally:
+        # Cleanup on macos since it's the only runner not entirely stateless.
+        if platform.system() == "Darwin":
+            shutil.rmtree(os.environ["GITHUB_WORKSPACE"])
 
-write_outputs()
+    write_outputs()

@@ -387,14 +387,14 @@ class Task:
             script = gha.gen_script(platform)
             payload[name] = {
                 "script": script,
-                "mapping": gha.output_mapping(),
+                "outputs_from": list(gha.outputs_from),
                 "env": gha.env_variables(platform),
                 "inputs": gha.args,
                 "secret_inputs": gha.secret_inputs,
             }
 
             if gha.condition is not None:
-                payload[name]['condition'] = gha.condition
+                payload[name]["condition"] = gha.condition
 
         utils.create_extra_artifact(payload_name, json.dumps(payload).encode())
 
@@ -546,15 +546,14 @@ class WindowsGenericWorkerTask(GenericWorkerTask):
 
     def with_prep_gha_tasks(self):
         for gha in self.gh_actions.values():
-            for out in gha.output_mappings:
-                if out.task_id:
-                    self.with_curl_artifact_script(
-                        out.task_id,
-                        "outputs.json",
-                        "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\",
-                        "private",
-                        rename=out.task_id + ".json",
-                    )
+            for output_from in gha.outputs_from:
+                self.with_curl_artifact_script(
+                    output_from,
+                    "outputs.json",
+                    "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\",
+                    "private",
+                    rename=output_from + ".json",
+                )
         return self.with_curl_artifact_script(
             CONFIG.decision_task_id,
             "%TASK_ID%.json",
@@ -791,15 +790,14 @@ class MacOsGenericWorkerTask(UnixTaskMixin, GenericWorkerTask):
 
     def with_prep_gha_tasks(self):
         for gha in self.gh_actions.values():
-            for out in gha.output_mappings:
-                if out.task_id:
-                    self.with_curl_artifact_script(
-                        out.task_id,
-                        "outputs.json",
-                        "$HOME/tasks/$TASK_ID/",
-                        "private",
-                        rename=out.task_id + ".json",
-                    )
+            for output_from in gha.outputs_from:
+                self.with_curl_artifact_script(
+                    output_from,
+                    "outputs.json",
+                    "$HOME/tasks/$TASK_ID/",
+                    "private",
+                    rename=output_from + ".json",
+                )
         return self.with_curl_artifact_script(
             CONFIG.decision_task_id,
             "$TASK_ID.json",
@@ -834,15 +832,14 @@ class DockerWorkerTask(UnixTaskMixin, Task):
 
     def with_prep_gha_tasks(self):
         for gha in self.gh_actions.values():
-            for out in gha.output_mappings:
-                if out.task_id:
-                    self.with_curl_artifact_script(
-                        out.task_id,
-                        "outputs.json",
-                        "$HOME/tasks/$TASK_ID/",
-                        "private",
-                        rename=out.task_id + ".json",
-                    )
+            for output_from in gha.outputs_from:
+                self.with_curl_artifact_script(
+                    output_from,
+                    "outputs.json",
+                    "$HOME/tasks/$TASK_ID/",
+                    "private",
+                    rename=output_from + ".json",
+                )
         return self.with_curl_artifact_script(
             CONFIG.decision_task_id,
             "$TASK_ID.json",

@@ -66,12 +66,13 @@ def create_bundle_task(os_name, type_, lang_task_id):
                 "bundle",
                 GithubAction(
                     "Eijebong/divvun-actions/speller/bundle",
-                    {"speller-type": type_, "speller-manifest-path": "manifest.toml"},
-                )
-                .with_mapped_output(
-                    "speller-paths", "build", "speller-paths", task_id=lang_task_id
-                )
-                .with_mapped_output("version", "version", "version"),
+                    {
+                        "speller-type": type_,
+                        "speller-manifest-path": "manifest.toml",
+                        "speller-path": "${{ steps.build.outputs['speller-paths'] }}",
+                        "version": "${{ steps.version.outputs.version }}",
+                    },
+                ).with_outputs_from(lang_task_id),
             )
             .with_prep_gha_tasks()
             .find_or_create(f"bundle.{os_name}_x64_{type_}.{CONFIG.git_sha}")
@@ -109,12 +110,13 @@ def create_bundle_task(os_name, type_, lang_task_id):
                 "bundle",
                 GithubAction(
                     "Eijebong/divvun-actions/speller/bundle",
-                    {"speller-type": type_, "speller-manifest-path": "manifest.toml"},
-                )
-                .with_mapped_output(
-                    "speller-paths", "build", "speller-paths", task_id=lang_task_id
-                )
-                .with_mapped_output("version", "version", "version"),
+                    {
+                        "speller-type": type_,
+                        "speller-manifest-path": "manifest.toml",
+                        "speller-path": "${{ steps.build.outputs['speller-paths'] }}",
+                        "version": "${{ steps.version.outputs.version }}",
+                    },
+                ).with_outputs_from(lang_task_id),
             )
             .with_prep_gha_tasks()
             .find_or_create(f"bundle.{os_name}_x64_{type_}.{CONFIG.git_sha}")
