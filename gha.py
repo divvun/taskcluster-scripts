@@ -97,6 +97,9 @@ class GithubAction:
 
     def with_secret_input(self, input_name, secret, name):
         self.secret_inputs[input_name] = {"secret": secret, "name": name}
+
+        # Remove the input from self.args in case it has a default
+        del self.args[input_name]
         return self
 
     def with_env(self, key, value):
