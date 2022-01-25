@@ -119,22 +119,3 @@ class GithubActionScript(GithubAction):
     def git_fetch_url(self):
         return None
 
-
-class ActionOutput:
-    def __init__(self, action_name, output_name):
-        self.action_name = action_name
-        self.output_name = output_name
-        self._value = None
-        self._operator = None
-
-    def eq(self, value):
-        self._value = value
-        self._operator = "eq"
-
-    def to_dict(self):
-        return {
-            "action": self.action_name,
-            "output": self.output_name,
-            "operator": self._operator,
-            "cmp": self._value,
-        }

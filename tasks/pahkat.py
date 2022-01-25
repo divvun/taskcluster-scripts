@@ -215,7 +215,7 @@ def create_pahkat_service_windows_task():
             "self_update_channel",
             GithubActionScript(
                 "echo ::set-output name=channel::nightly",
-                run_if=ActionOutput("version", "channel").eq("nightly"),
+                run_if="${{ steps.version.outputs.channel == 'nightly' }}",
             ),
         )
         .with_gha(

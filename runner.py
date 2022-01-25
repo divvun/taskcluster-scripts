@@ -285,14 +285,13 @@ async def run_action(action_name: str, action: Dict[str, Any]):
         raise SystemError()
 
 
-def should_run(condition):
-    current_value = OUTPUTS[condition["action"]].get(condition["output"])
-    if condition["operator"] == "eq":
-        if current_value is None:
-            return False
-        return current_value == condition["value"]
-    else:
-        raise NotImplementedError
+def should_run(condition, step):
+    all_outputs = OUTPUTS
+    for output in step["outputs_from"]:
+        with open(os.path.join(os.environ["GITHUB_WORKSPACE"], output + ".json")) as fd:
+            values = json.loads(fd.read())
+        all_outputs.update(values)
+    return parse_value_from(condition, all_outputs) == 'true'
 
 
 def parse_value_from(s, outputs):
@@ -455,7 +454,7 @@ async def main():
 
     for name, action in actions.items():
         if "condition" in action:
-            if should_run(action["condition"]):
+            if should_run(action["condition"], action):
                 print("Ignoring {} because condition was false".format(name))
                 continue
         await run_action(name, action)
