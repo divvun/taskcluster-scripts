@@ -93,7 +93,7 @@ def gha_pahkat(packages: List[str]):
     return GithubAction(
         "Eijebong/divvun-actions/pahkat/init",
         {
-            "repo": "https://pahkat.uit.no/devtools/",
+            "repo": "https://pahkat.thetc.se/devtools/",
             "channel": "nightly",
             "packages": ",".join(packages),
         },
