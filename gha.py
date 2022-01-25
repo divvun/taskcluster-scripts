@@ -1,6 +1,7 @@
 import requests
 import yaml
 import posixpath
+import re
 
 
 class GithubAction:
@@ -114,7 +115,7 @@ class GithubActionScript(GithubAction):
         self.script = script
 
     def gen_script(self, _platform):
-        return self.script
+        return re.sub("\n +", "\n ", self.script).strip()
 
     @property
     def git_fetch_url(self):

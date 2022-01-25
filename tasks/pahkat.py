@@ -44,12 +44,11 @@ def create_pahkat_uploader_task(os_):
             "actions-rs/cargo",
             {
                 "command": "build",
-                "args": "--release --manifest-path pahkat-uploader/Cargo.toml",
-                "target": "i686-pc-windows-msvc",
+                "args": "--release --manifest-path pahkat-uploader/Cargo.toml --target i686-pc-windows-msvc",
             },
         )
         dist = GithubActionScript(
-            "mkdir dist\\bin && move pahkat-uploader\\target\\release\\pahkat-uploader.exe dist\\bin\\pahkat-uploader.exe"
+            "mkdir dist\\bin && move pahkat-uploader\\target\\i686-pc-windows-msvc\\release\\pahkat-uploader.exe dist\\bin\\pahkat-uploader.exe"
         )
         sign = GithubAction(
             "Eijebong/divvun-actions/codesign", {"path": "dist/bin/pahkat-uploader.exe"}
@@ -266,9 +265,13 @@ def create_pahkat_service_windows_task():
         )
         .with_gha(
             "create_dist",
-            GithubActionScript(
-                "mkdir dist && move target\\release\\winsvc.exe dist\\pahkat-service.exe && move target\\release\\client.exe dist\\pahkatc.exe && mkdir dist-lib\\bin && move target\\release\\pahkat_rpc.dll dist-lib\\bin\\pahkat_rpc.dll"
-            ),
+            GithubActionScript("""
+                mkdir dist
+                move target\\i686-pc-windows-msvc\\release\\winsvc.exe dist\\pahkat-service.exe
+                move target\\i686-pc-windows-msvc\\release\\client.exe dist\\pahkatc.exe
+                mkdir dist-lib\\bin
+                move target\\i686-pc-windows-msvc\\release\\pahkat_rpc.dll dist-lib\\bin\\pahkat_rpc.dll
+            """),
         )
         .with_gha(
             "sign_code_server",
