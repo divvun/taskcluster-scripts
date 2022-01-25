@@ -264,7 +264,7 @@ async def run_action(action_name: str, action: Dict[str, Any]):
         # Ubuntu uses dash as its /bin/sh which breaks env variables with dashes in them
         extra_args["executable"] = "/bin/bash"
 
-    for script in action["script"].split('\n'):
+    for script in action["script"].split("\n"):
         print(script)
         process = await asyncio.subprocess.create_subprocess_shell(
             script,
