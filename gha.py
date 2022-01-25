@@ -99,7 +99,8 @@ class GithubAction:
         self.secret_inputs[input_name] = {"secret": secret, "name": name}
 
         # Remove the input from self.args in case it has a default
-        del self.args[input_name]
+        if input_name in self.args:
+            del self.args[input_name]
         return self
 
     def with_env(self, key, value):
@@ -118,4 +119,3 @@ class GithubActionScript(GithubAction):
     @property
     def git_fetch_url(self):
         return None
-

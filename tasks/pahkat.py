@@ -1,5 +1,5 @@
 from decisionlib import CONFIG
-from gha import GithubAction, GithubActionScript, ActionOutput
+from gha import GithubAction, GithubActionScript
 from .common import (
     macos_task,
     windows_task,
@@ -11,6 +11,9 @@ from .common import (
 
 
 def create_pahkat_tasks():
+    create_pahkat_service_windows_task()
+    # TODO: remove
+    return
     for os_ in ("macos", "windows", "linux"):
         create_pahkat_uploader_task(os_)
 
@@ -228,7 +231,7 @@ def create_pahkat_service_windows_task():
                 },
             )
             .with_env("RUSTC_BOOTSTRAP", 1)
-            .with_env("CHANNEL", "${{ steps.self_update_channel.outputs.channel }}")
+            .with_env("CHANNEL", "${{ steps.self_update_channel.outputs.channel }}"),
         )
         .with_gha(
             "rpc_client",
@@ -240,7 +243,7 @@ def create_pahkat_service_windows_task():
                 },
             )
             .with_env("RUSTC_BOOTSTRAP", 1)
-            .with_env("CHANNEL", "${{ steps.self_update_channel.outputs.channel }}")
+            .with_env("CHANNEL", "${{ steps.self_update_channel.outputs.channel }}"),
         )
         .with_gha(
             "create_dist",
@@ -264,7 +267,50 @@ def create_pahkat_service_windows_task():
             "create_installer",
             GithubAction(
                 "Eijebong/divvun-actions/inno-setup",
-                {"path": "pahkat-rpc/resources/instal.iss"},
+                {
+                    "path": "pahkat-rpc/resources/instal.iss",
+                    "defines": "Version=${{ steps.version.outputs.version }}",
+                },
             ),
         )
+        .with_gha(
+            "bundle_dll",
+            GithubAction("Eijebong/divvun-actions/create-txz", {"path": "dist-lib"}),
+        )
+        .with_gha(
+            "deploy_lib",
+            GithubAction(
+                "Eijebong/divvun-actions/deploy",
+                {
+                    "package-id": "libpahkat_rpc",
+                    "type": "TarballPackage",
+                    "platform": "windows",
+                    "arch": "i686",
+                    "repo": PAHKAT_REPO + "devtools/",
+                    "version": "${{ steps.version.outputs.version }}",
+                    "channel": "${{ steps.version.outputs.channel }}",
+                    "payload-path": "${{ steps.bundle_dll.outputs['txz-path'] }}",
+                },
+            ),
+        )
+        .with_gha(
+            "deploy_installer",
+            GithubAction(
+                "Eijebong/divvun-actions/deploy",
+                {
+                    "package-id": "pahkat-service",
+                    "type": "TarballPackage",
+                    "platform": "windows",
+                    "arch": "i686",
+                    "repo": PAHKAT_REPO + "divvun-installer/",
+                    "version": "${{ steps.version.outputs.version }}",
+                    "channel": "${{ steps.version.outputs.channel }}",
+                    "payload-path": "${{ steps.create_installer.outputs['installer-path'] }}",
+                    "windows-kind": "inno",
+                    "windows-product-code": "{6B3A048B-BB81-4865-86CA-61A0DF038CFE}_is1",
+                },
+            ),
+        )
+        .with_prep_gha_tasks()
+        .find_or_create(f"build.pahkat.service_windows.{CONFIG.git_sha}")
     )

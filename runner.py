@@ -291,7 +291,7 @@ def should_run(condition, step):
         with open(os.path.join(os.environ["GITHUB_WORKSPACE"], output + ".json")) as fd:
             values = json.loads(fd.read())
         all_outputs.update(values)
-    return parse_value_from(condition, all_outputs) == 'true'
+    return parse_value_from(condition, all_outputs) == "true"
 
 
 def parse_value_from(s, outputs):

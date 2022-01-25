@@ -294,4 +294,3 @@ class TestRunnerGetValueFromStr(BaseRunnerTest):
             '${{ false || (false || ((steps.step_1.outputs.output_1 == "value_1") || false)) }}'
         )
         self.assertEqual(value, "true")
-
