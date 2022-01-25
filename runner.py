@@ -255,6 +255,8 @@ def write_outputs():
 
 
 async def run_action(action_name: str, action: Dict[str, Any]):
+    print(f"Running {action_name}")
+    print(action['script'])
     env = get_env_for(action_name, action)
 
     extra_args = {}
