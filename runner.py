@@ -194,6 +194,9 @@ def get_env_for(step_name: str, step: Dict[str, Any]):
     def to_string(value):
         if isinstance(value, bool):
             return "true" if value else "false"
+        if isinstance(value, int):
+            return str(value)
+
         return value
 
     env = os.environ
@@ -205,7 +208,7 @@ def get_env_for(step_name: str, step: Dict[str, Any]):
         all_outputs.update(values)
 
     for name, value in step["env"].items():
-        env[name] = parse_value_from(os.path.expandvars(value), all_outputs)
+        env[name] = parse_value_from(os.path.expandvars(to_string(value)), all_outputs)
         os.environ = env
 
     for name, value in step["inputs"].items():
