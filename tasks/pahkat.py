@@ -22,6 +22,7 @@ def create_pahkat_tasks():
 
 def create_pahkat_prefix_cli_task():
     env = {}
+
     def get_bootstrap_uploader(os_):
         """
         Enable this and change URLs when Brendan decides that pain is necessary...
@@ -37,11 +38,13 @@ def create_pahkat_prefix_cli_task():
 
         return GithubActionScript(f"""
             curl {url} -o uploader.txz
-            tar xvf uploader.txz -C ${{RUNNER_TEMP}}
+            xz -d uploader.txz
+            tar xvf uploader.tar -C ${{RUNNER_TEMP}}
             echo ::add-path::${{RUNNER_TEMP}}/bin
         """)
-
     setup_uploader = get_bootstrap_uploader
+    #setup_uploader = gha_pahkat(["pahkat-uploader"])
+
     get_features = lambda _: "--features prefix"
 
     return generic_rust_build_upload_task(
