@@ -256,7 +256,6 @@ def write_outputs():
 
 async def run_action(action_name: str, action: Dict[str, Any]):
     print(f"Running {action_name}")
-    print(action['script'])
     env = get_env_for(action_name, action)
 
     extra_args = {}
@@ -265,29 +264,31 @@ async def run_action(action_name: str, action: Dict[str, Any]):
         # Ubuntu uses dash as its /bin/sh which breaks env variables with dashes in them
         extra_args["executable"] = "/bin/bash"
 
-    process = await asyncio.subprocess.create_subprocess_shell(
-        action["script"],
-        env=env,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        **extra_args,
-    )
-    assert process.stdout
+    for script in action["script"].split('\n'):
+        print(script)
+        process = await asyncio.subprocess.create_subprocess_shell(
+            script,
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            **extra_args,
+        )
+        assert process.stdout
 
-    decoder = codecs.getincrementaldecoder(sys.stdout.encoding)(errors="replace")
-    while True:
-        line = await process.stdout.readline()
-        if not line:
-            break
+        decoder = codecs.getincrementaldecoder(sys.stdout.encoding)(errors="replace")
+        while True:
+            line = await process.stdout.readline()
+            if not line:
+                break
 
-        line_str = decoder.decode(line).strip().lstrip()
-        await process_line(action_name, line_str)
+            line_str = decoder.decode(line).strip().lstrip()
+            await process_line(action_name, line_str)
 
-    await process.wait()
+        await process.wait()
 
-    if process.returncode != 0:
-        print(f"Process exited with code: {process.returncode}")
-        raise SystemError()
+        if process.returncode != 0:
+            print(f"Process exited with code: {process.returncode}")
+            raise SystemError()
 
 
 def should_run(condition, step):
