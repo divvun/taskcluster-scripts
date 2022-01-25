@@ -234,7 +234,7 @@ def create_pahkat_service_windows_task():
                 "actions-rs/cargo",
                 {
                     "command": "build",
-                    "args": "--bin winsvc --features windows--release --manifest-path pahkat-rpc/Cargo.toml",
+                    "args": "--bin winsvc --features windows --release --manifest-path pahkat-rpc/Cargo.toml",
                 },
             )
             .with_env("RUSTC_BOOTSTRAP", 1)
