@@ -155,12 +155,6 @@ class TestRunnerGetValueFromStr(BaseRunnerTest):
             self.get_value("${{ steps.step_1.output.output_1 }}")
 
         with self.assertRaises(ValueError):
-            self.get_value("${{ steps.step_1.outputs.output_3 }}")
-
-        with self.assertRaises(ValueError):
-            self.get_value("${{ steps.step_42.outputs.output_3 }}")
-
-        with self.assertRaises(ValueError):
             self.get_value("${{ steps.step_1.outputs['test-value] }}")
 
         with self.assertRaises(ValueError):
@@ -294,3 +288,16 @@ class TestRunnerGetValueFromStr(BaseRunnerTest):
             '${{ false || (false || ((steps.step_1.outputs.output_1 == "value_1") || false)) }}'
         )
         self.assertEqual(value, "true")
+
+    def test_undefined(self):
+        value = self.get_value("${{ steps.step_1.outputs.output_3 }}")
+        self.assertEqual(value, "undefined")
+
+        value = self.get_value("${{ steps.step_42.outputs.output_3 }}")
+        self.assertEqual(value, "undefined")
+
+        value = self.get_value("${{ steps.step_42.outputs.output_3 == undefined }}")
+        self.assertEqual(value, "true")
+
+        value = self.get_value("${{ steps.step_42.outputs.output_3 == 'foo' }}")
+        self.assertEqual(value, "false")

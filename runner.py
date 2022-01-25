@@ -339,9 +339,9 @@ def parse_value_from(s, outputs):
 
                 step_name, output_name = var_name[1], var_name[3]
                 if step_name not in outputs:
-                    raise ValueError(f"Step {step_name} not found")
+                    return "undefined"
                 if output_name not in outputs[step_name]:
-                    raise ValueError(f"Output {output_name} not found in {step_name}")
+                    return "undefined"
             else:
                 raise ValueError(f"Error while parsing variable in {remainder}")
 
@@ -386,6 +386,8 @@ def parse_condition(condition, outputs, depth):
             return False
         if value == "true":
             return True
+        if value == "undefined":
+            return None
         return value
 
     def eq(left, right):
@@ -434,7 +436,7 @@ def parse_condition(condition, outputs, depth):
             condition = condition[:left_start] + str(inner) + condition[right_end:]
             return parse_condition(condition, outputs, depth + 1)
 
-    if condition in ("null", "true", "false"):
+    if condition in ("null", "true", "false", "undefined"):
         return condition
 
     if condition.startswith('"') and condition.endswith('"'):
