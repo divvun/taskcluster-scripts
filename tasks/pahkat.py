@@ -29,18 +29,21 @@ def create_pahkat_prefix_cli_task():
         """
         if os_ == "macos":
             url = "https://divvun.ams3.cdn.digitaloceanspaces.com/pahkat/artifacts/pahkat-uploader_0.2.0-nightly.20220121T153431185Z_macos_x86_64.txz"
+            temp = "${RUNNER_TEMP}"
         elif os_ == "windows":
             url = "https://divvun.ams3.cdn.digitaloceanspaces.com/pahkat/artifacts/pahkat-uploader_0.2.0-nightly.20220121T153431185Z_windows_i686.txz"
+            temp = "%RUNNER_TEMP%"
         elif os_ == "linux":
             url = "https://divvun.ams3.cdn.digitaloceanspaces.com/pahkat/artifacts/pahkat-uploader_0.2.0-nightly.20220121T153431185Z_linux_x86_64.txz"
+            temp = "${RUNNER_TEMP}"
         else:
             raise NotImplementedError
 
         return GithubActionScript(f"""
             curl {url} -o uploader.txz
             xz -d uploader.txz
-            tar xvf uploader.tar -C ${{RUNNER_TEMP}}
-            echo ::add-path::${{RUNNER_TEMP}}/bin
+            tar xvf uploader.tar -C {temp}
+            echo ::add-path::{temp}/bin
         """)
     setup_uploader = get_bootstrap_uploader
     #setup_uploader = gha_pahkat(["pahkat-uploader"])
