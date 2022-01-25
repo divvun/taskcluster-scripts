@@ -290,7 +290,7 @@ def create_pahkat_service_windows_task():
             GithubAction(
                 "Eijebong/divvun-actions/inno-setup",
                 {
-                    "path": "pahkat-rpc/resources/instal.iss",
+                    "path": "pahkat-rpc/resources/install.iss",
                     "defines": "Version=${{ steps.version.outputs.version }}",
                 },
             ),
