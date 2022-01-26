@@ -1,6 +1,8 @@
 import decisionlib
-from gha import GithubAction
+from typing import List, Optional, Dict, Any, Callable
+from gha import GithubAction, GithubActionScript
 from typing import List
+
 
 BUILD_ARTIFACTS_EXPIRE_IN = "1 week"
 PAHKAT_REPO = "https://pahkat.thetc.se/"
@@ -98,3 +100,210 @@ def gha_pahkat(packages: List[str]):
             "packages": ",".join(packages),
         },
     )
+
+def _generic_rust_build_upload_task(
+    os_,
+    task_name,
+    cargo_toml_path,
+    package_id,
+    target_dir,
+    bin_name,
+    env,
+    setup_uploader,
+    rename_binary,
+    features,
+    version_action
+):
+    if os_ == "windows":
+        target_dir = "\\".join(target_dir.split("/"))
+        task_new = windows_task
+        install_rust = GithubAction(
+            "actions-rs/toolchain",
+            {
+                "toolchain": "stable",
+                "profile": "minimal",
+                "override": "true",
+                "components": "rustfmt",
+                "target": "i686-pc-windows-msvc",
+            },
+        )
+        build = GithubAction(
+            "actions-rs/cargo",
+            {
+                "command": "build",
+                "args": f"--release {features} --manifest-path {cargo_toml_path} --target i686-pc-windows-msvc",
+            },
+        )
+        dist = GithubActionScript(
+            f"mkdir dist\\bin && move {target_dir}\\i686-pc-windows-msvc\\release\\{bin_name}.exe dist\\bin\\{rename_binary}.exe"
+        )
+        sign = GithubAction(
+            "Eijebong/divvun-actions/codesign",
+            {"path": f"dist/bin/{rename_binary}.exe"},
+        )
+        deploy = GithubAction(
+            "Eijebong/divvun-actions/deploy",
+            {
+                "package-id": package_id,
+                "type": "TarballPackage",
+                "platform": "windows",
+                "arch": "i686",
+                "repo": PAHKAT_REPO + "devtools/",
+                "version": "${{ steps.version.outputs.version }}",
+                "channel": "${{ steps.version.outputs.channel }}",
+                "payload-path": "${{ steps.tarball.outputs['txz-path'] }}",
+            },
+        )
+    elif os_ == "macos":
+        task_new = macos_task
+        install_rust = GithubAction(
+            "actions-rs/toolchain",
+            {
+                "toolchain": "stable",
+                "profile": "minimal",
+                "override": "true",
+                "components": "rustfmt",
+            },
+        )
+        build = GithubAction(
+            "actions-rs/cargo",
+            {
+                "command": "build",
+                "args": f"--release {features} --manifest-path {cargo_toml_path}",
+            },
+        )
+        dist = GithubActionScript(
+            f"mkdir -p dist/bin && mv {target_dir}/release/{bin_name} dist/bin/{rename_binary}"
+        )
+        sign = GithubAction(
+            "Eijebong/divvun-actions/codesign", {"path": f"dist/bin/{rename_binary}"}
+        )
+        deploy = GithubAction(
+            "Eijebong/divvun-actions/deploy",
+            {
+                "package-id": package_id,
+                "type": "TarballPackage",
+                "platform": "macos",
+                "arch": "x86_64",
+                "repo": PAHKAT_REPO + "devtools/",
+                "version": "${{ steps.version.outputs.version }}",
+                "channel": "${{ steps.version.outputs.channel }}",
+                "payload-path": "${{ steps.tarball.outputs['txz-path'] }}",
+            },
+        )
+    elif os_ == "linux":
+        task_new = lambda name: linux_build_task(name).with_gha(
+            "setup_linux", GithubActionScript("apt install -y musl musl-tools")
+        )
+        install_rust = GithubAction(
+            "actions-rs/toolchain",
+            {
+                "toolchain": "stable",
+                "profile": "minimal",
+                "override": "true",
+                "components": "rustfmt",
+                "target": "x86_64-unknown-linux-musl",
+            },
+        )
+        build = GithubAction(
+            "actions-rs/cargo",
+            {
+                "command": "build",
+                "args": f"--release {features} --manifest-path {cargo_toml_path}",
+            },
+        )
+        dist = GithubActionScript(
+            f"mkdir -p dist/bin && mv {target_dir}/release/{bin_name} dist/bin/{rename_binary}"
+        )
+        sign = GithubActionScript('echo "No code signing on linux"')
+        deploy = GithubAction(
+            "Eijebong/divvun-actions/deploy",
+            {
+                "package-id": package_id,
+                "type": "TarballPackage",
+                "platform": "linux",
+                "arch": "x86_64",
+                "repo": PAHKAT_REPO + "devtools/",
+                "version": "${{ steps.version.outputs.version }}",
+                "channel": "${{ steps.version.outputs.channel }}",
+                "payload-path": "${{ steps.tarball.outputs['txz-path'] }}",
+            },
+        )
+    else:
+        raise NotImplementedError
+
+    return (
+        task_new(f"{task_name}: {os_}")
+        .with_env(**env)
+        .with_script(
+            r'call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7\Tools\VsDevCmd.bat"'
+            if os_ == "windows"
+            else ""
+        )
+        .with_gha("setup", gha_setup())
+        # The actions-rs action is broken on windows
+        .with_gha(
+            "install_rustup",
+            GithubActionScript(
+                "choco install -y --force rustup.install && echo ::add-path::%HOMEDRIVE%%HOMEPATH%\\.cargo\\bin"
+            ),
+            enabled=(os_ == "windows"),
+        )
+        .with_gha("version", version_action)
+        .with_gha("install_rust", install_rust)
+        .with_gha("build", build)
+        .with_gha("dist", dist)
+        .with_gha("sign", sign)
+        .with_gha(
+            "tarball",
+            GithubAction("Eijebong/divvun-actions/create-txz", {"path": "dist"}),
+        )
+        .with_gha("setup_uploader", setup_uploader)
+        .with_gha(
+            "deploy",
+            deploy.with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN"),
+        )
+        .with_prep_gha_tasks()
+        .find_or_create(f"build.{bin_name}.{os_}.{CONFIG.git_sha}")
+    )
+
+
+def generic_rust_build_upload_task(
+    task_name: str,
+    cargo_toml_path: str,
+    package_id: str,
+    target_dir: str,
+    bin_name: str,
+    env: Dict[str, Any],
+    setup_uploader: Callable[[str], GithubAction],
+    rename_binary: Optional[str]=None,
+    get_features: Optional[Callable[[str], GithubAction]]=None,
+    version_action: Optional[GithubAction]=None,
+    only_os: Optional[List[str]]=None
+):
+    if rename_binary is None:
+        rename_binary = bin_name
+    if version_action is None:
+        version_action = GithubAction("Eijebong/divvun-actions/version", {"cargo": cargo_toml_path, "nightly": "main, develop"}).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN")
+    if only_os is None:
+        only_os = ["macos", "windows", "linux"]
+
+    for os_ in only_os:
+        if get_features is not None:
+            features = get_features(os_)
+        else:
+            features = ""
+        _generic_rust_build_upload_task(
+            os_,
+            task_name,
+            cargo_toml_path,
+            package_id,
+            target_dir,
+            bin_name,
+            env,
+            setup_uploader(os_),
+            rename_binary,
+            features,
+            version_action
+        )
+
