@@ -148,7 +148,10 @@ async def process_command(step_name: str, line: str) -> bool:
     """
 
     if line.startswith("::add-mask::"):
-        secret = line[len("::add-mask::") :]
+        secret = line[len("::add-mask::") :].lstrip().strip()
+        if not secret:
+            return False
+
         SECRETS.add(secret)
         return False
 
@@ -160,6 +163,11 @@ async def process_command(step_name: str, line: str) -> bool:
     elif line.startswith("::add-path::"):
         path = line[len("::add-path::") :]
         EXTRA_PATH.append(path)
+    elif line.startswith("::set-env"):
+        output = line[len("::set-env") :]
+        name, value = output.split("::", 1)
+        name = name.split("=")[1]
+        os.environ[name] = value
     elif line.startswith("::create-artifact"):
         output = line[len("::create-artifact") :]
         name, path = output.split("::", 1)

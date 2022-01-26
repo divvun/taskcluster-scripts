@@ -6,3 +6,4 @@ from .pahkat_reposrv import (
     create_pahkat_reposrv_release_task,
 )
 from .ansible import create_ansible_task
+from .divvun_manager_macos import create_divvun_manager_macos_task

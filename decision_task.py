@@ -69,6 +69,9 @@ def tasks(task_for: str):
     if repo_name == "pahkat":
         create_pahkat_tasks()
 
+    if repo_name == "divvun-manager-macos":
+        create_divvun_manager_macos_task()
+
     # Deployment tasks
     if repo_name == "ansible-playbooks":
         create_ansible_task(["setup", "pahkat-reposrv"])
