@@ -20,7 +20,6 @@ PAHKAT_RUST_ENV = {
 
 def create_pahkat_tasks():
     create_pahkat_repomgr_tasks()
-    return
     create_pahkat_prefix_cli_tasks()
     create_pahkat_uploader_tasks()
     create_pahkat_service_windows_task()
