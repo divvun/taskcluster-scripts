@@ -19,15 +19,14 @@ PAHKAT_RUST_ENV = {
 }
 
 def create_pahkat_tasks():
-    create_pahkat_repomgr_tasks()
-    # TODO: remove
+    create_pahkat_prefix_cli_tasks()
     return
-    create_pahkat_prefix_cli_task()
-    create_pahkat_service_windows_task()
+    create_pahkat_repomgr_tasks()
     create_pahkat_uploader_tasks()
+    create_pahkat_service_windows_task()
 
 
-def create_pahkat_prefix_cli_task():
+def create_pahkat_prefix_cli_tasks():
     def get_bootstrap_uploader(os_):
         """
         Enable this and change URLs when Brendan decides that pain is necessary...
@@ -66,7 +65,6 @@ def create_pahkat_prefix_cli_task():
         get_features=get_features
     )
 
-
 def create_pahkat_uploader_tasks():
     # We're self boostrapping so add the dist directory in the path
     setup_uploader = lambda _: GithubActionScript("echo ::add-path::dist/bin")
@@ -77,6 +75,19 @@ def create_pahkat_uploader_tasks():
         package_id="pahkat-uploader",
         target_dir="pahkat-uploader/target",
         bin_name="pahkat-uploader",
+        env=PAHKAT_RUST_ENV,
+        setup_uploader=setup_uploader,
+    )
+
+def create_pahkat_repomgr_tasks():
+    setup_uploader = lambda _: gha_pahkat(["pahkat-uploader"])
+
+    return generic_rust_build_upload_task(
+        "Pahkat repomgr",
+        "pahkat-repomgr/Cargo.toml",
+        package_id="pahkat-repomgr",
+        target_dir="target",
+        bin_name="repomgr",
         env=PAHKAT_RUST_ENV,
         setup_uploader=setup_uploader,
     )
@@ -437,17 +448,4 @@ def create_pahkat_service_windows_task():
         .find_or_create(f"build.pahkat.service_windows.{CONFIG.git_sha}")
     )
 
-
-def create_pahkat_repomgr_tasks():
-    setup_uploader = lambda _: gha_pahkat(["pahkat-uploader"])
-
-    return generic_rust_build_upload_task(
-        "Pahkat repomgr",
-        "pahkat-repomgr/Cargo.toml",
-        package_id="pahkat-repomgr",
-        target_dir="target",
-        bin_name="repomgr",
-        env=PAHKAT_RUST_ENV,
-        setup_uploader=setup_uploader,
-    )
 
