@@ -33,7 +33,7 @@ def linux_build_task(name, bundle_dest="repo", with_secrets=True):
         .with_apt_update()
         .with_apt_install("curl", "git", "python3", "python3-pip")
         .with_pip_install("taskcluster", "pyYAML")
-        .with_apt_install("wget", "nodejs")
+        .with_apt_install("wget", "nodejs", "awscli")
         .with_repo_bundle("repo", bundle_dest)
         .with_repo_bundle("ci", "ci")
         .with_script(f"cd $HOME/tasks/$TASK_ID/{bundle_dest}")
