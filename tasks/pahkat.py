@@ -9,20 +9,25 @@ from .common import (
     PAHKAT_REPO,
 )
 
+PAHKAT_RUST_ENV = {
+    "RUST_VERSION": "stable",
+    "CARGO_INCREMENTAL": "0",
+    "RUSTUP_MAX_RETRIES": "10",
+    "CARGO_NET_RETRY": "10",
+    "RUST_BACKTRACE": "full",
+    "LZMA_API_STATIC": "1",
+}
 
 def create_pahkat_tasks():
-    create_pahkat_prefix_cli_task()
+    create_pahkat_repomgr_tasks()
     # TODO: remove
     return
+    create_pahkat_prefix_cli_task()
     create_pahkat_service_windows_task()
-    for os_ in ("macos", "windows", "linux"):
-        create_pahkat_uploader_task()
-        create_pahkat_repomgr_task(os_)
+    create_pahkat_uploader_tasks()
 
 
 def create_pahkat_prefix_cli_task():
-    env = {}
-
     def get_bootstrap_uploader(os_):
         """
         Enable this and change URLs when Brendan decides that pain is necessary...
@@ -45,9 +50,8 @@ def create_pahkat_prefix_cli_task():
             tar xvf uploader.tar -C {temp}
             echo ::add-path::{temp}/bin
         """)
-    setup_uploader = get_bootstrap_uploader
-    #setup_uploader = gha_pahkat(["pahkat-uploader"])
-
+    #setup_uploader = get_bootstrap_uploader
+    setup_uploader = lambda _: gha_pahkat(["pahkat-uploader"])
     get_features = lambda _: "--features prefix"
 
     return generic_rust_build_upload_task(
@@ -56,32 +60,24 @@ def create_pahkat_prefix_cli_task():
         package_id="pahkat-prefix-cli",
         target_dir="target",
         bin_name="pahkat-cli",
-        env=env,
+        env=PAHKAT_RUST_ENV,
         setup_uploader=setup_uploader,
         rename_binary="pahkat-prefix",
         get_features=get_features
     )
 
 
-def create_pahkat_uploader_task():
-    env = {
-        "RUST_VERSION": "stable",
-        "CARGO_INCREMENTAL": "0",
-        "RUSTUP_MAX_RETRIES": "10",
-        "CARGO_NET_RETRY": "10",
-        "RUST_BACKTRACE": "full",
-        "LZMA_API_STATIC": "1",
-    }
-
+def create_pahkat_uploader_tasks():
     # We're self boostrapping so add the dist directory in the path
     setup_uploader = lambda _: GithubActionScript("echo ::add-path::dist/bin")
+
     return generic_rust_build_upload_task(
         "Pahkat uploader",
         "pahkat-uploader/Cargo.toml",
         package_id="pahkat-uploader",
         target_dir="pahkat-uploader/target",
         bin_name="pahkat-uploader",
-        env=env,
+        env=PAHKAT_RUST_ENV,
         setup_uploader=setup_uploader,
     )
 
@@ -442,26 +438,16 @@ def create_pahkat_service_windows_task():
     )
 
 
-def create_pahkat_repomgr_task(os_):
-    if os_ == "windows":
-        task_new = windows_task
-    elif os_ == "macos":
-        task_new = macos_task
-    elif os_ == "linux":
-        task_new = lambda name: linux_build_task(name).with_gha(
-            "setup_linux", GithubActionScript("apt install -y musl musl-tools")
-        )
-    else:
-        raise NotImplementedError
+def create_pahkat_repomgr_tasks():
+    setup_uploader = lambda _: gha_pahkat(["pahkat-uploader"])
 
-    return (
-        task_new("Pahkat repomgr")
-        .with_gha("setup", gha_setup())
-        .with_gha(
-            "version",
-            GithubAction(
-                "Eijebong/divvun-actions/version",
-                {"cargo": "pahkat-repomgr/Cargo.toml"},
-            ).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN"),
-        )
+    return generic_rust_build_upload_task(
+        "Pahkat repomgr",
+        "pahkat-repomgr/Cargo.toml",
+        package_id="pahkat-repomgr",
+        target_dir="target",
+        bin_name="repomgr",
+        env=PAHKAT_RUST_ENV,
+        setup_uploader=setup_uploader,
     )
+
