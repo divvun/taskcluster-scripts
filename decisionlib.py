@@ -51,7 +51,7 @@ class Config:
         self.index_prefix = "project.divvun"
         self.index_read_only = False
         self.scopes_for_all_subtasks: List[str] = []
-        self.routes_for_all_subtasks: List[str] = []
+        self.routes_for_all_subtasks: List[str] = ["checks"]
         self.repacked_msi_files_expire_in = "1 month"
 
         # Set by docker-worker:
