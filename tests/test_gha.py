@@ -25,10 +25,10 @@ class TestGithubActionPaths(unittest.TestCase):
     def test_basic_action(self):
         self.assertEqual(
             self.action_toolchain.gen_script("win"),
-            "node actions-rs/toolchain/dist/index.js",
+            "node %HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\_temp\\actions-rs/toolchain/dist/index.js",
         )
         self.assertEqual(
-            self.action_deep.gen_script("win"), "node divvun/action/pahkat/index.js"
+            self.action_deep.gen_script("win"), "node %HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\_temp\\divvun/action/pahkat/index.js"
         )
 
     def test_action_path(self):

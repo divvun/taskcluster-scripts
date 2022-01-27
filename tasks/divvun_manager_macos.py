@@ -72,5 +72,5 @@ def create_divvun_manager_macos_task():
             },
         ).with_secret_input("GITHUB_TOKEN", "divvun", "github.token"))
         .with_prep_gha_tasks()
-        .find_or_create(f"build.divvun-manager.{CONFIG.git_sha}")
+        .find_or_create(f"build.divvun-manager-macos.{CONFIG.git_sha}")
     )

@@ -246,7 +246,7 @@ def _generic_rust_build_upload_task(
         .with_gha(
             "install_rustup",
             GithubActionScript(
-                "choco install -y --force rustup.install && echo ::add-path::%HOMEDRIVE%%HOMEPATH%\\.cargo\\bin"
+                "choco install -y --force rustup.install && echo ::add-path::${HOME}/.cargo/bin"
             ),
             enabled=(os_ == "windows"),
         )

@@ -167,7 +167,7 @@ async def process_command(step_name: str, line: str) -> bool:
         output = line[len("::set-env") :]
         name, value = output.split("::", 1)
         name = name.split("=")[1]
-        os.environ[name] = value
+        os.environ[name] = value.strip().lstrip()
     elif line.startswith("::create-artifact"):
         output = line[len("::create-artifact") :]
         name, path = output.split("::", 1)
@@ -243,6 +243,20 @@ def get_env_for(step_name: str, step: Dict[str, Any]):
     else:
         env["TASKCLUSTER_PROXY_URL"] = "http://taskcluster"
     env["BUILD_DIR"] = env["GITHUB_WORKSPACE"]
+    env["RUNNER_WORKSPACE"] = env["GITHUB_WORKSPACE"]
+    env["RUNNER_TOOL_CACHE"] = os.path.join(env["RUNNER_TEMP"], "_tc")
+    env["GITHUB_ENV"] = os.path.expandvars(os.path.join(env["RUNNER_TEMP"], "GITHUB_PATH"))
+
+    if os.path.isfile(env["GITHUB_ENV"]):
+        with open(env["GITHUB_ENV"], "r") as fd:
+            for line in fd.readlines():
+                try:
+                    name, value = line.split('=', 1)
+                    env[name] = value.strip()
+                except:
+                    pass
+    else:
+        open(env["GITHUB_ENV"], "w").close()
 
     if EXTRA_PATH:
         if platform.system() == "Windows":
@@ -268,35 +282,48 @@ async def run_action(action_name: str, action: Dict[str, Any]):
 
     extra_args = {}
 
-    if platform.system() == "Linux":
-        # Ubuntu uses dash as its /bin/sh which breaks env variables with dashes in them
-        extra_args["executable"] = "/bin/bash"
-
-    for script in action["script"].split("\n"):
-        print(script)
-        process = await asyncio.subprocess.create_subprocess_shell(
-            script,
+    cwd = action.get('cwd')
+    print("Running: ", action["script"])
+    if platform.system() == "Windows":
+        extra_args["executable"] = "C:\\Program Files\\PowerShell\\7\\pwsh.exe"
+        process = await asyncio.subprocess.create_subprocess_exec(
+            "pwsh", "-c", action["script"],
             env=env,
+            cwd=cwd,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             **extra_args,
         )
-        assert process.stdout
+    else:
+        if platform.system() == "Linux":
+            # Ubuntu uses dash as its /bin/sh which breaks env variables with dashes in them
+            extra_args["executable"] = "/bin/bash"
+        process = await asyncio.subprocess.create_subprocess_shell(
+            action["script"],
+            env=env,
+            cwd=cwd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            **extra_args,
+        )
 
-        decoder = codecs.getincrementaldecoder(sys.stdout.encoding)(errors="replace")
-        while True:
-            line = await process.stdout.readline()
-            if not line:
-                break
+    assert process.stdout
 
-            line_str = decoder.decode(line).strip().lstrip()
-            await process_line(action_name, line_str)
+    decoder = codecs.getincrementaldecoder(sys.stdout.encoding)(errors="replace")
+    while True:
+        line = await process.stdout.readline()
+        if not line:
+            break
 
-        await process.wait()
+        line_str = decoder.decode(line).strip().lstrip()
+        await process_line(action_name, line_str)
 
-        if process.returncode != 0:
-            print(f"Process exited with code: {process.returncode}")
-            raise SystemError()
+    await process.wait()
+
+    if process.returncode != 0:
+        print(f"Process exited with code: {process.returncode}")
+        print(await process.stdout.read())
+        raise SystemError()
 
 
 def should_run(condition, step):
@@ -406,6 +433,11 @@ def parse_condition(condition, outputs, depth):
         right = to_py(right)
         return str(left == right).lower()
 
+    def neq(left, right):
+        left = to_py(left)
+        right = to_py(right)
+        return str(left != right).lower()
+
     def and_(left, right):
         left = to_py(left)
         right = to_py(right)
@@ -420,6 +452,7 @@ def parse_condition(condition, outputs, depth):
         "&&": and_,
         "||": or_,
         "==": eq,
+        "!=": neq,
     }
 
     for op, func in ops.items():
@@ -467,6 +500,12 @@ async def main():
     file = sys.argv[1]
     with open(file) as fd:
         actions = json.loads(fd.read())
+
+    # Set HOME on windows. Since the script is ran from CMD, $HOME doesn't
+    # exist yet but since we need to share variables with powershell, we need
+    # it to be there.
+    if "HOME" not in os.environ:
+        os.environ["HOME"] = os.path.expandvars("%HOMEDRIVE%%HOMEPATH%")
 
     for name, action in actions.items():
         if "condition" in action:

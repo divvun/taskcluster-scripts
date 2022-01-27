@@ -7,3 +7,4 @@ from .pahkat_reposrv import (
 )
 from .ansible import create_ansible_task
 from .divvun_manager_macos import create_divvun_manager_macos_task
+from .divvun_manager_windows import create_divvun_manager_windows_tasks

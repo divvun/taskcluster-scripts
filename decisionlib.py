@@ -106,6 +106,17 @@ class Shared:
         """
         return taskcluster.stringDate(taskcluster.fromNow(offset, dateObj=self.now))
 
+    def task_root_for(self, platform):
+        if platform == "linux":
+            return "$HOME/tasks/$TASK_ID/_temp"
+        elif platform == "macos":
+            return "$HOME/tasks/$TASK_ID/_temp"
+        elif platform == "win":
+            return "%HOMEDRIVE%%HOMEPATH%\\_temp"
+        else:
+            raise NotImplementedError
+
+
 
 CONFIG = Config()
 SHARED = Shared()
@@ -374,7 +385,7 @@ class Task:
             return self
 
         if gha.git_fetch_url and gha.git_fetch_url not in self.action_paths:
-            self.with_additional_repo(gha.git_fetch_url, gha.repo_name)
+            self.with_additional_repo(gha.git_fetch_url, os.path.join(SHARED.task_root_for(self.platform()), gha.repo_name))
             self.action_paths.add(gha.git_fetch_url)
 
         self.gh_actions[name] = gha
@@ -396,12 +407,18 @@ class Task:
             if gha.condition is not None:
                 payload[name]["condition"] = gha.condition
 
+            if gha.cwd is not None:
+                payload[name]["cwd"] = gha.cwd
+
         utils.create_extra_artifact(payload_name, json.dumps(payload).encode())
 
     def gen_gha_payload(self, name: str):
         raise NotImplementedError
 
     def with_prep_gha_tasks(self):
+        raise NotImplementedError
+
+    def platform(self):
         raise NotImplementedError
 
 
@@ -543,6 +560,8 @@ class WindowsGenericWorkerTask(GenericWorkerTask):
 
     Scripts are written as `.bat` files executed with `cmd.exe`.
     """
+    def platform(self):
+        return "win"
 
     def with_prep_gha_tasks(self):
         for gha in self.gh_actions.values():
@@ -618,9 +637,14 @@ class WindowsGenericWorkerTask(GenericWorkerTask):
         git += """
             git fetch --verbose --no-tags {} {}
             git reset --hard {}
+            git rev-parse FETCH_HEAD > CURR_FETCH_HEAD_f
+            set /p CURR_FETCH_HEAD<CURR_FETCH_HEAD_f
+            rm CURR_FETCH_HEAD_f
+            git update-ref HEAD %CURR_FETCH_HEAD%
         """.format(
             assert_truthy(fetch_url),
             assert_truthy(fetch_ref),
+            assert_truthy(checkout_sha),
             assert_truthy(checkout_sha),
         )
         return self.with_git().with_script(git)
@@ -660,9 +684,9 @@ class WindowsGenericWorkerTask(GenericWorkerTask):
 
     def with_curl(self):
         return self.with_path_from_homedir(
-            "curl\\curl-7.79.1-win64-mingw\\bin"
+            "curl\\curl-7.81.0-win64-mingw\\bin"
         ).with_directory_mount(
-            "https://curl.se/windows/dl-7.79.1_4/curl-7.79.1_4-win64-mingw.zip",
+            "https://curl.se/windows/dl-7.81.0/curl-7.81.0-win64-mingw.zip",
             path="curl",
         )
 
@@ -743,6 +767,9 @@ class MacOsGenericWorkerTask(UnixTaskMixin, GenericWorkerTask):
 
     Scripts are interpreted with `bash`.
     """
+
+    def platform(self):
+        return "macos"
 
     def get_proxy_url(self) -> str:
         """
@@ -829,6 +856,9 @@ class DockerWorkerTask(UnixTaskMixin, Task):
     with_max_run_time_minutes = chaining(setattr, "max_run_time_minutes")
     with_caches = chaining(update_attr, "caches")
     with_capabilities = chaining(update_attr, "capabilities")
+
+    def platform(self):
+        return "linux"
 
     def with_prep_gha_tasks(self):
         for gha in self.gh_actions.values():
@@ -954,27 +984,42 @@ def url_basename(url: str) -> str:
 
 
 @contextlib.contextmanager
-def make_repo_bundle(path: str, bundle_name: str, sha: str):
+def make_repo_bundle(path: str, bundle_name: str, sha: str, *, shallow=True):
     cwd = os.getcwd()
     os.chdir(path)
-    subprocess.check_call(["git", "config", "user.name", "Decision task"])
-    subprocess.check_call(["git", "config", "user.email", "nobody@divvun.no"])
-    tree = subprocess.check_output(["git", "show", sha, "--pretty=%T", "--no-patch"])
-    message = "Shallow version of commit " + sha
-    commit = subprocess.check_output(
-        ["git", "commit-tree", tree.strip(), "-m", message]
-    )
-    subprocess.check_call(
-        ["git", "update-ref", CONFIG.git_bundle_shallow_ref, commit.strip()]
-    )
-    subprocess.check_call(["git", "show-ref"])
-    create = [
-        "git",
-        "bundle",
-        "create",
-        f"../{bundle_name}",
-        CONFIG.git_bundle_shallow_ref,
-    ]
+    if shallow:
+        subprocess.check_call(["git", "config", "user.name", "Decision task"])
+        subprocess.check_call(["git", "config", "user.email", "nobody@divvun.no"])
+        tree = subprocess.check_output(["git", "show", sha, "--pretty=%T", "--no-patch"])
+        message = "Shallow version of commit " + sha
+        commit = subprocess.check_output(
+            ["git", "commit-tree", tree.strip(), "-m", message]
+        )
+        subprocess.check_call(
+            ["git", "update-ref", CONFIG.git_bundle_shallow_ref, commit.strip()]
+        )
+
+        subprocess.check_call(["git", "show-ref"])
+        create = [
+            "git",
+            "bundle",
+            "create",
+            f"../{bundle_name}",
+            CONFIG.git_bundle_shallow_ref,
+            ]
+    else:
+        subprocess.check_call(["git", "fetch", "--unshallow", CONFIG.git_url])
+        subprocess.check_call(
+            ["git", "update-ref", CONFIG.git_bundle_shallow_ref, sha]
+        )
+        create = [
+            "git",
+            "bundle",
+            "create",
+            f"../{bundle_name}",
+            "--all"
+        ]
+
     with subprocess.Popen(create) as p:
         os.chdir(cwd)
         yield

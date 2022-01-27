@@ -66,13 +66,19 @@ def tasks(task_for: str):
     if repo_name == "divvun-manager-macos":
         create_divvun_manager_macos_task()
 
+    if repo_name == "divvun-manager-windows":
+        create_divvun_manager_windows_tasks()
+
     # Deployment tasks
     if repo_name == "ansible-playbooks":
         create_ansible_task(["setup", "pahkat-reposrv"])
 
 
 task_for = os.environ["TASK_FOR"]
+repo_name = os.environ["REPO_NAME"]
+need_full_clone = ["divvun-manager-windows"]
+
 with decisionlib.make_repo_bundle("/ci", "ci.bundle", "HEAD"):
     assert CONFIG.git_sha, "Unknown git sha for current repo"
-    with decisionlib.make_repo_bundle("/repo", "repo.bundle", CONFIG.git_sha):
+    with decisionlib.make_repo_bundle("/repo", "repo.bundle", CONFIG.git_sha, shallow=(repo_name not in need_full_clone)):
         tasks(task_for)

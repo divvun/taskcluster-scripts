@@ -35,10 +35,10 @@ def create_pahkat_prefix_cli_tasks():
             temp = "${RUNNER_TEMP}"
         elif os_ == "windows":
             url = "https://divvun.ams3.cdn.digitaloceanspaces.com/pahkat/artifacts/pahkat-uploader_0.2.0-nightly.20220121T153431185Z_windows_i686.txz"
-            temp = "%RUNNER_TEMP%"
+            temp = "${RUNNER_TEMP}"
         elif os_ == "linux":
             url = "https://divvun.ams3.cdn.digitaloceanspaces.com/pahkat/artifacts/pahkat-uploader_0.2.0-nightly.20220121T153431185Z_linux_x86_64.txz"
-            temp = "${RUNNER_TEMP}"
+            temp = "$env:RUNNER_TEMP"
         else:
             raise NotImplementedError
 
@@ -108,7 +108,7 @@ def create_pahkat_service_windows_task():
         .with_gha(
             "install_rustup",
             GithubActionScript(
-                "choco install -y --force rustup.install && echo ::add-path::%HOMEDRIVE%%HOMEPATH%\\.cargo\\bin"
+                "choco install -y --force rustup.install && echo ::add-path::${HOME}/.cargo/bin"
             ),
         )
         .with_gha(
