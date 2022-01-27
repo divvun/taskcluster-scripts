@@ -18,6 +18,7 @@ PAHKAT_RUST_ENV = {
 }
 
 def create_pahkat_tasks():
+    create_pahkat_windows_cli_task()
     create_pahkat_repomgr_tasks()
     create_pahkat_prefix_cli_tasks()
     create_pahkat_uploader_tasks()
@@ -242,3 +243,19 @@ def create_pahkat_service_windows_task():
         .find_or_create(f"build.pahkat.service_windows.{CONFIG.git_sha}")
     )
 
+def create_pahkat_windows_cli_task():
+    setup_uploader = lambda _: gha_pahkat(["pahkat-uploader"])
+    get_features = lambda _: "--features windows"
+
+    return generic_rust_build_upload_task(
+        "Pahkat windows CLI",
+        "pahkat-cli/Cargo.toml",
+        package_id="pahkat-windows-cli",
+        target_dir="target",
+        bin_name="pahkat-cli",
+        env=PAHKAT_RUST_ENV,
+        setup_uploader=setup_uploader,
+        rename_binary="pahkat-windows",
+        get_features=get_features,
+        only_os=["windows"]
+    )
