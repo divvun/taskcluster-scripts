@@ -12,12 +12,6 @@ from tasks import *
 
 
 def tasks(task_for: str):
-    # Work around a tc-github bug/limitation:
-    # https://bugzilla.mozilla.org/show_bug.cgi?id=1548781#c4
-    if task_for.startswith("github"):
-        # https://github.com/taskcluster/taskcluster/blob/21f257dc8/services/github/config.yml#L14
-        CONFIG.routes_for_all_subtasks.append("statuses")
-
     if task_for == "github-pull-request":
         CONFIG.index_read_only = True
         # We want the merge commit that GitHub creates for the PR.
