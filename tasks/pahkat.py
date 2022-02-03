@@ -18,10 +18,10 @@ PAHKAT_RUST_ENV = {
 }
 
 def create_pahkat_tasks():
-    create_pahkat_uploader_tasks()
+    #create_pahkat_uploader_tasks()
     #create_pahkat_windows_cli_task()
     #create_pahkat_repomgr_tasks()
-    #create_pahkat_prefix_cli_tasks()
+    create_pahkat_prefix_cli_tasks()
     #create_pahkat_service_windows_task()
 
 
@@ -30,14 +30,15 @@ def create_pahkat_prefix_cli_tasks():
         """
         Enable this and change URLs when Brendan decides that pain is necessary...
         """
+        BOOTSTRAP_VERSION="0.2.0-nightly.20220203T084729034Z"
         if os_ == "macos":
-            url = "https://divvun.ams3.cdn.digitaloceanspaces.com/pahkat/artifacts/pahkat-uploader_0.2.0-nightly.20220121T153431185Z_macos_x86_64.txz"
+            url = f"https://divvun.ams3.cdn.digitaloceanspaces.com/pahkat/artifacts/pahkat-uploader_{BOOTSTRAP_VERSION}_macos_x86_64.txz"
             temp = "${RUNNER_TEMP}"
         elif os_ == "windows":
-            url = "https://divvun.ams3.cdn.digitaloceanspaces.com/pahkat/artifacts/pahkat-uploader_0.2.0-nightly.20220121T153431185Z_windows_i686.txz"
+            url = "https://divvun.ams3.cdn.digitaloceanspaces.com/pahkat/artifacts/pahkat-uploader_{BOOTSTRAP_VERSION}_windows_i686.txz"
             temp = "${RUNNER_TEMP}"
         elif os_ == "linux":
-            url = "https://divvun.ams3.cdn.digitaloceanspaces.com/pahkat/artifacts/pahkat-uploader_0.2.0-nightly.20220121T153431185Z_linux_x86_64.txz"
+            url = f"https://divvun.ams3.cdn.digitaloceanspaces.com/pahkat/artifacts/pahkat-uploader_{BOOTSTRAP_VERSION}_linux_x86_64.txz"
             temp = "$env:RUNNER_TEMP"
         else:
             raise NotImplementedError
@@ -48,8 +49,8 @@ def create_pahkat_prefix_cli_tasks():
             tar xvf uploader.tar -C {temp}
             echo ::add-path::{temp}/bin
         """)
-    #setup_uploader = get_bootstrap_uploader
-    setup_uploader = lambda _: gha_pahkat(["pahkat-uploader"])
+    setup_uploader = get_bootstrap_uploader
+    #setup_uploader = lambda _: gha_pahkat(["pahkat-uploader"])
     get_features = lambda _: "--features prefix"
 
     return generic_rust_build_upload_task(
