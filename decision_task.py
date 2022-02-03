@@ -73,6 +73,9 @@ def tasks(task_for: str):
     if repo_name == "ansible-playbooks":
         create_ansible_task(["setup", "pahkat-reposrv"])
 
+    if repo_name == "divvunspell-libreoffice":
+        create_libreoffice_tasks()
+
 
 task_for = os.environ["TASK_FOR"]
 repo_name = os.environ["REPO_NAME"]
