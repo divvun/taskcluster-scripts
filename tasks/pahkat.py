@@ -35,11 +35,11 @@ def create_pahkat_prefix_cli_tasks():
             url = f"https://divvun.ams3.cdn.digitaloceanspaces.com/pahkat/artifacts/pahkat-uploader_{BOOTSTRAP_VERSION}_macos_x86_64.txz"
             temp = "${RUNNER_TEMP}"
         elif os_ == "windows":
-            url = "https://divvun.ams3.cdn.digitaloceanspaces.com/pahkat/artifacts/pahkat-uploader_{BOOTSTRAP_VERSION}_windows_i686.txz"
-            temp = "${RUNNER_TEMP}"
+            url = f"https://divvun.ams3.cdn.digitaloceanspaces.com/pahkat/artifacts/pahkat-uploader_{BOOTSTRAP_VERSION}_windows_i686.txz"
+            temp = "$env:RUNNER_TEMP"
         elif os_ == "linux":
             url = f"https://divvun.ams3.cdn.digitaloceanspaces.com/pahkat/artifacts/pahkat-uploader_{BOOTSTRAP_VERSION}_linux_x86_64.txz"
-            temp = "$env:RUNNER_TEMP"
+            temp = "${RUNNER_TEMP}"
         else:
             raise NotImplementedError
 
