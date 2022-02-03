@@ -28,7 +28,6 @@ def create_kbd_task(os_name):
                     },
                 ),
             )
-            .with_prep_gha_tasks()
             .find_or_create(f"kbdgen.{os_name}_x64.{CONFIG.git_sha}")
         )
 
@@ -53,7 +52,6 @@ def create_kbd_task(os_name):
                     {"keyboard-type": "keyboard-macos"},
                 ),
             )
-            .with_prep_gha_tasks()
             .find_or_create(f"kbdgen.{os_name}_x64.{CONFIG.git_sha}")
         )
 

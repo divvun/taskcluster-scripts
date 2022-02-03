@@ -314,6 +314,9 @@ class Task:
 
         <https://docs.taskcluster.net/docs/reference/core/taskcluster-index/references/api#findTask>
         """
+        if self.gh_actions:
+            self.with_prep_gha_tasks()
+
         task_id = SHARED.found_or_created_indexed_tasks.get(index_path)
         if task_id is not None:
             return task_id
@@ -371,7 +374,7 @@ class Task:
 
     def with_repo_bundle(self, name, dest, **kwargs):
         return self.with_curl_artifact_script(
-            CONFIG.decision_task_id, f"{name}.bundle", "$HOME/tasks/$TASK_ID"
+            CONFIG.decision_task_id, f"{name}.bundle", "$HOME/tasks/$TASK_ID", directory="private"
         ).with_repo(
             "$HOME/tasks/$TASK_ID/" + dest,
             f"$HOME/tasks/$TASK_ID/{name}.bundle",
@@ -460,7 +463,9 @@ class GenericWorkerTask(Task):
         mounts = []
         seen = set()
         for m in self.mounts:
-            if m["directory"] not in seen:
+            if "directory" not in m:
+                mounts.append(m)
+            elif m["directory"] not in seen:
                 mounts.append(m)
                 seen.add(m["directory"])
 
@@ -654,6 +659,7 @@ class WindowsGenericWorkerTask(GenericWorkerTask):
             CONFIG.decision_task_id,
             f"{name}.bundle",
             "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%",
+            directory="private",
         ).with_repo(
             "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\" + dest,
             f"%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\{name}.bundle",

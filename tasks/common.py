@@ -3,6 +3,7 @@ from typing import List, Optional, Dict, Any, Callable
 from gha import GithubAction, GithubActionScript
 from typing import List
 from decisionlib import CONFIG
+import os
 
 
 BUILD_ARTIFACTS_EXPIRE_IN = "1 week"
@@ -37,9 +38,12 @@ def linux_build_task(name, bundle_dest="repo", with_secrets=True):
         .with_apt_install("curl", "git", "python3", "python3-pip")
         .with_pip_install("taskcluster", "pyYAML")
         .with_apt_install("wget", "nodejs", "awscli")
-        .with_repo_bundle("repo", bundle_dest)
-        .with_repo_bundle("ci", "ci")
-        .with_script(f"cd $HOME/tasks/$TASK_ID/{bundle_dest}")
+        .with_additional_repo(os.environ["CI_REPO_URL"], "${HOME}/tasks/${TASK_ID}/ci")
+        .with_gha("clone", GithubAction("actions/checkout", {
+            "repository": os.environ["REPO_FULL_NAME"],
+            "path": bundle_dest
+        }).with_secret_input("token", "divvun", "github.token"))
+        .with_gha("Set CWD", GithubActionScript(f"echo ::set-cwd::$HOME/tasks/$TASK_ID/{bundle_dest}"))
     )
     return task
 
@@ -58,9 +62,12 @@ def macos_task(name):
         .with_features("taskclusterProxy")
         .with_script("mkdir -p $HOME/tasks/$TASK_ID")
         .with_script("mkdir -p $HOME/tasks/$TASK_ID/_temp")
-        .with_repo_bundle("ci", "ci")
-        .with_repo_bundle("repo", "repo")
-        .with_script("cd $HOME/tasks/$TASK_ID/repo")
+        .with_additional_repo(os.environ["CI_REPO_URL"], "${HOME}/tasks/${TASK_ID}/ci")
+        .with_gha("clone", GithubAction("actions/checkout", {
+            "repository": os.environ["REPO_FULL_NAME"],
+            "path": "repo"
+        }).with_secret_input("token", "divvun", "github.token"))
+        .with_gha("Set CWD", GithubActionScript(f"echo ::set-cwd::$HOME/tasks/$TASK_ID/repo"))
     )
 
 
@@ -78,11 +85,15 @@ def windows_task(name):
         .with_script("mkdir %HOMEDRIVE%%HOMEPATH%\\%TASK_ID%")
         .with_script("mkdir %HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\_temp")
         .with_features("taskclusterProxy")
-        .with_repo_bundle("ci", "ci")
-        .with_repo_bundle("repo", "repo")
+        .with_git()
+        .with_additional_repo(os.environ["CI_REPO_URL"], "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\ci")
+        .with_gha("clone", GithubAction("actions/checkout", {
+            "repository": os.environ["REPO_FULL_NAME"],
+            "path": "repo"
+        }).with_secret_input("token", "divvun", "github.token"))
         .with_python3()
         .with_script("pip install --user taskcluster")
-        .with_script("cd %HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\repo")
+        .with_gha("Set CWD", GithubActionScript(f"echo ::set-cwd::%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\repo"))
     )
 
 
@@ -264,7 +275,6 @@ def _generic_rust_build_upload_task(
             "deploy",
             deploy.with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN"),
         )
-        .with_prep_gha_tasks()
         .find_or_create(f"build.{bin_name}.{os_}.{CONFIG.git_sha}")
     )
 

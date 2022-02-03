@@ -24,7 +24,6 @@ def create_pahkat_reposrv_task(tag_name: str):
                 },
             ),
         )
-        .with_prep_gha_tasks()
     )
 
     if tag_name:
@@ -47,6 +46,5 @@ def create_pahkat_reposrv_release_task(build_task_id: str, tag_name: str):
                 {"tag_name": tag_name, "files": "pahkat-reposrv"},
             ).with_secret_input("token", "divvun", "github.token"),
         )
-        .with_prep_gha_tasks()
         .find_or_create(f"release.linux_x64.{CONFIG.git_sha}")
     )

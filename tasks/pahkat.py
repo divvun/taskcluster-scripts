@@ -240,7 +240,6 @@ def create_pahkat_service_windows_task():
                 },
             ),
         )
-        .with_prep_gha_tasks()
         .find_or_create(f"build.pahkat.service_windows.{CONFIG.git_sha}")
     )
 
