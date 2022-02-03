@@ -163,6 +163,9 @@ async def process_command(step_name: str, line: str) -> bool:
     elif line.startswith("::add-path::"):
         path = line[len("::add-path::") :]
         EXTRA_PATH.append(path)
+    elif line.startswith("::set-cwd::"):
+        path = line[len("::set-cwd::") :]
+        os.chdir(os.path.expandvars(path))
     elif line.startswith("::set-env"):
         output = line[len("::set-env") :]
         name, value = output.split("::", 1)

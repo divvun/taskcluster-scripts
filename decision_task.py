@@ -81,7 +81,5 @@ task_for = os.environ["TASK_FOR"]
 repo_name = os.environ["REPO_NAME"]
 need_full_clone = ["divvun-manager-windows"]
 
-with decisionlib.make_repo_bundle("/ci", "ci.bundle", "HEAD"):
-    assert CONFIG.git_sha, "Unknown git sha for current repo"
-    with decisionlib.make_repo_bundle("/repo", "repo.bundle", CONFIG.git_sha, shallow=(repo_name not in need_full_clone)):
-        tasks(task_for)
+assert CONFIG.git_sha, "Unknown git sha for current repo"
+tasks(task_for)

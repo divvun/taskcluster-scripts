@@ -75,16 +75,11 @@ class GithubAction:
         parts = self.path.split("/")
         assert len(parts) > 1
 
-        if parts[0] == "actions":
-            raise NotImplementedError
-
         return "/".join(parts[:2])
 
     @property
     def action_path(self):
         parts = self.path.split("/")
-        if parts[0] == "actions":
-            raise NotImplementedError
 
         return "/".join(parts[2:])
 

@@ -9,14 +9,13 @@ def create_libreoffice_tasks():
             "branch": "main",
             "name": "lib-windows-x86_64",
             "repo": "divvun/divvunspell",
-        }))
+        }).with_secret_input("github_token", "divvun", "github.token"))
         .with_gha("Create OXT", GithubActionScript("""
         mkdir -p lib/win32-amd64
         mv *.dll lib/win32-amd64
         zip -r divvunspell.zip *
         mv divvunspell.zip divvunspell.oxt
         """))
-        .with_prep_gha_tasks()
         .with_artifacts("divvunspell.oxt")
         .find_or_create(f"build.libreoffice.linux_x64.{CONFIG.git_sha}")
     )
@@ -38,7 +37,6 @@ def create_libreoffice_tasks():
             "command": "build",
             "args": f"--release --example oxtinst"
         }))
-        .with_prep_gha_tasks()
         .with_artifacts("minst/target/release/examples/oxtinst.exe")
         .find_or_create(f"build.libreoffice.windows.{CONFIG.git_sha}")
     )
