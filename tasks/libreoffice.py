@@ -1,4 +1,4 @@
-from .common import linux_build_task, windows_task, gha_setup
+from .common import linux_build_task, windows_task, gha_setup, PAHKAT_REPO
 from decisionlib import CONFIG
 from gha import GithubAction, GithubActionScript
 
@@ -57,9 +57,20 @@ def create_libreoffice_tasks():
             "Eijebong/divvun-actions/codesign",
             {"path": f"minst/target/release/examples/oxtinst.exe"},
         ))
-        .with_gha("Move installer in the right place", GithubActionScript("""
-            mv minst\\target\\release\\examples\\oxtinst.exe ../../
-        """))
+        .with_gha("version", GithubAction("Eijebong/divvun-actions/version", {
+            "filepath": "VERSION",
+        }))
+        .with_gha("deploy", GithubAction("Eijebong/divvun-actions/deploy",
+            {
+                "package-id": "divvunspell-libreoffice",
+                "type": "WindowsExecutable",
+                "platform": "windows",
+                "repo": PAHKAT_REPO + "tools/",
+                "version": "${{ steps.version.outputs.version }}",
+                "channel": "${{ steps.version.outputs.channel }}",
+                "payload-path": "minst\\target\\release\\examples\\oxtinst.exe",
+            },
+        ))
         .with_artifacts("oxtinst.exe")
         .find_or_create(f"build.libreoffice.windows.{CONFIG.git_sha}")
     )
