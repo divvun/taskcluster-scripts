@@ -8,7 +8,7 @@ def create_ansible_task(roles: List[str], depends_on=None):
     task = (
         linux_build_task(
             "Ansible playbooks deployment: {}".format(",".join(roles)),
-            with_secrets=False,
+            with_secrets=False, clone_self=False
         )
         .with_scopes("secrets:get:divvun-deploy")
         .with_additional_repo(

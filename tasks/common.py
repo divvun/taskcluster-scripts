@@ -10,7 +10,7 @@ BUILD_ARTIFACTS_EXPIRE_IN = "1 week"
 PAHKAT_REPO = "https://pahkat.uit.no/"
 
 
-def linux_build_task(name, bundle_dest="repo", with_secrets=True):
+def linux_build_task(name, bundle_dest="repo", with_secrets=True, clone_self=True):
     task = (
         decisionlib.DockerWorkerTask(name)
         .with_worker_type("linux")
@@ -43,8 +43,8 @@ def linux_build_task(name, bundle_dest="repo", with_secrets=True):
             "repository": os.environ["REPO_FULL_NAME"],
             "path": bundle_dest,
             "ref": CONFIG.git_sha,
-        }).with_secret_input("token", "divvun", "github.token"))
-        .with_gha("Set CWD", GithubActionScript(f"echo ::set-cwd::$HOME/tasks/$TASK_ID/{bundle_dest}"))
+        }, enabled=clone_self).with_secret_input("token", "divvun", "github.token"))
+        .with_gha("Set CWD", GithubActionScript(f"echo ::set-cwd::$HOME/tasks/$TASK_ID/{bundle_dest}"), enabled=clone_self)
     )
     return task
 
