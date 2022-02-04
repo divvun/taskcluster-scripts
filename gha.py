@@ -2,6 +2,7 @@ import requests
 import yaml
 import posixpath
 import re
+import os
 
 
 class GithubAction:
@@ -34,16 +35,19 @@ class GithubAction:
             env = {
                 "RUNNER_TEMP": "$HOME/tasks/$TASK_ID/_temp",
                 "GITHUB_WORKSPACE": "$HOME/tasks/$TASK_ID",
+                "GITHUB_REF": os.environ["GIT_REF"],
             }
         elif platform == "macos":
             env = {
                 "RUNNER_TEMP": "$HOME/tasks/$TASK_ID/_temp",
                 "GITHUB_WORKSPACE": "$HOME/tasks/$TASK_ID",
+                "GITHUB_REF": os.environ["GIT_REF"],
             }
         elif platform == "win":
             env = {
                 "RUNNER_TEMP": "${HOME}/${TASK_ID}/_temp",
                 "GITHUB_WORKSPACE": "${HOME}/${TASK_ID}",
+                "GITHUB_REF": os.environ["GIT_REF"],
             }
 
         env.update(self.env)
