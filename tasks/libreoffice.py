@@ -69,6 +69,7 @@ def create_libreoffice_tasks():
                 "version": "${{ steps.version.outputs.version }}",
                 "channel": "${{ steps.version.outputs.channel }}",
                 "payload-path": "minst\\target\\release\\examples\\oxtinst.exe",
+                "windows-product-code": "{068F854F-0A4E-5C59-8A89-9B1263A85C46}_is1",
             },
         ))
         .with_artifacts("oxtinst.exe")
