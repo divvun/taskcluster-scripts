@@ -43,7 +43,7 @@ def linux_build_task(name, bundle_dest="repo", with_secrets=True, clone_self=Tru
             "repository": os.environ["REPO_FULL_NAME"],
             "path": bundle_dest,
             "ref": CONFIG.git_sha,
-        }, enabled=clone_self).with_secret_input("token", "divvun", "github.token"))
+        }).with_secret_input("token", "divvun", "github.token"), enabled=clone_self)
         .with_gha("Set CWD", GithubActionScript(f"echo ::set-cwd::$HOME/tasks/$TASK_ID/{bundle_dest}"), enabled=clone_self)
     )
     return task
