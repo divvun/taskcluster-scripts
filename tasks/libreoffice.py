@@ -73,6 +73,5 @@ def create_libreoffice_tasks():
                 "windows-product-code": "{068F854F-0A4E-5C59-8A89-9B1263A85C46}_is1",
             },
         ))
-        .with_artifacts("oxtinst.exe")
         .find_or_create(f"build.libreoffice.windows.{CONFIG.git_sha}")
     )
