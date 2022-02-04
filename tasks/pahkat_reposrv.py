@@ -6,7 +6,7 @@ from .common import linux_build_task
 
 def create_pahkat_reposrv_task(tag_name: str):
     task = (
-        linux_build_task("Pahkat reposrv build", with_secrets=False)
+        linux_build_task("Pahkat reposrv build")
         .with_gha(
             "Install rust",
             GithubAction(
