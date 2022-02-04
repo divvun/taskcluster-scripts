@@ -41,7 +41,8 @@ def linux_build_task(name, bundle_dest="repo", with_secrets=True):
         .with_additional_repo(os.environ["CI_REPO_URL"], "${HOME}/tasks/${TASK_ID}/ci")
         .with_gha("clone", GithubAction("actions/checkout", {
             "repository": os.environ["REPO_FULL_NAME"],
-            "path": bundle_dest
+            "path": bundle_dest,
+            "ref": CONFIG.git_sha,
         }).with_secret_input("token", "divvun", "github.token"))
         .with_gha("Set CWD", GithubActionScript(f"echo ::set-cwd::$HOME/tasks/$TASK_ID/{bundle_dest}"))
     )
