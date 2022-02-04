@@ -1,4 +1,4 @@
-from .common import linux_build_task, windows_task, gha_setup, PAHKAT_REPO
+from .common import linux_build_task, windows_task, gha_setup, gha_pahkat, PAHKAT_REPO
 from decisionlib import CONFIG
 from gha import GithubAction, GithubActionScript
 
@@ -29,6 +29,7 @@ def create_libreoffice_tasks():
         }).with_secret_input("token", "divvun", "github.token"))
         .with_rustup()
         .with_gha("setup", gha_setup())
+        .with_gha("install_uploader", gha_pahkat(["pahkat-uploader"]))
         .with_gha("Install rust", GithubAction(
             "actions-rs/toolchain",
             {
