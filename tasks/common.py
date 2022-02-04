@@ -7,7 +7,7 @@ import os
 
 
 BUILD_ARTIFACTS_EXPIRE_IN = "1 week"
-PAHKAT_REPO = "https://pahkat.thetc.se/"
+PAHKAT_REPO = "https://pahkat.uit.no/"
 
 
 def linux_build_task(name, bundle_dest="repo", with_secrets=True):
@@ -108,7 +108,7 @@ def gha_pahkat(packages: List[str]):
     return GithubAction(
         "Eijebong/divvun-actions/pahkat/init",
         {
-            "repo": "https://pahkat.thetc.se/devtools/",
+            "repo": "https://pahkat.uit.no/devtools/",
             "channel": "nightly",
             "packages": ",".join(packages),
         },

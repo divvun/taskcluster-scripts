@@ -72,10 +72,10 @@ def create_divvun_manager_windows_tasks():
             GithubActionScript(
                 """
             mkdir pahkat-config
-            echo \"[\"\"https://pahkat.thetc.se/divvun-installer/\"\"]`nchannel = \"\"nightly\"\"\" > ./pahkat-config/repos.toml
+            echo \"[\"\"https://pahkat.uit.no/divvun-installer/\"\"]`nchannel = \"\"nightly\"\"\" > ./pahkat-config/repos.toml
             ls pahkat-config
             cat pahkat-config/repos.toml
-            pahkat-windows download https://pahkat.thetc.se/divvun-installer/packages/pahkat-service --output ./pahkat-service -c pahkat-config
+            pahkat-windows download https://pahkat.uit.no/divvun-installer/packages/pahkat-service --output ./pahkat-service -c pahkat-config
             move pahkat-service\\* pahkat-service-setup.exe
         """,
                 run_if="${{ steps.version.outputs.channel == 'nightly' }}",
@@ -86,10 +86,10 @@ def create_divvun_manager_windows_tasks():
             GithubActionScript(
                 """
             mkdir pahkat-config
-            echo \"[\"\"https://pahkat.thetc.se/divvun-installer/\"\"]`nchannel = \"\"beta\"\"\" > ./pahkat-config/repos.toml
+            echo \"[\"\"https://pahkat.uit.no/divvun-installer/\"\"]`nchannel = \"\"beta\"\"\" > ./pahkat-config/repos.toml
             ls pahkat-config
             cat pahkat-config/repos.toml
-            pahkat-windows download https://pahkat.thetc.se/divvun-installer/packages/pahkat-service --output ./pahkat-service -c pahkat-config
+            pahkat-windows download https://pahkat.uit.no/divvun-installer/packages/pahkat-service --output ./pahkat-service -c pahkat-config
             move pahkat-service\\* pahkat-service-setup.exe
         """,
                 run_if="${{ steps.version.outputs.channel != 'nightly' }}",
@@ -171,7 +171,7 @@ def create_divvun_manager_windows_tasks():
                     "platform": "windows",
                     "version": "${{ steps.version.outputs.version }}",
                     "payload-path": "${{ steps.installer.outputs.installer-path }}",
-                    "repo": "https://pahkat.thetc.se/divvun-installer/",
+                    "repo": "https://pahkat.uit.no/divvun-installer/",
                     "channel": "${{ steps.version.outputs.channel }}",
                     "windows-kind": "inno",
                     "windows-product-code": "{4CF2F367-82A8-5E60-8334-34619CBA8347}_is1",
@@ -188,7 +188,7 @@ def create_divvun_manager_windows_tasks():
                     "arch": "i686",
                     "version": "${{ steps.version.outputs.version }}",
                     "payload-path": "../oneclick-bundler/target/dist/Divvun.Installer.OneClick.exe",
-                    "repo": "https://pahkat.thetc.se/divvun-installer/",
+                    "repo": "https://pahkat.uit.no/divvun-installer/",
                     "channel": "${{ steps.version.outputs.channel }}",
                     "windows-product-code": "divvun-manager-oneclick",  # Unused but mandatory
                 },
