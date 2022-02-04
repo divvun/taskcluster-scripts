@@ -1,4 +1,4 @@
-from .common import linux_build_task, windows_task
+from .common import linux_build_task, windows_task, gha_setup
 from decisionlib import CONFIG
 from gha import GithubAction, GithubActionScript
 
@@ -28,6 +28,7 @@ def create_libreoffice_tasks():
             "path": "repo/minst",
         }).with_secret_input("token", "divvun", "github.token"))
         .with_rustup()
+        .with_gha("setup", gha_setup())
         .with_gha("Install rust", GithubAction(
             "actions-rs/toolchain",
             {
@@ -44,10 +45,18 @@ def create_libreoffice_tasks():
             "command": "build",
             "args": f"--release --example oxtuninst --manifest-path minst/Cargo.toml"
         }))
+        .with_gha("Sign uninstaller", GithubAction(
+            "Eijebong/divvun-actions/codesign",
+            {"path": f"minst/target/release/examples/oxtuninst.exe"},
+        ))
         .with_gha("Build installer", GithubAction("actions-rs/cargo", {
             "command": "build",
             "args": f"--release --example oxtinst --manifest-path minst/Cargo.toml"
         }))
+        .with_gha("Sign installer", GithubAction(
+            "Eijebong/divvun-actions/codesign",
+            {"path": f"minst/target/release/examples/oxtinst.exe"},
+        ))
         .with_gha("Move installer in the right place", GithubActionScript("""
             mv minst\\target\\release\\examples\\oxtinst.exe ../../
         """))
