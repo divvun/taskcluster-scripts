@@ -30,7 +30,7 @@ def create_libreoffice_tasks():
                 {
                     "package-id": "divvunspell-libreoffice-oxt",
                     "type": "TarballPackage",
-                    "platform": "linux",
+                    "platform": "windows",
                     "repo": PAHKAT_REPO + "devtools/",
                     "version": "${{ steps.version.outputs.version }}",
                     "channel": "${{ steps.version.outputs.channel }}",
