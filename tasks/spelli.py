@@ -32,17 +32,17 @@ def create_spelli_task():
         .with_gha(
             "pahkat",
             gha_pahkat(
-                ["pahkat-uploader", "pahkat-windows-cli"]
+                ["pahkat-uploader"]
             ),
         )
         .with_gha(
             "get_oxt_nightly",
             GithubActionScript(
                 """
-            mkdir pahkat-config
-            echo \"[\"\"https://pahkat.uit.no/devtools/\"\"]`nchannel = \"\"nightly\"\"\" > ./pahkat-config/repos.toml
-            pahkat-windows download https://pahkat.uit.no/devtools/packages/divvunspell-libreoffice-oxt --output ./divvunspell-libreoffice-oxt -c pahkat-config
-            move divvunspell-libreoffice-oxt\\* divvunspell-libreoffice.oxt
+                curl -Ls "https://pahkat.uit.no/devtools/download/divvunspell-libreoffice-oxt?platform=windows&channel=nightly" -o divvunspell-libreoffice-oxt.txz
+                xz -d divvunspell-libreoffice-oxt.txz
+                tar xvf divvunspell-libreoffice-oxt.tar
+                ls
         """,
                 run_if="${{ steps.version.outputs.channel == 'nightly' }}",
             ),
@@ -51,10 +51,10 @@ def create_spelli_task():
             "get_pahkat_service_stable",
             GithubActionScript(
                 """
-            mkdir pahkat-config
-            echo \"[\"\"https://pahkat.uit.no/devtools/\"\"]`nchannel = \"\"stable\"\"\" > ./pahkat-config/repos.toml
-            pahkat-windows download https://pahkat.uit.no/devtools/packages/divvunspell-libreoffice-oxt --output ./divvunspell-libreoffice-oxt -c pahkat-config
-            move divvunspell-libreoffice-oxt\\* divvunspell-libreoffice.oxt
+                curl -Ls "https://pahkat.uit.no/devtools/download/divvunspell-libreoffice-oxt?platform=windows&channel=stable" -o divvunspell-libreoffice-oxt.txz
+                xz -d divvunspell-libreoffice-oxt.txz
+                tar xvf divvunspell-libreoffice-oxt.tar
+                ls
         """,
                 run_if="${{ steps.version.outputs.channel != 'nightly' }}",
             ),
