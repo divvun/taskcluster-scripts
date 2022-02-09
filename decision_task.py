@@ -76,6 +76,9 @@ def tasks(task_for: str):
     if repo_name == "divvunspell-libreoffice":
         create_libreoffice_tasks()
 
+    if repo_name == "spelli":
+        create_spelli_task()
+
 
 task_for = os.environ["TASK_FOR"]
 repo_name = os.environ["REPO_NAME"]
