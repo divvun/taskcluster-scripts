@@ -295,6 +295,7 @@ async def run_action(action_name: str, action: Dict[str, Any]):
             cwd=cwd,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
+            limit=1024*256,
             **extra_args,
         )
     else:
@@ -305,6 +306,7 @@ async def run_action(action_name: str, action: Dict[str, Any]):
             action["script"],
             env=env,
             cwd=cwd,
+            limit=1024*256,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             **extra_args,
