@@ -42,7 +42,7 @@ def create_spelli_task():
                 curl -Ls "https://pahkat.uit.no/devtools/download/divvunspell-libreoffice-oxt?platform=windows&channel=nightly" -o divvunspell-libreoffice-oxt.txz
                 xz -d divvunspell-libreoffice-oxt.txz
                 tar xvf divvunspell-libreoffice-oxt.tar
-                ls
+                mv divvunspell.oxt divvunspell-libreoffice.oxt
         """,
                 run_if="${{ steps.version.outputs.channel == 'nightly' }}",
             ),
@@ -54,7 +54,7 @@ def create_spelli_task():
                 curl -Ls "https://pahkat.uit.no/devtools/download/divvunspell-libreoffice-oxt?platform=windows&channel=stable" -o divvunspell-libreoffice-oxt.txz
                 xz -d divvunspell-libreoffice-oxt.txz
                 tar xvf divvunspell-libreoffice-oxt.tar
-                ls
+                mv divvunspell.oxt divvunspell-libreoffice.oxt
         """,
                 run_if="${{ steps.version.outputs.channel != 'nightly' }}",
             ),
