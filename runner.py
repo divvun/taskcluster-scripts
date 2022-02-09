@@ -512,7 +512,7 @@ async def main():
 
     for name, action in actions.items():
         if "condition" in action:
-            if should_run(action["condition"], action):
+            if not should_run(action["condition"], action):
                 print("Ignoring {} because condition was false".format(name))
                 continue
         await run_action(name, action)
