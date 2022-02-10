@@ -36,7 +36,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
         return (
             windows_task(f"Bundle lang: {os_name} {type_}")
             .with_git()
-            .with_curl_artifact_script(lang_task_id, "spellers.tar.gz", extract=True, out_directory="repo")
+            .with_curl_artifact_script(lang_task_id, "spellers.tar.gz", extract=True, as_gha=True)
             .with_gha(
                 "init",
                 GithubAction(
@@ -79,7 +79,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
     if os_name == "macos-latest":
         return (
             macos_task(f"Bundle lang: {os_name} {type_}")
-            .with_curl_artifact_script(lang_task_id, "spellers.tar.gz", extract=True, out_directory="repo")
+            .with_curl_artifact_script(lang_task_id, "spellers.tar.gz", extract=True, as_gha=True)
             .with_gha(
                 "init",
                 GithubAction(

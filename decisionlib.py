@@ -200,8 +200,13 @@ class Task:
     def get_proxy_url(self) -> str:
         return os.environ["TASKCLUSTER_PROXY_URL"]
 
-    def with_script(self, *script: str):
-        self.scripts.extend(script)
+    def with_script(self, *script: str, as_gha=False):
+        if as_gha:
+            self.with_gha("script_%s" % len(self.gh_actions), gha.GithubActionScript(
+                "\n".join(script)
+            ))
+        else:
+            self.scripts.extend(script)
         return self
 
     def with_late_script(self, *script: str):
@@ -346,12 +351,13 @@ class Task:
             % (repo_url, target)
         )
 
-    def with_curl_script(self, url: str, file_path: str):
+    def with_curl_script(self, url: str, file_path: str, as_gha=False):
         return self.with_script(
             """
             curl --compressed --ssl-no-revoke --retry 5 --connect-timeout 10 -Lf "%s" -o "%s"
         """
-            % (url, file_path)
+            % (url, file_path),
+            as_gha=as_gha
         )
 
     def with_curl_artifact_script(
@@ -362,17 +368,20 @@ class Task:
         directory="public",
         rename=None,
         extract=False,
+        as_gha=False
     ):
         queue_service = self.get_proxy_url() + "/api/queue"
         ret = self.with_dependencies(task_id).with_curl_script(
             queue_service
             + "/v1/task/%s/artifacts/%s/%s" % (task_id, directory, artifact_name),
             os.path.join(out_directory, rename or url_basename(artifact_name)),
+            as_gha=as_gha
         )
         if extract:
             ret = self.with_script(
                 "tar xvf %s"
-                % os.path.join(out_directory, rename or url_basename(artifact_name))
+                % os.path.join(out_directory, rename or url_basename(artifact_name)),
+                as_gha=as_gha
             )
 
         return ret
@@ -689,9 +698,9 @@ class WindowsGenericWorkerTask(GenericWorkerTask):
             )
         )
 
-    def with_curl_script(self, url, file_path):
+    def with_curl_script(self, url, file_path, as_gha=False):
         self.with_curl()
-        return super().with_curl_script(url, file_path)
+        return super().with_curl_script(url, file_path, as_gha)
 
     def with_curl(self):
         return self.with_path_from_homedir(
