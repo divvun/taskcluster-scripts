@@ -966,7 +966,7 @@ class DockerWorkerTask(UnixTaskMixin, Task):
         files = os.path.basename(path)
         return self.with_late_script(
             f"""
-            find {basedir} -wholename "{files}" -exec tar --xform="s#{basedir}/##" -rvf /{targz} {{}} \\;
+            find {basedir} -wholename "{files}" -exec tar -P --xform="s#{basedir}/##" -rvf /{targz} {{}} \\;
         """
         ).with_artifacts("/" + targz)
 
