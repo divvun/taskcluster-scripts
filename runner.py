@@ -260,6 +260,7 @@ def get_env_for(step_name: str, step: Dict[str, Any]):
                 except:
                     pass
     else:
+        os.makedirs(os.path.dirname(env["GITHUB_ENV"]), exist_ok=True)
         open(env["GITHUB_ENV"], "w").close()
 
     if EXTRA_PATH:
