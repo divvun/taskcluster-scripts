@@ -72,7 +72,7 @@ def macos_task(name):
     )
 
 
-def windows_task(name):
+def windows_task(name, clone_self=True):
     return (
         decisionlib.WindowsGenericWorkerTask(name)
         .with_worker_type("windows")
@@ -91,10 +91,10 @@ def windows_task(name):
         .with_gha("clone", GithubAction("actions/checkout", {
             "repository": os.environ["REPO_FULL_NAME"],
             "path": "repo"
-        }).with_secret_input("token", "divvun", "github.token"))
+        }).with_secret_input("token", "divvun", "github.token"), enabled=clone_self)
         .with_python3()
         .with_script("pip install --user taskcluster")
-        .with_gha("Set CWD", GithubActionScript(f"echo ::set-cwd::%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\repo"))
+        .with_gha("Set CWD", GithubActionScript(f"echo ::set-cwd::%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\repo"), enabled=clone_self)
     )
 
 
