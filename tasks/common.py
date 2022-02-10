@@ -95,6 +95,7 @@ def windows_task(name, clone_self=True):
         .with_python3()
         .with_script("pip install --user taskcluster")
         .with_gha("Set CWD", GithubActionScript(f"echo ::set-cwd::%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\repo"), enabled=clone_self)
+        .with_gha("Set CWD", GithubActionScript(f"echo ::set-cwd::%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%"), enabled=not clone_self)
     )
 
 
