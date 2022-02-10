@@ -76,7 +76,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
             .with_gha(
                 "deploy",
                 GithubAction(
-                    "Eijebong/divvun-actions/deploy",
+                    "Eijebong/divvun-actions/speller/deploy",
                     {
                         "speller-type": type_,
                         "speller-manifest-path": "manifest.toml",
@@ -133,7 +133,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
             .with_gha(
                 "deploy",
                 GithubAction(
-                    "Eijebong/divvun-actions/deploy",
+                    "Eijebong/divvun-actions/speller/deploy",
                     {
                         "speller-type": type_,
                         "speller-manifest-path": "manifest.toml",
