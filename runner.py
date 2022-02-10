@@ -287,15 +287,17 @@ async def run_action(action_name: str, action: Dict[str, Any]):
     extra_args = {}
 
     cwd = action.get('cwd')
-    print("Running: ", action["script"])
     if platform.system() == "Windows":
         shell = action.get("shell", "pwsh")
         if shell == "cmd":
             tmp = tempfile.TemporaryFile("w", suffix=".bat");
             tmp.write(action["script"])
-            cmdargs = ["cmd", "call " + tmp.name]
+            cmdargs = ["cmd", "/C", "call " + tmp.name]
+            print("Writing", action["script"], " to", tmp.name)
         else:
             cmdargs = ["pwsh", "-c", action["script"]]
+
+        print("Running ", cmdargs)
 
         process = await asyncio.subprocess.create_subprocess_exec(
             *cmdargs,
@@ -307,6 +309,7 @@ async def run_action(action_name: str, action: Dict[str, Any]):
             **extra_args,
         )
     else:
+        print("Running: ", action["script"])
         if platform.system() == "Linux":
             # Ubuntu uses dash as its /bin/sh which breaks env variables with dashes in them
             extra_args["executable"] = "/bin/bash"
