@@ -64,6 +64,7 @@ import os
 import platform
 import subprocess
 import shutil
+import tempfile
 
 from collections import defaultdict
 from typing import Set, Dict, List, Any
@@ -289,8 +290,15 @@ async def run_action(action_name: str, action: Dict[str, Any]):
     print("Running: ", action["script"])
     if platform.system() == "Windows":
         shell = action.get("shell", "pwsh")
+        if shell == "cmd":
+            tmp = tempfile.TemporaryFile("w", suffix=".bat");
+            tmp.write(action["script"])
+            cmdargs = ["cmd", "call " + tmp.name]
+        else:
+            cmdargs = ["pwsh", "-c", action["script"]]
+
         process = await asyncio.subprocess.create_subprocess_exec(
-            shell, "-c" if "pwsh" else "/C", action["script"],
+            *cmdargs,
             env=env,
             cwd=cwd,
             stdout=subprocess.PIPE,
