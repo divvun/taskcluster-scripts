@@ -68,7 +68,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
                     {
                         "speller-type": type_,
                         "speller-manifest-path": "manifest.toml",
-                        "speller-path": "${{ steps.build.outputs['speller-paths'] }}",
+                        "speller-paths": "${{ steps.build.outputs['speller-paths'] }}",
                         "version": "${{ steps.version.outputs.version }}",
                     },
                 ).with_outputs_from(lang_task_id),
@@ -111,7 +111,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
                     {
                         "speller-type": type_,
                         "speller-manifest-path": "manifest.toml",
-                        "speller-path": "${{ steps.build.outputs['speller-paths'] }}",
+                        "speller-paths": "${{ steps.build.outputs['speller-paths'] }}",
                         "version": "${{ steps.version.outputs.version }}",
                     },
                 ).with_outputs_from(lang_task_id),
