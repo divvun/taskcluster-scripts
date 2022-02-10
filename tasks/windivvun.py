@@ -6,10 +6,16 @@ def create_windivvun_tasks():
     windivvun_tasks = create_windivvun_build_tasks()
     mso_tasks = create_mso_build_tasks()
     task = windows_task("Windivvun installer").with_script("mkdir artifacts", as_gha=True)
-    for (task_id, artifact) in windivvun_tasks:
-        task.with_curl_artifact_script(task_id, artifact, out_directory="artifacts", as_gha=True)
-    for (task_id, artifact) in mso_tasks:
-        task.with_curl_artifact_script(task_id, artifact, out_directory="artifacts", as_gha=True)
+    for (task_id, arch) in windivvun_tasks:
+        (task
+            .with_script(f"mkdir artifacts/windivvun-{arch}", as_gha=True)
+            .with_curl_artifact_script(task_id, "windivvun.dll", out_directory=f"artifacts/windivvun-{arch}", as_gha=True)
+        )
+    for (task_id, arch) in mso_tasks:
+        (task
+            .with_script(f"mkdir artifacts/divvunspell-mso-{arch}", as_gha=True)
+            .with_curl_artifact_script(task_id, "divvunspellmso.dll", out_directory=f"artifacts/divvunspell-mso-{arch}", as_gha=True)
+        )
 
     return (task
         .with_gha("setup", gha_setup())
@@ -67,9 +73,12 @@ def create_mso_build_tasks():
                     },
                 ),
             )
-            .with_artifacts(f"target/{triple}/release/divvunspellmso.dll")
+            .with_gha("artifact", GithubActionScript(f"""
+                mv target/{triple}/release/divvunspellmso.dll ../../
+            """))
+            .with_artifacts(f"divvunspellmso.dll")
             .find_or_create(f"build.windivvun-mso.{arch}.{CONFIG.git_sha})"),
-            f"target/{triple}/release/divvunspellmso.dll"
+            arch
         ))
 
     return mso_tasks
@@ -100,9 +109,12 @@ def create_windivvun_build_tasks():
                     },
                 ),
             )
-            .with_artifacts(f"repo/target/{triple}/release/windivvun.dll")
+            .with_gha("artifact", GithubActionScript(f"""
+                mv target/{triple}/release/windivvun.dll ../../
+            """))
+            .with_artifacts(f"windivvun.dll")
             .find_or_create(f"build.windivvun.{arch}.{CONFIG.git_sha})"),
-            f"target/{triple}/release/windivvun.dll"
+            arch
         ))
 
     return windivvun_tasks
