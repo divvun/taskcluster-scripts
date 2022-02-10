@@ -26,7 +26,7 @@ def create_windivvun_tasks():
         .with_gha("move_artifacts", GithubActionScript("""
             cp $env:RUNNER_TEMP\\pahkat-prefix\\pkg\\spelli\\bin\\spelli.exe artifacts\\
         """))
-        .with_gha("build_installer", GithubAction("Eijebong/divvun-actions/inno-setup", {
+        .with_gha("installer", GithubAction("Eijebong/divvun-actions/inno-setup", {
             "path": "install.iss",
             "defines": "Version=${{ steps.version.outputs.version }}",
         }))
