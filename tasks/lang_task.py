@@ -12,10 +12,10 @@ def create_lang_task(with_apertium):
     return (
         linux_build_task("Lang build", bundle_dest="lang")
         .with_additional_repo(
-            "https://github.com/giellalt/giella-core.git", "giella-core"
+            "https://github.com/giellalt/giella-core.git", "${HOME}/tasks/${TASK_ID}/giella-core"
         )
         .with_additional_repo(
-            "https://github.com/giellalt/giella-shared.git", "giella-shared"
+            "https://github.com/giellalt/giella-shared.git", "${HOME}/tasks/${TASK_ID}/giella-shared"
         )
         .with_gha(
             "deps",
