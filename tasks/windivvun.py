@@ -55,9 +55,9 @@ def create_mso_build_tasks():
             }))
             .with_gha("build", GithubActionScript(f"""
               cd divvunspell-mso
-              "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Auxiliary\\Build\\{vcvars}"
+              call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Auxiliary\\Build\\{vcvars}"
               cargo build --target {triple} --release
-            """).with_secret_input("SENTRY_DSN", "divvun", "MSO_DSN"))
+            """).with_secret_input("SENTRY_DSN", "divvun", "MSO_DSN").with_shell("cmd"))
             .with_gha(
                 "sign",
                 GithubAction(
@@ -88,9 +88,9 @@ def create_windivvun_build_tasks():
                 "override": "true",
             }))
             .with_gha("build", GithubActionScript(f"""
-              "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Auxiliary\\Build\\{vcvars}"
+              call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Auxiliary\\Build\\{vcvars}"
               cargo build --target {triple} --release
-            """))
+            """).with_shell("cmd"))
             .with_gha(
                 "sign",
                 GithubAction(
