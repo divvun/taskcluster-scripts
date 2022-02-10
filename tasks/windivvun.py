@@ -51,7 +51,7 @@ def create_mso_build_tasks():
             windows_task("MSO build: %s" % arch, clone_self=False)
             .with_rustup()
             .with_gha("clone_mso", GithubAction("actions/checkout", {
-                "repository": "mso-nda-resources",
+                "repository": "divvun/mso-nda-resources",
             }).with_secret_input("token", "divvun", "github.token"))
             .with_gha("setup", gha_setup())
             .with_gha("rustup", GithubAction("actions-rs/toolchain", {
