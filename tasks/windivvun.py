@@ -61,6 +61,7 @@ def create_mso_build_tasks():
             }))
             .with_gha("build", GithubActionScript(f"""
               cd divvunspell-mso
+              set SENTRY_DSN=%INPUT_SENTRY_DSN%
               call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Auxiliary\\Build\\{vcvars}"
               cargo build --target {triple} --release
             """).with_secret_input("SENTRY_DSN", "divvun", "MSO_DSN").with_shell("cmd"))
