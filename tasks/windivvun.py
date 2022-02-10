@@ -75,7 +75,7 @@ def create_mso_build_tasks():
                 ),
             )
             .with_gha("artifact", GithubActionScript(f"""
-                mv target/{triple}/release/divvunspellmso.dll ../../
+                mv target/{triple}/release/divvunspellmso.dll ../
             """))
             .with_artifacts(f"divvunspellmso.dll")
             .find_or_create(f"build.windivvun-mso.{arch}.{CONFIG.git_sha})"),
