@@ -290,10 +290,12 @@ async def run_action(action_name: str, action: Dict[str, Any]):
     if platform.system() == "Windows":
         shell = action.get("shell", "pwsh")
         if shell == "cmd":
-            tmp = tempfile.TemporaryFile("w", suffix=".bat");
+            tmp = tempfile.NamedTemporaryFile("w", suffix=".bat", delete=False);
             tmp.write(action["script"])
             cmdargs = ["cmd", "/C", "call " + tmp.name]
             print("Writing", action["script"], " to", tmp.name)
+            # Force close the file here because cmd is dumb and doesn't want to run if the file is still opened
+            tmp.close()
         else:
             cmdargs = ["pwsh", "-c", action["script"]]
 
