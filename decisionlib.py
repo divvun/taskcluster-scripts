@@ -172,6 +172,7 @@ class Task:
             "GITHUB_REPOSITORY": os.environ["REPO_FULL_NAME"],
         }
         self.scripts: List[str] = []
+        self.late_scripts: List[str] = []
         self.action_paths: Set[str] = set()
         self.gh_actions: collections.OrderedDict[
             str, gha.GithubAction
@@ -201,6 +202,10 @@ class Task:
 
     def with_script(self, *script: str):
         self.scripts.extend(script)
+        return self
+
+    def with_late_script(self, *script: str):
+        self.late_scripts.extend(script)
         return self
 
     def with_early_script(self, *script: str):
@@ -597,7 +602,7 @@ class WindowsGenericWorkerTask(GenericWorkerTask):
         )
 
     def build_command(self):
-        return ['cmd.exe /C "{}"'.format(deindent("\n".join(self.scripts)))]
+        return ['cmd.exe /C "{}"'.format(deindent("\n".join(self.scripts + self.late_scripts)))]
 
     def with_path_from_homedir(self, *paths: str):
         """
@@ -797,7 +802,7 @@ class MacOsGenericWorkerTask(UnixTaskMixin, GenericWorkerTask):
                 "-o",
                 "pipefail",
                 "-c",
-                "{}".format(deindent("\n".join(self.scripts))),
+                "{}".format(deindent("\n".join(self.scripts + self.late_scripts))),
             ]
         ]
 
@@ -902,7 +907,7 @@ class DockerWorkerTask(UnixTaskMixin, Task):
                 "-o",
                 "pipefail",
                 "-c",
-                "{}".format(deindent("\n".join(self.scripts))),
+                "{}".format(deindent("\n".join(self.scripts + self.late_scripts))),
             ],
         }
         return dict_update_if_truthy(
@@ -959,7 +964,7 @@ class DockerWorkerTask(UnixTaskMixin, Task):
         targz = name + ".tar.gz"
         basedir = os.path.dirname(path)
         files = os.path.basename(path)
-        return self.with_script(
+        return self.with_late_script(
             f"""
             find {basedir} -wholename "{files}" -exec tar --xform="s#{basedir}/##" -rvf /{targz} {{}} \\;
         """
