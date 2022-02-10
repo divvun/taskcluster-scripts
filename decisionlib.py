@@ -324,12 +324,12 @@ class Task:
 
         <https://docs.taskcluster.net/docs/reference/core/taskcluster-index/references/api#findTask>
         """
-        if self.gh_actions:
-            self.with_prep_gha_tasks()
-
         task_id = SHARED.found_or_created_indexed_tasks.get(index_path)
         if task_id is not None:
             return task_id
+
+        if self.gh_actions:
+            self.with_prep_gha_tasks()
 
         try:
             task_id = Task.find(index_path)
@@ -426,6 +426,9 @@ class Task:
 
             if gha.cwd is not None:
                 payload[name]["cwd"] = gha.cwd
+
+            if gha.shell is not None:
+                payload[name]["shell"] = gha.shell
 
         utils.create_extra_artifact(payload_name, json.dumps(payload).encode())
 

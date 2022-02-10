@@ -288,9 +288,9 @@ async def run_action(action_name: str, action: Dict[str, Any]):
     cwd = action.get('cwd')
     print("Running: ", action["script"])
     if platform.system() == "Windows":
-        extra_args["executable"] = "C:\\Program Files\\PowerShell\\7\\pwsh.exe"
+        shell = action.get("shell", "pwsh")
         process = await asyncio.subprocess.create_subprocess_exec(
-            "pwsh", "-c", action["script"],
+            shell, "-c" if "pwsh" else "/C", action["script"],
             env=env,
             cwd=cwd,
             stdout=subprocess.PIPE,

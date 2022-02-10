@@ -26,6 +26,7 @@ class GithubAction:
         self.condition = run_if
         self.env = {}
         self.cwd = None
+        self.shell = None
         self.npm_install = npm_install
 
     def env_variables(self, platform):
@@ -129,6 +130,10 @@ class GithubAction:
 
     def with_cwd(self, cwd):
         self.cwd = cwd
+        return self
+
+    def with_shell(self, shell):
+        self.shell = shell
         return self
 
 
