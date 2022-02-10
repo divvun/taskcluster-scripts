@@ -62,7 +62,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
                 ).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN"),
             )
             .with_gha(
-                "bundle",
+                "bundler",
                 GithubAction(
                     "Eijebong/divvun-actions/speller/bundle",
                     {
@@ -72,6 +72,20 @@ def create_bundle_task(os_name, type_, lang_task_id):
                         "version": "${{ steps.version.outputs.version }}",
                     },
                 ).with_outputs_from(lang_task_id),
+            )
+            .with_gha(
+                "deploy",
+                GithubAction(
+                    "Eijebong/divvun-actions/deploy",
+                    {
+                        "speller-type": type_,
+                        "speller-manifest-path": "manifest.toml",
+                        "payload-path": "${{ steps.bundler.outputs['payload-path'] }}",
+                        "version": "${{ steps.version.outputs.version }}",
+                        "channel": "${{ steps.version.outputs.channel }}",
+                        "repo": "https://pahkat.uit.no/main/",
+                    }
+                )
             )
             .find_or_create(f"bundle.{os_name}_x64_{type_}.{CONFIG.git_sha}")
         )
@@ -105,7 +119,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
                 ).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN"),
             )
             .with_gha(
-                "bundle",
+                "bundler",
                 GithubAction(
                     "Eijebong/divvun-actions/speller/bundle",
                     {
@@ -115,6 +129,20 @@ def create_bundle_task(os_name, type_, lang_task_id):
                         "version": "${{ steps.version.outputs.version }}",
                     },
                 ).with_outputs_from(lang_task_id),
+            )
+            .with_gha(
+                "deploy",
+                GithubAction(
+                    "Eijebong/divvun-actions/deploy",
+                    {
+                        "speller-type": type_,
+                        "speller-manifest-path": "manifest.toml",
+                        "payload-path": "${{ steps.bundler.outputs['payload-path'] }}",
+                        "version": "${{ steps.version.outputs.version }}",
+                        "channel": "${{ steps.version.outputs.channel }}",
+                        "repo": "https://pahkat.uit.no/main/",
+                    }
+                )
             )
             .find_or_create(f"bundle.{os_name}_x64_{type_}.{CONFIG.git_sha}")
         )
