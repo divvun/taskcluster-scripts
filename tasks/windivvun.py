@@ -24,7 +24,7 @@ def create_windivvun_tasks():
         }).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN"))
         .with_gha("pahkat", gha_pahkat(["pahkat-uploader"]))
         .with_gha("download_spelli_stable", GithubActionScript("""
-            curl -Ls "https://pahkat.uit.no/devtools/download/spelli?platform=windows&channel=nightly" -o artifacts\\spelli.exe
+            curl -Ls "https://pahkat.uit.no/devtools/download/spelli?platform=windows&channel=beta" -o artifacts\\spelli.exe
         """, run_if="${{ steps.version.outputs.channel != 'nightly' }}"))
         .with_gha("download_spelli_nightly", GithubActionScript("""
             curl -Ls "https://pahkat.uit.no/devtools/download/spelli?platform=windows&channel=nightly" -o artifacts\\spelli.exe
