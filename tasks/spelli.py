@@ -51,7 +51,7 @@ def create_spelli_task():
             "get_pahkat_service_stable",
             GithubActionScript(
                 """
-                curl -Ls "https://pahkat.uit.no/devtools/download/divvunspell-libreoffice-oxt?platform=windows&channel=stable" -o divvunspell-libreoffice-oxt.txz
+                curl -Ls "https://pahkat.uit.no/devtools/download/divvunspell-libreoffice-oxt?platform=windows&channel=beta" -o divvunspell-libreoffice-oxt.txz
                 xz -d divvunspell-libreoffice-oxt.txz
                 tar xvf divvunspell-libreoffice-oxt.tar
                 mv divvunspell.oxt divvunspell-libreoffice.oxt
