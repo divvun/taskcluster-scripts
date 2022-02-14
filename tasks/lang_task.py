@@ -27,7 +27,7 @@ def create_lang_task(with_apertium):
             "build", GithubAction("Eijebong/divvun-actions/lang/build", {"fst": "hfst"})
         )
         .with_named_artifacts("spellers", "${HOME}/tasks/${TASK_ID}/lang/build/tools/spellcheckers/*.zhfst")
-        .find_or_create(f"build.linux_x64.{CONFIG.git_sha}")
+        .find_or_create(f"build.linux_x64.{CONFIG.index_path}")
     )
 
 
@@ -87,7 +87,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
                     }
                 )
             )
-            .find_or_create(f"bundle.{os_name}_x64_{type_}.{CONFIG.git_sha}")
+            .find_or_create(f"bundle.{os_name}_x64_{type_}.{CONFIG.index_path}")
         )
 
     if os_name == "macos-latest":
@@ -144,7 +144,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
                     }
                 )
             )
-            .find_or_create(f"bundle.{os_name}_x64_{type_}.{CONFIG.git_sha}")
+            .find_or_create(f"bundle.{os_name}_x64_{type_}.{CONFIG.index_path}")
         )
 
     raise NotImplementedError

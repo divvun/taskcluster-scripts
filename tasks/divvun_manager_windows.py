@@ -194,5 +194,5 @@ def create_divvun_manager_windows_tasks():
                 },
             ).with_secret_input("GITHUB_TOKEN", "divvun", "github.token"),
         )
-        .find_or_create(f"build.divvun-manager-windows.{CONFIG.git_sha}")
+        .find_or_create(f"build.divvun-manager-windows.{CONFIG.index_path}")
     )

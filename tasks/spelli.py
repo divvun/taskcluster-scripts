@@ -95,6 +95,6 @@ def create_spelli_task():
                 "payload-path": "${{ steps.tarball.outputs['txz-path'] }}",
             },
         ))
-        .find_or_create(f"build.spelli.{CONFIG.git_sha}")
+        .find_or_create(f"build.spelli.{CONFIG.index_path}")
     )
 

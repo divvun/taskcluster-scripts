@@ -28,7 +28,7 @@ def create_kbd_task(os_name):
                     },
                 ),
             )
-            .find_or_create(f"kbdgen.{os_name}_x64.{CONFIG.git_sha}")
+            .find_or_create(f"kbdgen.{os_name}_x64.{CONFIG.index_path}")
         )
 
     if os_name == "macos-latest":
@@ -52,7 +52,7 @@ def create_kbd_task(os_name):
                     {"keyboard-type": "keyboard-macos"},
                 ),
             )
-            .find_or_create(f"kbdgen.{os_name}_x64.{CONFIG.git_sha}")
+            .find_or_create(f"kbdgen.{os_name}_x64.{CONFIG.index_path}")
         )
 
     raise NotImplementedError

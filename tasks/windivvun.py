@@ -35,12 +35,12 @@ def create_windivvun_tasks():
             "platform": "windows",
             "payload-path": "${{ steps.installer.outputs['installer-path'] }}",
             "version": "${{ steps.version.outputs.version }}",
-            "repo": "https://pahkat.uit.no/tools",
+            "repo": "https://pahkat.uit.no/tools/",
             "channel": "${{ steps.version.outputs.channel }}",
             "windows-kind": "inno",
             "windows-product-code": "{41F71B6E-DE82-433D-8659-7E2D7C3B95E2}_is1",
         }).with_secret_input("GITHUB_TOKEN", "divvun", "github.token"))
-        .find_or_create(f"build.windivvun-installer.{CONFIG.git_sha}")
+        .find_or_create(f"build.windivvun-installer.{CONFIG.index_path}")
     )
 
 def create_mso_build_tasks():
@@ -78,7 +78,7 @@ def create_mso_build_tasks():
                 mv target/{triple}/release/divvunspellmso.dll ../
             """))
             .with_artifacts(f"divvunspellmso.dll")
-            .find_or_create(f"build.windivvun-mso.{arch}.{CONFIG.git_sha})"),
+            .find_or_create(f"build.windivvun-mso.{arch}.{CONFIG.index_path})"),
             arch
         ))
 
@@ -114,7 +114,7 @@ def create_windivvun_build_tasks():
                 mv target/{triple}/release/windivvun.dll ../../
             """))
             .with_artifacts(f"windivvun.dll")
-            .find_or_create(f"build.windivvun.{arch}.{CONFIG.git_sha})"),
+            .find_or_create(f"build.windivvun.{arch}.{CONFIG.index_path})"),
             arch
         ))
 

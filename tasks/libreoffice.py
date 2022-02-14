@@ -39,5 +39,5 @@ def create_libreoffice_tasks():
             ),
         )
         .with_artifacts("/divvunspell.oxt")
-        .find_or_create(f"build.libreoffice.linux_x64.{CONFIG.git_sha}")
+        .find_or_create(f"build.libreoffice.linux_x64.{CONFIG.index_path}")
     )

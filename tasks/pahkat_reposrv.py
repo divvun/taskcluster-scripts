@@ -32,7 +32,7 @@ def create_pahkat_reposrv_task(tag_name: str):
         )
 
         return task.find_or_create(f"build.linux_x64.{tag_name}")
-    return task.find_or_create(f"build.linux_x64.{CONFIG.git_sha}")
+    return task.find_or_create(f"build.linux_x64.{CONFIG.index_path}")
 
 
 def create_pahkat_reposrv_release_task(build_task_id: str, tag_name: str):
@@ -46,5 +46,5 @@ def create_pahkat_reposrv_release_task(build_task_id: str, tag_name: str):
                 {"tag_name": tag_name, "files": "pahkat-reposrv"},
             ).with_secret_input("token", "divvun", "github.token"),
         )
-        .find_or_create(f"release.linux_x64.{CONFIG.git_sha}")
+        .find_or_create(f"release.linux_x64.{CONFIG.index_path}")
     )

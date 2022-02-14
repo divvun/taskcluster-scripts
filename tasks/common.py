@@ -277,7 +277,7 @@ def _generic_rust_build_upload_task(
             "deploy",
             deploy.with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN"),
         )
-        .find_or_create(f"build.{bin_name}.{os_}.{CONFIG.git_sha}")
+        .find_or_create(f"build.{bin_name}.{os_}.{CONFIG.index_path}")
     )
 
 

@@ -86,6 +86,12 @@ class Config:
         output = subprocess.check_output(["git", "rev-parse", "HEAD"])
         self.git_sha = output.decode("utf8").strip()
 
+    @property
+    def index_path(self):
+        if self.git_ref.startswith("refs/tags/"):
+            return CONFIG.git_ref[len("refs/tags/") :]
+        return self.git_sha
+
 
 class Shared:
     """

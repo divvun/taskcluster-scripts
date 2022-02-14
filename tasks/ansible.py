@@ -29,4 +29,4 @@ def create_ansible_task(roles: List[str], depends_on=None):
     if depends_on is not None:
         task = task.with_dependencies(depends_on)
 
-    return task.find_or_create(f"deploy.{CONFIG.git_sha}")
+    return task.find_or_create(f"deploy.{CONFIG.index_path}")
