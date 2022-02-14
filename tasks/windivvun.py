@@ -22,10 +22,13 @@ def create_windivvun_tasks():
         .with_gha("version", GithubAction("Eijebong/divvun-actions/version", {
             "cargo": "true",
         }).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN"))
-        .with_gha("pahkat", gha_pahkat(["pahkat-uploader", "spelli"]))
-        .with_gha("move_artifacts", GithubActionScript("""
-            cp $env:RUNNER_TEMP\\pahkat-prefix\\pkg\\spelli\\bin\\spelli.exe artifacts\\
-        """))
+        .with_gha("pahkat", gha_pahkat(["pahkat-uploader"]))
+        .with_gha("download_spelli_stable", GithubActionScript("""
+            curl -Ls "https://pahkat.uit.no/devtools/download/spelli?platform=windows&channel=nightly" -o artifacts\\spelli.exe
+        """, run_if="${{ steps.version.outputs.channel != 'nightly' }}"))
+        .with_gha("download_spelli_nightly", GithubActionScript("""
+            curl -Ls "https://pahkat.uit.no/devtools/download/spelli?platform=windows&channel=nightly" -o artifacts\\spelli.exe
+        """, run_if="${{ steps.version.outputs.channel == 'nightly' }}"))
         .with_gha("installer", GithubAction("Eijebong/divvun-actions/inno-setup", {
             "path": "install.iss",
             "defines": "Version=${{ steps.version.outputs.version }}",
