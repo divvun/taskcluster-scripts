@@ -38,7 +38,8 @@ Action description format:
         "inputs": {"name": "value", ...},
         "secret_inputs": {"name": {"secret": "tc-secret", "name": "foo"}, ...},
         "outputs_from": ["task_id_1", ...],
-        "script": ""
+        "script": "",
+        "post_script": ""
     }
     ```
     - env: This should be dictionary containing environment variables to have
@@ -54,6 +55,7 @@ Action description format:
       like a normal input.
     - outputs_from: A list of actions to get outputs from
     - script: The script to run. This is usually `node path/to/action.js` but could be anything.
+    - post_script: Script to run unconditionally after the task
 """
 
 import sys
@@ -283,7 +285,8 @@ def write_outputs():
     utils.create_extra_artifact("outputs.json", json.dumps(OUTPUTS).encode())
 
 
-async def run_action(action_name: str, action: Dict[str, Any]):
+async def run_action(action_name: str, action: Dict[str, Any], post=False):
+    script_index = "post_script" if post else "script"
     print(f"Running {action_name}")
     env = get_env_for(action_name, action)
 
@@ -294,13 +297,13 @@ async def run_action(action_name: str, action: Dict[str, Any]):
         shell = action.get("shell", "pwsh")
         if shell == "cmd":
             tmp = tempfile.NamedTemporaryFile("w", suffix=".bat", delete=False);
-            tmp.write(action["script"])
+            tmp.write(action[script_index])
             cmdargs = ["cmd", "/C", "call " + tmp.name]
-            print("Writing", action["script"], " to", tmp.name)
+            print("Writing", action[script_index], " to", tmp.name)
             # Force close the file here because cmd is dumb and doesn't want to run if the file is still opened
             tmp.close()
         else:
-            cmdargs = ["pwsh", "-c", action["script"]]
+            cmdargs = ["pwsh", "-c", action[script_index]]
 
         print("Running ", cmdargs)
 
@@ -314,12 +317,12 @@ async def run_action(action_name: str, action: Dict[str, Any]):
             **extra_args,
         )
     else:
-        print("Running: ", action["script"])
+        print("Running: ", action[script_index])
         if platform.system() == "Linux":
             # Ubuntu uses dash as its /bin/sh which breaks env variables with dashes in them
             extra_args["executable"] = "/bin/bash"
         process = await asyncio.subprocess.create_subprocess_shell(
-            action["script"],
+            action[script_index],
             env=env,
             cwd=cwd,
             limit=1024*256,
@@ -528,12 +531,20 @@ async def main():
     if "HOME" not in os.environ:
         os.environ["HOME"] = os.path.expandvars("%HOMEDRIVE%%HOMEPATH%")
 
-    for name, action in actions.items():
-        if "condition" in action:
-            if not should_run(action["condition"], action):
-                print("Ignoring {} because condition was false".format(name))
-                continue
-        await run_action(name, action)
+    post_actions = []
+    try:
+        for name, action in actions.items():
+            if "condition" in action:
+                if not should_run(action["condition"], action):
+                    print("Ignoring {} because condition was false".format(name))
+                    continue
+                await run_action(name, action)
+                if "post_script" in action and action["post_script"]:
+                    post_actions.append((name, action))
+    finally:
+        for (name, action) in post_actions:
+            await run_action(name, action, post=True)
+
 
 
 if __name__ == "__main__":

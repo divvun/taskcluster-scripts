@@ -442,6 +442,9 @@ class Task:
             if gha.shell is not None:
                 payload[name]["shell"] = gha.shell
 
+            if gha.post_script_path:
+                payload[name]["post_script"] = gha.gen_post_script(platform)
+
         utils.create_extra_artifact(payload_name, json.dumps(payload).encode())
 
     def gen_gha_payload(self, name: str):

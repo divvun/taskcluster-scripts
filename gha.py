@@ -18,6 +18,7 @@ class GithubAction:
             self.path = path
             self.version = 'master'
         self.args = {}
+        self.post_path = None
         self.run_path = "index.js"
         self.parse_config()
         self.args.update(args)
@@ -75,6 +76,10 @@ class GithubAction:
         if run_path:
             self.run_path = run_path
 
+        post_path = config.get("runs", {}).get("post")
+        if post_path:
+            self.post_path = post_path
+
     @property
     def repo_name(self):
         parts = self.path.split("/")
@@ -96,21 +101,39 @@ class GithubAction:
     def script_path(self):
         return posixpath.join(self.action_path, self.run_path)
 
-    def gen_script(self, platform):
+    @property
+    def post_script_path(self):
+        if not self.post_path:
+            return None
+        return posixpath.join(self.action_path, self.post_path)
+
+    def task_root(self, platform):
         if platform == "linux":
-            task_root = "$HOME/tasks/$TASK_ID/_temp/"
+            return "$HOME/tasks/$TASK_ID/_temp/"
         elif platform == "macos":
-            task_root = "$HOME/tasks/$TASK_ID/_temp/"
+            return "$HOME/tasks/$TASK_ID/_temp/"
         elif platform == "win":
-            task_root = "${HOME}/${TASK_ID}/_temp/"
+            return "${HOME}/${TASK_ID}/_temp/"
         else:
             raise NotImplementedError
+
+    def gen_script(self, platform):
+        task_root = self.task_root(platform)
 
         out = ""
         if self.npm_install:
             out += f"npm install {task_root}{self.repo_name}\n"
             self.env["NODE_PATH"] = f"{task_root}{self.repo_name}/node_modules"
         return out + f"node {task_root}{self.repo_name}/{self.script_path}"
+
+    def gen_post_script(self, platform):
+        task_root = self.task_root(platform)
+
+        out = ""
+        if self.npm_install:
+            out += f"npm install {task_root}{self.repo_name}\n"
+            self.env["NODE_PATH"] = f"{task_root}{self.repo_name}/node_modules"
+        return out + f"node {task_root}{self.repo_name}/{self.post_script_path}"
 
     def with_outputs_from(self, task_id):
         self.outputs_from.add(task_id)
