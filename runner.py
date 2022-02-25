@@ -544,9 +544,9 @@ async def main():
                 if not should_run(action["condition"], action):
                     print("Ignoring {} because condition was false".format(name))
                     continue
-                await run_action(name, action)
-                if "post_script" in action and action["post_script"]:
-                    post_actions.append((name, action))
+            await run_action(name, action)
+            if "post_script" in action and action["post_script"]:
+                post_actions.append((name, action))
         CURRENT_STATUS = "success"
     except Exception as e:
         print(e)
