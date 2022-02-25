@@ -142,7 +142,7 @@ def gather_secrets():
             pass
 
 
-async def process_command(step_name: str, line: str) -> bool:
+async def process_command(step_name: str, line: str):
     """
     Try processing a command from a github action.
     Return True to keep the line in the logs, False to hide it
@@ -151,10 +151,12 @@ async def process_command(step_name: str, line: str) -> bool:
     if line.startswith("::add-mask::"):
         secret = line[len("::add-mask::") :].lstrip().strip()
         if not secret:
-            return False
+            return
 
         SECRETS.add(secret)
-        return False
+        return
+
+    print(line)
 
     if line.startswith("::set-output"):
         output = line[len("::set-output") :]
@@ -179,7 +181,7 @@ async def process_command(step_name: str, line: str) -> bool:
         with open(path, "rb") as fd:
             await utils.create_extra_artifact_async(name, fd.read(), public=True)
 
-    return True
+    return
 
 
 async def process_line(step_name: str, line: str):
@@ -189,8 +191,8 @@ async def process_line(step_name: str, line: str):
     overridden the print command, secrets are filtered out
     """
     if line.startswith("::"):
-        if not await process_command(step_name, line):
-            return None
+        await process_command(step_name, line)
+        return None
 
     print(line)
 
