@@ -548,8 +548,10 @@ async def main():
                 if "post_script" in action and action["post_script"]:
                     post_actions.append((name, action))
         CURRENT_STATUS = "success"
-    except:
+    except Exception as e:
+        print(e)
         CURRENT_STATUS = "failed"
+        raise
     finally:
         for (name, action) in post_actions:
             await run_action(name, action, post=True)
@@ -559,6 +561,9 @@ async def main():
 if __name__ == "__main__":
     try:
         asyncio.run(main())
+    except Exception as e:
+        print(e)
+        raise
     finally:
         # Cleanup on macos since it's the only runner not entirely stateless.
         if platform.system() == "Darwin":
