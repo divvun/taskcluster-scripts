@@ -379,7 +379,7 @@ def parse_value_from(s, outputs):
         parts = variable.split()
         # ${{ steps.step_name.outputs.foo }} or ${{ steps.step_name.outputs['foo'] }}
         if len(parts) == 1:
-            if parts[0].strip().strip_left() == "job.status":
+            if parts[0].strip().lstrip() == "job.status":
                 if CURRENT_STATUS is None:
                     return "${{ job.status }}"
                 return CURRENT_STATUS
