@@ -317,6 +317,9 @@ class Task:
         print("Found task %s indexed at %s" % (task_id, full_index_path))
         return task_id
 
+    def create_index_at(self, path: str, task_id: str):
+        SHARED.index_service.insertTask(path, { "task_id": task_id, "data": {}, "expires": SHARED.from_now_json(self.index_and_artifacts_expire_in), "rank": 0})
+
     def find_or_create(self, index_path: str) -> str:
         """
         Try to find a task in the Index and return its ID.
@@ -339,12 +342,14 @@ class Task:
 
         try:
             task_id = Task.find(index_path)
+            if self.gh_actions:
+                self.gen_gha_payload(f"{task_id}.json")
         except taskcluster.TaskclusterRestFailure as e:
             if e.status_code != 404:  # pragma: no cover
                 raise
-            if not CONFIG.index_read_only:
-                self.with_index_at(index_path)
             task_id = self.create()
+            if not CONFIG.index_read_only:
+                self.create_index_at(index_path, task_id)
 
         SHARED.found_or_created_indexed_tasks[index_path] = task_id
         return task_id
