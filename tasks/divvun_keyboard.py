@@ -39,7 +39,7 @@ def create_android_keyboard_task():
             .with_env("LANG", "en_US.UTF-8"),
             enabled=(CONFIG.git_ref == "refs/heads/master"),
         )
-        .find_or_create(f"keyboard-build.ios.{CONFIG.index_path}")
+        .find_or_create(f"keyboard-build.android.{CONFIG.index_path}")
     )
 
 
