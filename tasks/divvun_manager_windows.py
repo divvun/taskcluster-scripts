@@ -7,7 +7,7 @@ def create_divvun_manager_windows_tasks():
     return (
         windows_task("Divvun manager (windows)", clone_full=True)
         .with_additional_repo(
-            "https://github.com/divvun/oneclick-bundler", "${HOME}/tasks/${TASK_ID}/oneclick-bundler"
+            "https://github.com/divvun/oneclick-bundler", "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\oneclick-bundler"
         )
         .with_gha("setup", gha_setup())
         .with_gha(
