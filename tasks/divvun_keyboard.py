@@ -3,12 +3,12 @@ from decisionlib import CONFIG
 from .common import macos_task, gha_setup, gha_pahkat
 
 
-def create_divvun_keyboard_tasks():
-    create_ios_keyboard_task()
-    create_android_keyboard_task()
+def create_divvun_keyboard_tasks(bundle):
+    create_ios_keyboard_task(bundle)
+    create_android_keyboard_task(bundle)
 
 
-def create_android_keyboard_task():
+def create_android_keyboard_task(bundle):
     return (
         macos_task(f"Build keyboard: Android")
         .with_gha("setup", gha_setup())
@@ -24,7 +24,7 @@ def create_android_keyboard_task():
             "build",
             GithubAction(
                 "Eijebong/divvun-actions/keyboard/build-meta",
-                {"keyboard-type": "keyboard-android", "bundle-path": "divvun.kbdgen"},
+                {"keyboard-type": "keyboard-android", "bundle-path": bundle},
             ),
         )
         .with_gha(
@@ -43,7 +43,7 @@ def create_android_keyboard_task():
     )
 
 
-def create_ios_keyboard_task():
+def create_ios_keyboard_task(bundle):
     return (
         macos_task(f"Build keyboard: IOS")
         .with_gha("setup", gha_setup())
@@ -52,7 +52,7 @@ def create_ios_keyboard_task():
             "build",
             GithubAction(
                 "Eijebong/divvun-actions/keyboard/build-meta",
-                {"keyboard-type": "keyboard-ios", "bundle-path": "divvun.kbdgen"},
+                {"keyboard-type": "keyboard-ios", "bundle-path": bundle},
             ),
         )
         .with_gha(
