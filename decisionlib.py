@@ -317,8 +317,9 @@ class Task:
         print("Found task %s indexed at %s" % (task_id, full_index_path))
         return task_id
 
-    def create_index_at(self, path: str, task_id: str):
-        SHARED.index_service.insertTask(path, { "task_id": task_id, "data": {}, "expires": SHARED.from_now_json(self.index_and_artifacts_expire_in), "rank": 0})
+    def create_index_at(self, index_path: str, task_id: str):
+        full_index_path = "%s.%s" % (CONFIG.index_prefix, index_path)
+        SHARED.index_service.insertTask(full_index_path, { "task_id": task_id, "data": {}, "expires": SHARED.from_now_json(self.index_and_artifacts_expire_in), "rank": 0})
 
     def find_or_create(self, index_path: str) -> str:
         """
