@@ -5,7 +5,7 @@ from gha import GithubAction, GithubActionScript
 
 def create_divvun_manager_windows_tasks():
     return (
-        windows_task("Divvun manager (windows)")
+        windows_task("Divvun manager (windows)", clone_full=True)
         .with_additional_repo(
             "https://github.com/divvun/oneclick-bundler", "${HOME}/tasks/${TASK_ID}/oneclick-bundler"
         )

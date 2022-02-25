@@ -72,7 +72,7 @@ def macos_task(name):
     )
 
 
-def windows_task(name, clone_self=True):
+def windows_task(name, clone_self=True, clone_full=False):
     return (
         decisionlib.WindowsGenericWorkerTask(name)
         .with_worker_type("windows")
@@ -90,7 +90,8 @@ def windows_task(name, clone_self=True):
         .with_additional_repo(os.environ["CI_REPO_URL"], "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\ci")
         .with_gha("clone", GithubAction("actions/checkout", {
             "repository": os.environ["REPO_FULL_NAME"],
-            "path": "repo"
+            "path": "repo",
+            "fetch-depth": 0 if clone_full else 1,
         }).with_secret_input("token", "divvun", "github.token"), enabled=clone_self)
         .with_python3()
         .with_script("pip install --user taskcluster")
