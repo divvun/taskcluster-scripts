@@ -5,7 +5,7 @@ from gha import GithubAction, GithubActionScript
 def create_divvun_manager_macos_task():
     return (
         macos_task("Divvun manager (macos)")
-        .with_additional_repo("https://github.com/divvun/pahkat", "pahkat")
+        .with_additional_repo("https://github.com/divvun/pahkat", "${HOME}/tasks/${TASK_ID}/pahkat")
         .with_gha("setup", gha_setup())
         .with_gha("version", GithubAction("Eijebong/divvun-actions/version", {
             "xcode": ".",
