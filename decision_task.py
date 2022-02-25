@@ -82,7 +82,7 @@ def tasks(task_for: str):
     if repo_name == "windivvun-service":
         create_windivvun_tasks()
 
-    if repo_name == "divvun-keyboard":
+    if repo_name in ("divvun-keyboard", "divvun-dev-keyboard"):
         create_divvun_keyboard_tasks()
 
 
