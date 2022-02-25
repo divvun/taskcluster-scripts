@@ -77,6 +77,7 @@ import utils
 SECRETS: Set[str] = set()
 OUTPUTS: defaultdict[str, Dict[str, str]] = defaultdict(lambda: {})
 EXTRA_PATH: List[str] = []
+CURRENT_STATUS = None
 _ORIG_PRINT = print
 
 
@@ -378,6 +379,11 @@ def parse_value_from(s, outputs):
         parts = variable.split()
         # ${{ steps.step_name.outputs.foo }} or ${{ steps.step_name.outputs['foo'] }}
         if len(parts) == 1:
+            if parts[0].strip().strip_left() == "job.status":
+                if CURRENT_STATUS is None:
+                    return "${{ job.status }}"
+                return CURRENT_STATUS
+
             var_name = parts[0].split(".")
             if var_name[0] != "steps":
                 raise ValueError(f"Unsupported operation in {remainder}")
@@ -541,6 +547,9 @@ async def main():
                 await run_action(name, action)
                 if "post_script" in action and action["post_script"]:
                     post_actions.append((name, action))
+        CURRENT_STATUS = "success"
+    except:
+        CURRENT_STATUS = "failed"
     finally:
         for (name, action) in post_actions:
             await run_action(name, action, post=True)
