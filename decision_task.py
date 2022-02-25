@@ -82,6 +82,9 @@ def tasks(task_for: str):
     if repo_name == "windivvun-service":
         create_windivvun_tasks()
 
+    if repo_name == "divvun-keyboard":
+        create_divvun_keyboard_tasks()
+
 
 task_for = os.environ["TASK_FOR"]
 repo_name = os.environ["REPO_NAME"]

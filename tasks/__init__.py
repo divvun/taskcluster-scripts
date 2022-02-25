@@ -11,3 +11,4 @@ from .divvun_manager_windows import create_divvun_manager_windows_tasks
 from .libreoffice import create_libreoffice_tasks
 from .spelli import create_spelli_task
 from .windivvun import create_windivvun_tasks
+from .divvun_keyboard import create_divvun_keyboard_tasks
