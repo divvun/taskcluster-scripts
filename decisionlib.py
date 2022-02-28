@@ -97,7 +97,12 @@ class Config:
     @property
     def commit_message(self):
         if self._commit_message is None:
-            self._commit_message = requests.get(f"https://github.com/{os.environ['REPO_FULL_NAME']}/{self.git_sha}.patch").text.split("diff --git a/")[0]
+            print("Getting commit message")
+            print(f"https://github.com/{os.environ['REPO_FULL_NAME']}/commit/{self.git_sha}.patch")
+            commit =  requests.get(f"https://github.com/{os.environ['REPO_FULL_NAME']}/commit/{self.git_sha}.patch").text
+            print(commit)
+            self._commit_message = commit.split("diff --git a/")[0]
+            print(self._commit_message)
         return self._commit_message
 
 
