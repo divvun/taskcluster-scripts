@@ -417,6 +417,9 @@ class Task:
             self.with_additional_repo(gha.git_fetch_url, os.path.join(SHARED.task_root_for(self.platform()), gha.repo_name))
             self.action_paths.add(gha.git_fetch_url)
 
+        if CONFIG.git_ref != "refs/heads/main" and CONFIG.git_ref != "refs/heads/master" and not CONFIG.git_ref.startswith("refs/tags/"):
+            gha = gha.with_env("PAHKAT_NO_DEPLOY", "true")
+
         self.gh_actions[name] = gha
         return self
 
