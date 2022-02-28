@@ -20,6 +20,7 @@ import datetime
 import json
 import os
 import re
+import requests
 import subprocess
 import sys
 from typing import Dict, List, Set, Optional, Tuple
@@ -70,6 +71,7 @@ class Config:
         self.tc_root_url = os.environ.get("TASKCLUSTER_ROOT_URL")
         self.default_provisioner_id = "divvun"
         self._tree_hash = None
+        self._commit_message = None
 
     def tree_hash(self) -> str:
         if self._tree_hash is None:
@@ -91,6 +93,12 @@ class Config:
         if self.git_ref.startswith("refs/tags/"):
             return CONFIG.git_ref[len("refs/tags/") :]
         return self.git_sha
+
+    @property
+    def commit_message(self):
+        if self._commit_message is None:
+            self._commit_message = requests.get(f"https://github.com/{os.environ['REPO_FULL_NAME']}/{self.git_sha}.patch").text.split("diff --git a/")[0]
+        return self._commit_message
 
 
 class Shared:
@@ -418,6 +426,9 @@ class Task:
             self.action_paths.add(gha.git_fetch_url)
 
         if CONFIG.git_ref != "refs/heads/main" and CONFIG.git_ref != "refs/heads/master" and not CONFIG.git_ref.startswith("refs/tags/"):
+            gha = gha.with_env("PAHKAT_NO_DEPLOY", "true")
+
+        if "[no deploy]" in CONFIG.commit_message:
             gha = gha.with_env("PAHKAT_NO_DEPLOY", "true")
 
         self.gh_actions[name] = gha
