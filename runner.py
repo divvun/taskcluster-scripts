@@ -67,6 +67,7 @@ import platform
 import subprocess
 import shutil
 import tempfile
+import time
 
 from collections import defaultdict
 from typing import Set, Dict, List, Any
@@ -255,6 +256,9 @@ def get_env_for(step_name: str, step: Dict[str, Any]):
     env["RUNNER_WORKSPACE"] = env["GITHUB_WORKSPACE"]
     env["RUNNER_TOOL_CACHE"] = os.path.join(env["RUNNER_TEMP"], "_tc")
     env["GITHUB_ENV"] = os.path.expandvars(os.path.join(env["RUNNER_TEMP"], "GITHUB_PATH"))
+    # We can't acces the real github run id, this is the closest we'll get to an unique monotically incrementing number
+    # Take milliseconds so we can start hight than the current github run id at the time of writing
+    env["GITHUB_RUN_ID"] = str(int(time.time() * 1000))
 
     if os.path.isfile(env["GITHUB_ENV"]):
         with open(env["GITHUB_ENV"], "r") as fd:
