@@ -6,7 +6,7 @@ import os
 
 
 class GithubAction:
-    def __init__(self, path, args, *, run_if=None, npm_install=False):
+    def __init__(self, path, args, *, run_if=None, npm_install=False, enable_post=True):
         """
         Path here is the github path to an actions which is {org}/{repo}/{action_path_in_repo}
         Args will all be put in the env as INPUT_{key} = {value}
@@ -29,6 +29,7 @@ class GithubAction:
         self.cwd = None
         self.shell = None
         self.npm_install = npm_install
+        self.enable_post = enable_post
 
     def env_variables(self, platform):
         env = {}
@@ -103,7 +104,7 @@ class GithubAction:
 
     @property
     def post_script_path(self):
-        if not self.post_path:
+        if not self.post_path or not self.enable_post:
             return None
         return posixpath.join(self.action_path, self.post_path)
 

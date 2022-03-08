@@ -43,7 +43,7 @@ def linux_build_task(name, bundle_dest="repo", with_secrets=True, clone_self=Tru
             "repository": os.environ["REPO_FULL_NAME"],
             "path": bundle_dest,
             "ref": CONFIG.git_sha,
-        }).with_secret_input("token", "divvun", "github.token"), enabled=clone_self)
+        }, enable_post=False).with_secret_input("token", "divvun", "github.token"), enabled=clone_self)
         .with_gha("Set CWD", GithubActionScript(f"echo ::set-cwd::$HOME/tasks/$TASK_ID/{bundle_dest}"), enabled=clone_self)
     )
     return task
@@ -67,7 +67,7 @@ def macos_task(name):
         .with_gha("clone", GithubAction("actions/checkout", {
             "repository": os.environ["REPO_FULL_NAME"],
             "path": "repo"
-        }).with_secret_input("token", "divvun", "github.token"))
+        }, enable_post=False).with_secret_input("token", "divvun", "github.token"))
         .with_gha("Set CWD", GithubActionScript(f"echo ::set-cwd::$HOME/tasks/$TASK_ID/repo"))
     )
 
@@ -92,7 +92,7 @@ def windows_task(name, clone_self=True, clone_full=False):
             "repository": os.environ["REPO_FULL_NAME"],
             "path": "repo",
             "fetch-depth": 0 if clone_full else 1,
-        }).with_secret_input("token", "divvun", "github.token"), enabled=clone_self)
+        }, enable_post=False).with_secret_input("token", "divvun", "github.token"), enabled=clone_self)
         .with_python3()
         .with_script("pip install --user taskcluster")
         .with_gha("Set CWD", GithubActionScript(f"echo ::set-cwd::%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\repo"), enabled=clone_self)
