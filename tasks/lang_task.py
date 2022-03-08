@@ -20,7 +20,7 @@ def create_lang_task(with_apertium):
         .with_gha(
             "deps",
             GithubAction(
-                "Eijebong/divvun-actions/lang/install-deps", {"sudo": "false"}
+                "Eijebong/divvun-actions/lang/install-deps", {"sudo": "false", "apertium": with_apertium}
             ),
         )
         .with_gha(
