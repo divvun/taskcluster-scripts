@@ -10,6 +10,9 @@ import decisionlib
 from decisionlib import CONFIG
 from tasks import *
 
+NO_DEPLOY_LANG = {
+    "zxx", # No linguistic data
+}
 
 def tasks(task_for: str):
     if task_for == "github-pull-request":
@@ -39,6 +42,9 @@ def tasks(task_for: str):
     # Lang repositories common tasks
     if repo_name.startswith("lang-"):
         lang_task_id = create_lang_task(repo_name.endswith("apertium"))
+        if repo_name[len("lang-"):] in NO_DEPLOY_LANG:
+            return
+
         for os_, type_ in [
             ("macos-latest", "speller-macos"),
             ("macos-latest", "speller-mobile"),
