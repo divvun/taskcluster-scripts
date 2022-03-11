@@ -12,6 +12,9 @@ from tasks import *
 
 NO_DEPLOY_LANG = {
     "zxx", # No linguistic data
+    "est-x-utee",
+    "est-x-plamk",
+    "nno-x-ext-apertium",
 }
 
 def tasks(task_for: str):
