@@ -43,6 +43,7 @@ def linux_build_task(name, bundle_dest="repo", with_secrets=True, clone_self=Tru
             "repository": os.environ["REPO_FULL_NAME"],
             "path": bundle_dest,
             "ref": CONFIG.git_sha,
+            "fetch-depth": 0
         }, enable_post=False).with_secret_input("token", "divvun", "github.token"), enabled=clone_self)
         .with_gha("Set CWD", GithubActionScript(f"echo ::set-cwd::$HOME/tasks/$TASK_ID/{bundle_dest}"), enabled=clone_self)
     )
@@ -66,13 +67,14 @@ def macos_task(name):
         .with_additional_repo(os.environ["CI_REPO_URL"], "${HOME}/tasks/${TASK_ID}/ci")
         .with_gha("clone", GithubAction("actions/checkout", {
             "repository": os.environ["REPO_FULL_NAME"],
-            "path": "repo"
+            "path": "repo",
+            "fetch-depth": 0
         }, enable_post=False).with_secret_input("token", "divvun", "github.token"))
         .with_gha("Set CWD", GithubActionScript(f"echo ::set-cwd::$HOME/tasks/$TASK_ID/repo"))
     )
 
 
-def windows_task(name, clone_self=True, clone_full=False):
+def windows_task(name, clone_self=True):
     return (
         decisionlib.WindowsGenericWorkerTask(name)
         .with_worker_type("windows")
@@ -91,7 +93,7 @@ def windows_task(name, clone_self=True, clone_full=False):
         .with_gha("clone", GithubAction("actions/checkout", {
             "repository": os.environ["REPO_FULL_NAME"],
             "path": "repo",
-            "fetch-depth": 0 if clone_full else 1,
+            "fetch-depth": 0
         }, enable_post=False).with_secret_input("token", "divvun", "github.token"), enabled=clone_self)
         .with_python3()
         .with_script("pip install --user taskcluster")
