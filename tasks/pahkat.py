@@ -138,7 +138,7 @@ def create_pahkat_service_windows_task():
                 "actions-rs/cargo",
                 {
                     "command": "build",
-                    "args": "--lib --features windows --release --manifest-path pahkat-rpc/Cargo.toml --target i686-pc-windows-msvc",
+                    "args": "-vv --lib --features windows --release --manifest-path pahkat-rpc/Cargo.toml --target i686-pc-windows-msvc",
                 },
             )
             .with_env("RUSTC_BOOTSTRAP", 1)
@@ -150,7 +150,7 @@ def create_pahkat_service_windows_task():
                 "actions-rs/cargo",
                 {
                     "command": "build",
-                    "args": "--bin winsvc --features windows --release --manifest-path pahkat-rpc/Cargo.toml --target i686-pc-windows-msvc",
+                    "args": "-vv --bin winsvc --features windows --release --manifest-path pahkat-rpc/Cargo.toml --target i686-pc-windows-msvc",
                 },
             )
             .with_env("RUSTC_BOOTSTRAP", 1)
@@ -162,7 +162,7 @@ def create_pahkat_service_windows_task():
                 "actions-rs/cargo",
                 {
                     "command": "build",
-                    "args": "--bin client --features windows --release --manifest-path pahkat-rpc/Cargo.toml --target i686-pc-windows-msvc",
+                    "args": "-vv --bin client --features windows --release --manifest-path pahkat-rpc/Cargo.toml --target i686-pc-windows-msvc",
                 },
             )
             .with_env("RUSTC_BOOTSTRAP", 1)
