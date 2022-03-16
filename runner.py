@@ -93,7 +93,10 @@ def filtered_print(*args):
         for secret in SECRETS:
             arg = str(arg).replace(secret, "[******]")
         filtered.append(arg)
-    _ORIG_PRINT(*filtered)
+    try:
+        _ORIG_PRINT(*filtered)
+    except UnicodeEncodeError:
+        _ORIG_PRINT("[Unicode decode error]")
 
 
 print = filtered_print
