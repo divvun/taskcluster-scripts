@@ -64,8 +64,8 @@ class Config:
         self.task_owner = os.environ.get("TASK_OWNER")
         self.task_source = os.environ.get("TASK_SOURCE")
         self.git_url = os.environ.get("GIT_URL")
-        self.git_ref = os.environ.get("GIT_REF")
-        self.git_sha = os.environ.get("GIT_SHA")
+        self.git_ref = os.environ["GIT_REF"]
+        self.git_sha = os.environ["GIT_SHA"]
         self.git_bundle_shallow_ref = "refs/heads/shallow"
 
         self.tc_root_url = os.environ.get("TASKCLUSTER_ROOT_URL")
@@ -91,8 +91,11 @@ class Config:
     @property
     def index_path(self):
         if self.git_ref.startswith("refs/tags/"):
-            return CONFIG.git_ref[len("refs/tags/") :]
-        return self.git_sha
+            index = CONFIG.git_ref[len("refs/tags/") :]
+        else:
+            index = self.git_sha
+
+        return index.replace("+", "_")
 
     @property
     def commit_message(self):
