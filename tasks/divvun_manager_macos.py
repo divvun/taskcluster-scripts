@@ -10,8 +10,8 @@ def create_divvun_manager_macos_task():
                 "repository": "https://github.com/divvun/pahkat",
                 "path": "${HOME}/tasks/${TASK_ID}/repo/pahkat",
                 "fetch-depth": 0,
-            }
-        ))
+            }, enable_post=False).with_secret_input("token", "divvun", "github.token")
+        )
         .with_gha("setup", gha_setup())
         .with_gha("version", GithubAction("Eijebong/divvun-actions/version", {
             "xcode": ".",
