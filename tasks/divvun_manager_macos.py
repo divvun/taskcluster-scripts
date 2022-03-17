@@ -5,7 +5,13 @@ from gha import GithubAction, GithubActionScript
 def create_divvun_manager_macos_task():
     return (
         macos_task("Divvun manager (macos)")
-        .with_additional_repo("https://github.com/divvun/pahkat", "${HOME}/tasks/${TASK_ID}/pahkat")
+        .with_gha("clone_pahkat", GithubAction("actions/checkout",
+            {
+                "repository": "https://github.com/divvun/pahkat",
+                "path": "${HOME}/tasks/${TASK_ID}/repo/pahkat",
+                "fetch-depth": 0,
+            }
+        ))
         .with_gha("setup", gha_setup())
         .with_gha("version", GithubAction("Eijebong/divvun-actions/version", {
             "xcode": ".",
