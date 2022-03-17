@@ -7,7 +7,7 @@ def create_divvun_manager_macos_task():
         macos_task("Divvun manager (macos)")
         .with_gha("clone_pahkat", GithubAction("actions/checkout",
             {
-                "repository": "https://github.com/divvun/pahkat",
+                "repository": "divvun/pahkat",
                 "path": "${HOME}/tasks/${TASK_ID}/repo/pahkat",
                 "fetch-depth": 0,
             }, enable_post=False).with_secret_input("token", "divvun", "github.token")
