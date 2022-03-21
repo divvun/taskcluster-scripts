@@ -44,7 +44,8 @@ def linux_build_task(name, bundle_dest="repo", with_secrets=True, clone_self=Tru
             "path": bundle_dest,
             "ref": CONFIG.git_sha,
             "fetch-depth": 0
-        }, enable_post=False).with_secret_input("token", "divvun", "github.token"), enabled=clone_self)
+        }, enable_post=False).with_secret_input("token", "divvun", "github.token"), enabled=clone_self and not CONFIG.index_read_only)
+        .with_additional_repo(os.environ["GIT_URL"], "${HOME}/tasks/${TASK_ID}/repo", enabled=CONFIG.index_read_only)
         .with_gha("Set CWD", GithubActionScript(f"echo ::set-cwd::$HOME/tasks/$TASK_ID/{bundle_dest}"), enabled=clone_self)
     )
     return task

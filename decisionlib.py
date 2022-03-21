@@ -377,7 +377,10 @@ class Task:
         SHARED.found_or_created_indexed_tasks[index_path] = task_id
         return task_id
 
-    def with_additional_repo(self, repo_url: str, target: str):
+    def with_additional_repo(self, repo_url: str, target: str, enabled=True):
+        if not enabled:
+            return self
+
         return self.with_script(
             """
             git clone --depth=1 %s %s
