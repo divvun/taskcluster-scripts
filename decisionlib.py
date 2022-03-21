@@ -212,11 +212,18 @@ class Task:
     with_priority = chaining(setattr, "priority")
 
     with_dependencies = chaining(append_to_attr, "dependencies")
-    with_scopes = chaining(append_to_attr, "scopes")
     with_routes = chaining(append_to_attr, "routes")
 
     with_extra = chaining(update_attr, "extra")
     with_env = chaining(update_attr, "env")
+
+    def with_scopes(self, *scopes):
+        for scope in scopes:
+            if CONFIG.index_read_only and scope.startswith("secrets"):
+                print("Ignoring scope %s because this is a pull request", scope)
+                continue
+            self.scopes.append(scope)
+        return self
 
     def get_proxy_url(self) -> str:
         return os.environ["TASKCLUSTER_PROXY_URL"]

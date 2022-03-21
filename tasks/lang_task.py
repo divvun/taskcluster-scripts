@@ -4,6 +4,32 @@ from gha import GithubAction, GithubActionScript
 from decisionlib import CONFIG
 from .common import linux_build_task, macos_task, windows_task
 
+NO_DEPLOY_LANG = {
+    "zxx", # No linguistic data
+    "est-x-plamk",
+    "nno-x-ext-apertium",
+}
+
+INSTALL_APERTIUM_LANG = {
+    "hil",
+}
+
+def create_lang_tasks(repo_name):
+    should_install_apertium = repo_name.endswith("apertium") or repo_name[len('lang-'):] in \
+        INSTALL_APERTIUM_LANG
+
+    lang_task_id = create_lang_task(should_install_apertium)
+
+    # index_read_only means this is a PR and shouldn't run deployment steps
+    if repo_name[len("lang-"):] in NO_DEPLOY_LANG or CONFIG.index_read_only:
+        return
+
+    for os_, type_ in [
+        ("macos-latest", "speller-macos"),
+        ("macos-latest", "speller-mobile"),
+        ("windows-latest", "speller-windows"),
+    ]:
+        create_bundle_task(os_, type_, lang_task_id)
 
 def create_lang_task(with_apertium):
     if os.path.isfile(".build-config.yml"):

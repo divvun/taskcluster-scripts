@@ -10,13 +10,9 @@ import decisionlib
 from decisionlib import CONFIG
 from tasks import *
 
-NO_DEPLOY_LANG = {
-    "zxx", # No linguistic data
-    "est-x-plamk",
-    "nno-x-ext-apertium",
-}
-
 def tasks(task_for: str):
+    repo_name = os.environ["REPO_NAME"]
+
     if task_for == "github-pull-request":
         CONFIG.index_read_only = True
         # We want the merge commit that GitHub creates for the PR.
@@ -27,13 +23,15 @@ def tasks(task_for: str):
         # As of right now we do not want to run any task for pull requests. Add
         # them here if needed. Keep in mind that said task should not have
         # access to any secrets.
+        # Lang repositories common tasks
+        if repo_name.startswith("lang-"):
+            create_lang_tasks(repo_name)
+
         return
 
     if task_for == "daily":
         # Put any daily task here.
         return
-
-    repo_name = os.environ["REPO_NAME"]
 
     is_tag = False
     tag_name = ""
@@ -43,16 +41,7 @@ def tasks(task_for: str):
 
     # Lang repositories common tasks
     if repo_name.startswith("lang-"):
-        lang_task_id = create_lang_task(repo_name.endswith("apertium"))
-        if repo_name[len("lang-"):] in NO_DEPLOY_LANG:
-            return
-
-        for os_, type_ in [
-            ("macos-latest", "speller-macos"),
-            ("macos-latest", "speller-mobile"),
-            ("windows-latest", "speller-windows"),
-        ]:
-            create_bundle_task(os_, type_, lang_task_id)
+        create_lang_tasks(repo_name)
 
     # Keyboard repositories common tasks
     if repo_name.startswith("keyboard-"):
