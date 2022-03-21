@@ -48,7 +48,6 @@ class Config:
     """
 
     def __init__(self):
-        self.task_name_template = "Divvun: %s"
         self.index_prefix = "project.divvun"
         self.index_read_only = False
         self.scopes_for_all_subtasks: List[str] = []
@@ -301,7 +300,7 @@ class Task:
             "deadline": SHARED.from_now_json(self.deadline_in),
             "expires": SHARED.from_now_json(self.expires_in),
             "metadata": {
-                "name": CONFIG.task_name_template % self.name,
+                "name": "%s - %s" % (self.name, os.environ["REPO_NAME"]),
                 "description": self.description,
                 "owner": CONFIG.task_owner,
                 "source": CONFIG.task_source,
