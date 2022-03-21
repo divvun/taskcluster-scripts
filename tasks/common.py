@@ -45,7 +45,7 @@ def linux_build_task(name, bundle_dest="repo", with_secrets=True, clone_self=Tru
             "ref": CONFIG.git_sha,
             "fetch-depth": 0
         }, enable_post=False).with_secret_input("token", "divvun", "github.token"), enabled=clone_self and not CONFIG.index_read_only)
-        .with_additional_repo(os.environ["GIT_URL"], "${HOME}/tasks/${TASK_ID}/repo", enabled=CONFIG.index_read_only)
+        .with_additional_repo(os.environ["GIT_URL"], f"${{HOME}}/tasks/${{TASK_ID}}/{bundle_dest}", enabled=CONFIG.index_read_only)
         .with_gha("Set CWD", GithubActionScript(f"echo ::set-cwd::$HOME/tasks/$TASK_ID/{bundle_dest}"), enabled=clone_self)
     )
     return task
@@ -70,7 +70,8 @@ def macos_task(name):
             "repository": os.environ["REPO_FULL_NAME"],
             "path": "repo",
             "fetch-depth": 0
-        }, enable_post=False).with_secret_input("token", "divvun", "github.token"))
+        }, enable_post=False).with_secret_input("token", "divvun", "github.token"), enabled=not CONFIG.index_read_only)
+        .with_additional_repo(os.environ["GIT_URL"], "${HOME}/tasks/${TASK_ID}/repo", enabled=CONFIG.index_read_only)
         .with_gha("Set CWD", GithubActionScript(f"echo ::set-cwd::$HOME/tasks/$TASK_ID/repo"))
     )
 
@@ -95,7 +96,8 @@ def windows_task(name, clone_self=True):
             "repository": os.environ["REPO_FULL_NAME"],
             "path": "repo",
             "fetch-depth": 0
-        }, enable_post=False).with_secret_input("token", "divvun", "github.token"), enabled=clone_self)
+        }, enable_post=False).with_secret_input("token", "divvun", "github.token"), enabled=not CONFIG.index_read_only)
+        .with_additional_repo(os.environ["GIT_URL"], "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\repo", enabled=CONFIG.index_read_only)
         .with_python3()
         .with_script("pip install --user taskcluster")
         .with_gha("Set CWD", GithubActionScript(f"echo ::set-cwd::%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\repo"), enabled=clone_self)
