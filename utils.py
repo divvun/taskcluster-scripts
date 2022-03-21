@@ -25,7 +25,7 @@ async def create_extra_artifact_async(path: str, content: bytes, public=False):
         path,
         {
             "contentType": "plain/text",
-            "expires": taskcluster.fromNow("1 hour"),
+            "expires": taskcluster.fromNow("1 day"),
             "storageType": "object",
         },
     )
