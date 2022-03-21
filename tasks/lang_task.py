@@ -34,7 +34,7 @@ def create_lang_task(with_apertium):
 def create_bundle_task(os_name, type_, lang_task_id):
     if os_name == "windows-latest":
         return (
-            windows_task(f"Bundle lang: {os_name} {type_}")
+            windows_task(f"Bundle lang: {type_}")
             .with_git()
             .with_curl_artifact_script(lang_task_id, "spellers.tar.gz", extract=True, as_gha=True)
             .with_gha(
@@ -92,7 +92,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
 
     if os_name == "macos-latest":
         return (
-            macos_task(f"Bundle lang: {os_name} {type_}")
+            macos_task(f"Bundle lang: {type_}")
             .with_curl_artifact_script(lang_task_id, "spellers.tar.gz", extract=True, as_gha=True)
             .with_gha(
                 "init",
