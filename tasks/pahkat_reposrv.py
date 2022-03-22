@@ -27,7 +27,7 @@ def create_pahkat_reposrv_task(tag_name: str):
     )
 
     if tag_name:
-        task = task.with_script("cp ./target/release/pahkat-reposrv /").with_artifacts(
+        task = task.with_script("cp ./target/release/pahkat-reposrv /", as_gha=True).with_artifacts(
             "/pahkat-reposrv"
         )
 
