@@ -38,8 +38,7 @@ def create_pahkat_reposrv_task(tag_name: str):
 def create_pahkat_reposrv_release_task(build_task_id: str, tag_name: str):
     return (
         linux_build_task("Pahkat reposrv release")
-        .with_curl_artifact_script(build_task_id, "pahkat-reposrv")
-        .with_script("mv $HOME/pahkat-reposrv .", as_gha=True)
+        .with_curl_artifact_script(build_task_id, "pahkat-reposrv", as_gha=True)
         .with_gha(
             "Release pahkat reposrv",
             GithubAction(
