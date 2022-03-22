@@ -222,6 +222,8 @@ class Task:
             if CONFIG.index_read_only and scope.startswith("secrets"):
                 print("Ignoring scope %s because this is a pull request", scope)
                 continue
+            if not scope:
+                continue
             self.scopes.append(scope)
         return self
 
