@@ -233,10 +233,12 @@ def get_env_for(step_name: str, step: Dict[str, Any]):
         os.environ = env
 
     for name, value in step["inputs"].items():
-        env["INPUT_" + name.upper()] = parse_value_from(
+        output_value = parse_value_from(
             os.path.expandvars(to_string(value)), all_outputs
         )
-        os.environ = env
+        if output_value != "undefined":
+            env["INPUT_" + name.upper()] = output_value
+            os.environ = env
 
     for input_name, secret in step["secret_inputs"].items():
         name = "INPUT_" + input_name.upper()
