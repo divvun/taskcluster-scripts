@@ -12,6 +12,9 @@ from tasks import *
 
 def tasks(task_for: str):
     repo_name = os.environ["REPO_NAME"]
+    if "[ci skip]" in CONFIG.commit_message:
+        print("Skipping CI")
+        return
 
     if task_for == "github-pull-request":
         CONFIG.index_read_only = True
