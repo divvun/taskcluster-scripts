@@ -52,6 +52,17 @@ def create_kbd_task(os_name):
                     {"keyboard-type": "keyboard-macos"},
                 ),
             )
+            .with_gha(
+                "upload",
+                GithubAction(
+                    "Eijebong/divvun-actions/keyboard/deploy",
+                    {
+                        "keyboard-type": "keyboard-macos",
+                        "payload-path": "${{ steps.build.outputs['payload-path'] }}",
+                        "channel": "${{ steps.build.outputs.channel }}",
+                    },
+                ),
+            )
             .find_or_create(f"kbdgen.{os_name}_x64.{CONFIG.index_path}")
         )
 
