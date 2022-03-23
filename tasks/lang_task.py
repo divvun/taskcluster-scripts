@@ -84,7 +84,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
                 "version",
                 GithubAction(
                     "Eijebong/divvun-actions/version",
-                    {"speller-manifest": True, "nightly": "develop, test-ci"},
+                    {"speller-manifest": True, "nightly": "develop, test-ci", "insta-stable": "true"},
                 ).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN"),
             )
             .with_gha(
@@ -141,7 +141,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
                 "version",
                 GithubAction(
                     "Eijebong/divvun-actions/version",
-                    {"speller-manifest": True, "nightly": "develop, test-ci"},
+                    {"speller-manifest": True, "nightly": "develop, test-ci", "insta-stable": "true"},
                 ).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN"),
             )
             .with_gha(
