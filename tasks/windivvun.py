@@ -70,7 +70,7 @@ def create_mso_build_tasks():
                 "profile": "minimal",
                 "override": "true",
             }))
-            .with_gha("Set CWD", GithubActionScript(f"echo ::set-cwd::%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\mso-nda-resources"))
+            .with_gha("Set MSO CWD", GithubActionScript(f"echo ::set-cwd::%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\mso-nda-resources"))
             .with_gha("build", GithubActionScript(f"""
               cd divvunspell-mso
               set SENTRY_DSN=%INPUT_SENTRY_DSN%
