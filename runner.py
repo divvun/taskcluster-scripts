@@ -61,6 +61,7 @@ Action description format:
 import sys
 import asyncio
 import codecs
+import collections
 import json
 import os
 import platform
@@ -538,7 +539,7 @@ async def main():
     gather_secrets()
     file = sys.argv[1]
     with open(file) as fd:
-        actions = json.loads(fd.read())
+        actions = json.JSONDecoder(object_pairs_hook=collections.OrderedDict).decode(fd.read())
 
     # Set HOME on windows. Since the script is ran from CMD, $HOME doesn't
     # exist yet but since we need to share variables with powershell, we need
