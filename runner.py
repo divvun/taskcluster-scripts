@@ -539,7 +539,6 @@ async def main():
     file = sys.argv[1]
     with open(file) as fd:
         actions = json.loads(fd.read())
-        print(actions)
 
     # Set HOME on windows. Since the script is ran from CMD, $HOME doesn't
     # exist yet but since we need to share variables with powershell, we need
