@@ -297,7 +297,7 @@ def write_outputs():
 
 async def run_action(action_name: str, action: Dict[str, Any], post=False):
     script_index = "post_script" if post else "script"
-    print(f"Running {action_name}")
+    print("Running {}{}".format(action_name, " [POST]" * post))
     env = get_env_for(action_name, action)
 
     extra_args = {}
