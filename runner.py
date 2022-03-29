@@ -61,6 +61,7 @@ Action description format:
 import sys
 import asyncio
 import codecs
+import copy
 import json
 import os
 import platform
@@ -221,6 +222,10 @@ def get_env_for(step_name: str, step: Dict[str, Any]):
         return value
 
     env = os.environ
+    # We need to change `os.environ` for some `os.path` calls to work properly
+    # but we don't want things to leak between tasks so we have to save the
+    # environment to restore it later.
+    previous_env = copy.deepcopy(os.environ)
     secrets_service = helper.TaskclusterConfig().get_service("secrets")
     all_outputs = OUTPUTS
     for output in step["outputs_from"]:
@@ -282,6 +287,9 @@ def get_env_for(step_name: str, step: Dict[str, Any]):
             env["PATH"] = env["PATH"] + ";" + ";".join(EXTRA_PATH)
         else:
             env["PATH"] = env["PATH"] + ":" + ":".join(EXTRA_PATH)
+
+    # Restore the environment from before the call.
+    os.environ = previous_env
 
     return env
 
