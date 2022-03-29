@@ -264,6 +264,10 @@ def get_env_for(step_name: str, step: Dict[str, Any]):
         env["TASKCLUSTER_PROXY_URL"] = "http://taskcluster"
     env["BUILD_DIR"] = env["GITHUB_WORKSPACE"]
     env["RUNNER_WORKSPACE"] = env["GITHUB_WORKSPACE"]
+    # leak that in the global environment, we need it for cleanup purposes on macos
+    # XXX: There might be a better way to fix this but I can't be bothered at
+    # the moment of writing this. Sorry future me.
+    previous_env["GITHUB_WORKSPACE"] = env["GITHUB_WORKSPACE"]
     env["RUNNER_TOOL_CACHE"] = os.path.join(env["RUNNER_TEMP"], "_tc")
     env["GITHUB_ENV"] = os.path.expandvars(os.path.join(env["RUNNER_TEMP"], "GITHUB_PATH"))
     # We can't acces the real github run id, this is the closest we'll get to an unique monotically incrementing number
