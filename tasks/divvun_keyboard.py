@@ -11,7 +11,7 @@ def create_divvun_keyboard_tasks(bundle):
 def create_android_keyboard_task(bundle):
     return (
         macos_task(f"Build keyboard: Android")
-        .with_env(**{"ANDROID_HOME": "/usr/local/Caskroom/android-sdk/4333796"})
+        .with_env(**{"ANDROID_HOME": "/Users/admin/android-sdk"})
         .with_gha("setup", gha_setup())
         .with_gha("init", gha_pahkat(["kbdgen@2.0.0-nightly.20210622T210632Z"]))
         .with_gha(
