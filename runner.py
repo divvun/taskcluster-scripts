@@ -586,8 +586,6 @@ if __name__ == "__main__":
         print(e)
         raise
     finally:
-        # Cleanup on macos since it's the only runner not entirely stateless.
-        if platform.system() == "Darwin":
-            shutil.rmtree(os.environ["GITHUB_WORKSPACE"])
+        print("No cleanup")
 
     write_outputs()
