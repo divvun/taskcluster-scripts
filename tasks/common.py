@@ -38,7 +38,7 @@ def linux_build_task(name, bundle_dest="repo", with_secrets=True, clone_self=Tru
         .with_apt_install("curl", "git", "python3", "python3-pip")
         .with_pip_install("taskcluster", "pyYAML")
         .with_apt_install("wget", "nodejs", "awscli")
-        .with_additional_repo(os.environ["CI_REPO_URL"], "${HOME}/tasks/${TASK_ID}/ci")
+        .with_additional_repo(os.environ["CI_REPO_URL"], "${HOME}/tasks/${TASK_ID}/ci", branch=os.environ["CI_REPO_REF"])
         .with_gha("clone", GithubAction("actions/checkout", {
             "repository": os.environ["REPO_FULL_NAME"],
             "path": bundle_dest,
@@ -65,7 +65,7 @@ def macos_task(name):
         .with_features("taskclusterProxy")
         .with_script("mkdir -p $HOME/tasks/$TASK_ID")
         .with_script("mkdir -p $HOME/tasks/$TASK_ID/_temp")
-        .with_additional_repo(os.environ["CI_REPO_URL"], "${HOME}/tasks/${TASK_ID}/ci")
+        .with_additional_repo(os.environ["CI_REPO_URL"], "${HOME}/tasks/${TASK_ID}/ci", branch=os.environ["CI_REPO_REF"])
         .with_gha("clone", GithubAction("actions/checkout", {
             "repository": os.environ["REPO_FULL_NAME"],
             "path": "repo",
@@ -91,7 +91,7 @@ def windows_task(name, clone_self=True):
         .with_script("mkdir %HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\_temp")
         .with_features("taskclusterProxy")
         .with_git()
-        .with_additional_repo(os.environ["CI_REPO_URL"], "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\ci")
+        .with_additional_repo(os.environ["CI_REPO_URL"], "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\ci", branch=os.environ["CI_REPO_REF"])
         .with_gha("clone", GithubAction("actions/checkout", {
             "repository": os.environ["REPO_FULL_NAME"],
             "path": "repo",

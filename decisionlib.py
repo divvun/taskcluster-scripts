@@ -379,15 +379,19 @@ class Task:
         SHARED.found_or_created_indexed_tasks[index_path] = task_id
         return task_id
 
-    def with_additional_repo(self, repo_url: str, target: str, enabled=True):
+    def with_additional_repo(self, repo_url: str, target: str, enabled=True, branch=None):
         if not enabled:
             return self
 
+        extra = ""
+        if branch is not None:
+            extra = f"--branch={branch}"
+
         return self.with_script(
             """
-            git clone --depth=1 %s %s
+            git clone --depth=1 %s %s %s
         """
-            % (repo_url, target)
+            % (repo_url, target, extra)
         )
 
     def with_curl_script(self, url: str, file_path: str, as_gha=False):
