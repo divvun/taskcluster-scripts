@@ -53,7 +53,7 @@ def create_ios_keyboard_task(bundle):
             "publish",
             GithubActionScript(
                 """
-            fastlane pilot upload --api_key_path "$DIVVUN_CI_CONFIG/enc/creds/macos/appstore-key.json" --skip_submission --skip_waiting_for_build_processing --ipa "output/ios-build/ipa/Divvun Keyboards.ipa"
+            fastlane pilot upload --api_key_path "${DIVVUN_CI_CONFIG}/enc/creds/macos/appstore-key.json" --skip_submission --skip_waiting_for_build_processing --ipa "output/ios-build/ipa/Divvun Keyboards.ipa"
             """
             )
             .with_env("SPACESHIP_SKIP_2FA_UPGRADE", 1)

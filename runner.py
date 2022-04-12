@@ -269,22 +269,10 @@ def get_env_for(step_name: str, step: Dict[str, Any]):
     # the moment of writing this. Sorry future me.
     previous_env["GITHUB_WORKSPACE"] = env["GITHUB_WORKSPACE"]
     env["RUNNER_TOOL_CACHE"] = os.path.join(env["RUNNER_TEMP"], "_tc")
-    env["GITHUB_ENV"] = os.path.expandvars(os.path.join(env["RUNNER_TEMP"], "GITHUB_PATH"))
     # We can't acces the real github run id, this is the closest we'll get to an unique monotically incrementing number
     # Take milliseconds so we can start hight than the current github run id at the time of writing
     env["GITHUB_RUN_NUMBER"] = str(int(time.time() * 1000))
 
-    if os.path.isfile(env["GITHUB_ENV"]):
-        with open(env["GITHUB_ENV"], "r") as fd:
-            for line in fd.readlines():
-                try:
-                    name, value = line.split('=', 1)
-                    env[name] = value.strip()
-                except:
-                    pass
-    else:
-        os.makedirs(os.path.dirname(env["GITHUB_ENV"]), exist_ok=True)
-        open(env["GITHUB_ENV"], "w").close()
 
     if EXTRA_PATH:
         if platform.system() == "Windows":
