@@ -31,7 +31,7 @@ def create_android_keyboard_task(bundle):
             )
             .with_env("SPACESHIP_SKIP_2FA_UPGRADE", 1)
             .with_env("LANG", "en_US.UTF-8"),
-            enabled=(CONFIG.git_ref == "refs/heads/master"),
+            enabled=(CONFIG.git_ref == "refs/heads/main"),
         )
         .find_or_create(f"keyboard-build.android.{CONFIG.index_path}")
     )
@@ -58,7 +58,7 @@ def create_ios_keyboard_task(bundle):
             )
             .with_env("SPACESHIP_SKIP_2FA_UPGRADE", 1)
             .with_env("LANG", "en_US.UTF-8"),
-            enabled=(CONFIG.git_ref == "refs/heads/master"),
+            enabled=(CONFIG.git_ref == "refs/heads/main"),
         )
         .find_or_create(f"keyboard-build.ios.{CONFIG.index_path}")
     )
