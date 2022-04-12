@@ -25,6 +25,7 @@ def create_android_keyboard_task(bundle):
             "publish",
             GithubActionScript(
                 """
+                source ${DIVVUN_CI_CONFIG}/enc/env.sh
                 cd output/deps/giella-ime
                 ./gradlew publishApk
             """
