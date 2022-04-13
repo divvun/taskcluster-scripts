@@ -753,6 +753,13 @@ class WindowsGenericWorkerTask(GenericWorkerTask):
             )
         )
 
+    def with_cmake(self):
+        return (
+            self
+            .with_path_from_homedir("cmake\\cmake-3.23.1-windows-x86_64\\bin")
+            .with_directory_mount("https://github.com/Kitware/CMake/releases/download/v3.23.1/cmake-3.23.1-windows-x86_64.zip", path="cmake")
+        )
+
     def with_curl_script(self, url, file_path, as_gha=False):
         self.with_curl()
         return super().with_curl_script(url, file_path, as_gha)

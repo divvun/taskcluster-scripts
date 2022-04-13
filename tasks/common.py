@@ -136,7 +136,7 @@ def _generic_rust_build_upload_task(
 ):
     if os_ == "windows":
         target_dir = "\\".join(target_dir.split("/"))
-        task_new = windows_task
+        task_new = lambda name: windows_task(name).with_cmake()
         install_rust = GithubAction(
             "actions-rs/toolchain",
             {
