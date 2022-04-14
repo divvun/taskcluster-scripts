@@ -195,7 +195,7 @@ def rust_task_for_os(os_):
                 "toolchain": "stable",
                 "profile": "minimal",
                 "override": "true",
-                "components": "rustfmt",
+                "components": "rustfmt,clippy",
                 "target": "i686-pc-windows-msvc",
             },
         )
@@ -217,7 +217,7 @@ def rust_task_for_os(os_):
                 "toolchain": "stable",
                 "profile": "minimal",
                 "override": "true",
-                "components": "rustfmt",
+                "components": "rustfmt,clippy",
             },
         )
         return lambda name: macos_task(name).with_gha("install_rust", install_rust)
@@ -228,7 +228,7 @@ def rust_task_for_os(os_):
                 "toolchain": "stable",
                 "profile": "minimal",
                 "override": "true",
-                "components": "rustfmt",
+                "components": "rustfmt,clippy",
                 "target": "x86_64-unknown-linux-musl",
             },
         )
