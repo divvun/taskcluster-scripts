@@ -31,9 +31,7 @@ def create_spelli_task():
         )
         .with_gha(
             "pahkat",
-            gha_pahkat(
-                ["pahkat-uploader"]
-            ),
+            gha_pahkat(["pahkat-uploader"]),
         )
         .with_gha(
             "get_oxt_nightly",
@@ -59,42 +57,48 @@ def create_spelli_task():
                 run_if="${{ steps.version.outputs.channel != 'nightly' }}",
             ),
         )
-        .with_gha("build", GithubAction(
-            "actions-rs/cargo",
-            {
-                "command": "build",
-                "args": f"--release --target i686-pc-windows-msvc",
-            },
-        ))
-        .with_gha("create_dist", GithubActionScript(
-            f"mkdir dist\\bin && move target\\i686-pc-windows-msvc\\release\\spelli.exe dist\\bin\\spelli.exe"
-        ))
+        .with_gha(
+            "build",
+            GithubAction(
+                "actions-rs/cargo",
+                {
+                    "command": "build",
+                    "args": f"--release --target i686-pc-windows-msvc",
+                },
+            ),
+        )
+        .with_gha(
+            "create_dist",
+            GithubActionScript(
+                f"mkdir dist\\bin && move target\\i686-pc-windows-msvc\\release\\spelli.exe dist\\bin\\spelli.exe"
+            ),
+        )
         .with_gha(
             "sign_spelli",
             GithubAction(
                 "Eijebong/divvun-actions/codesign",
-                {
-                    "path": "dist/bin/spelli.exe"
-                },
+                {"path": "dist/bin/spelli.exe"},
             ),
         )
         .with_gha(
             "tarball",
             GithubAction("Eijebong/divvun-actions/create-txz", {"path": "dist"}),
         )
-        .with_gha("deploy", GithubAction(
-            "Eijebong/divvun-actions/deploy",
-            {
-                "package-id": "spelli",
-                "type": "TarballPackage",
-                "platform": "windows",
-                "arch": "i686",
-                "repo": PAHKAT_REPO + "devtools/",
-                "version": "${{ steps.version.outputs.version }}",
-                "channel": "${{ steps.version.outputs.channel }}",
-                "payload-path": "${{ steps.tarball.outputs['txz-path'] }}",
-            },
-        ))
+        .with_gha(
+            "deploy",
+            GithubAction(
+                "Eijebong/divvun-actions/deploy",
+                {
+                    "package-id": "spelli",
+                    "type": "TarballPackage",
+                    "platform": "windows",
+                    "arch": "i686",
+                    "repo": PAHKAT_REPO + "devtools/",
+                    "version": "${{ steps.version.outputs.version }}",
+                    "channel": "${{ steps.version.outputs.channel }}",
+                    "payload-path": "${{ steps.tarball.outputs['txz-path'] }}",
+                },
+            ),
+        )
         .find_or_create(f"build.spelli.{CONFIG.index_path}")
     )
-

@@ -27,9 +27,9 @@ def create_pahkat_reposrv_task(tag_name: str):
     )
 
     if tag_name:
-        task = task.with_script("cp ./target/release/pahkat-reposrv /", as_gha=True).with_artifacts(
-            "/pahkat-reposrv"
-        )
+        task = task.with_script(
+            "cp ./target/release/pahkat-reposrv /", as_gha=True
+        ).with_artifacts("/pahkat-reposrv")
 
         return task.find_or_create(f"build.linux_x64.{tag_name}")
     return task.find_or_create(f"build.linux_x64.{CONFIG.index_path}")

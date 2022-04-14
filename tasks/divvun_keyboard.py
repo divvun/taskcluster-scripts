@@ -58,7 +58,8 @@ def create_ios_keyboard_task(bundle, is_dev):
             GithubActionScript(
                 """
             fastlane pilot upload --api_key_path "${DIVVUN_CI_CONFIG}/enc/creds/macos/appstore-key.json" --skip_submission --skip_waiting_for_build_processing --ipa "output/ios-build/ipa/%s"
-            """ % ipa_name
+            """
+                % ipa_name
             )
             .with_env("SPACESHIP_SKIP_2FA_UPGRADE", 1)
             .with_env("LANG", "en_US.UTF-8"),

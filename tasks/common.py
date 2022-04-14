@@ -38,15 +38,35 @@ def linux_build_task(name, bundle_dest="repo", with_secrets=True, clone_self=Tru
         .with_apt_install("curl", "git", "python3", "python3-pip")
         .with_pip_install("taskcluster", "pyYAML")
         .with_apt_install("wget", "nodejs", "awscli")
-        .with_additional_repo(os.environ["CI_REPO_URL"], "${HOME}/tasks/${TASK_ID}/ci", branch=os.environ["CI_REPO_REF"])
-        .with_gha("clone", GithubAction("actions/checkout", {
-            "repository": os.environ["REPO_FULL_NAME"],
-            "path": bundle_dest,
-            "ref": CONFIG.git_sha,
-            "fetch-depth": 0
-        }, enable_post=False).with_secret_input("token", "divvun", "github.token"), enabled=clone_self and not CONFIG.index_read_only)
-        .with_additional_repo(os.environ["GIT_URL"], f"${{HOME}}/tasks/${{TASK_ID}}/{bundle_dest}", enabled=CONFIG.index_read_only)
-        .with_gha("Set CWD", GithubActionScript(f"echo ::set-cwd::$HOME/tasks/$TASK_ID/{bundle_dest}"), enabled=clone_self)
+        .with_additional_repo(
+            os.environ["CI_REPO_URL"],
+            "${HOME}/tasks/${TASK_ID}/ci",
+            branch=os.environ["CI_REPO_REF"],
+        )
+        .with_gha(
+            "clone",
+            GithubAction(
+                "actions/checkout",
+                {
+                    "repository": os.environ["REPO_FULL_NAME"],
+                    "path": bundle_dest,
+                    "ref": CONFIG.git_sha,
+                    "fetch-depth": 0,
+                },
+                enable_post=False,
+            ).with_secret_input("token", "divvun", "github.token"),
+            enabled=clone_self and not CONFIG.index_read_only,
+        )
+        .with_additional_repo(
+            os.environ["GIT_URL"],
+            f"${{HOME}}/tasks/${{TASK_ID}}/{bundle_dest}",
+            enabled=CONFIG.index_read_only,
+        )
+        .with_gha(
+            "Set CWD",
+            GithubActionScript(f"echo ::set-cwd::$HOME/tasks/$TASK_ID/{bundle_dest}"),
+            enabled=clone_self,
+        )
     )
     return task
 
@@ -65,14 +85,32 @@ def macos_task(name):
         .with_features("taskclusterProxy")
         .with_script("mkdir -p $HOME/tasks/$TASK_ID")
         .with_script("mkdir -p $HOME/tasks/$TASK_ID/_temp")
-        .with_additional_repo(os.environ["CI_REPO_URL"], "${HOME}/tasks/${TASK_ID}/ci", branch=os.environ["CI_REPO_REF"])
-        .with_gha("clone", GithubAction("actions/checkout", {
-            "repository": os.environ["REPO_FULL_NAME"],
-            "path": "repo",
-            "fetch-depth": 0
-        }, enable_post=False).with_secret_input("token", "divvun", "github.token"), enabled=not CONFIG.index_read_only)
-        .with_additional_repo(os.environ["GIT_URL"], "${HOME}/tasks/${TASK_ID}/repo", enabled=CONFIG.index_read_only)
-        .with_gha("Set CWD", GithubActionScript(f"echo ::set-cwd::$HOME/tasks/$TASK_ID/repo"))
+        .with_additional_repo(
+            os.environ["CI_REPO_URL"],
+            "${HOME}/tasks/${TASK_ID}/ci",
+            branch=os.environ["CI_REPO_REF"],
+        )
+        .with_gha(
+            "clone",
+            GithubAction(
+                "actions/checkout",
+                {
+                    "repository": os.environ["REPO_FULL_NAME"],
+                    "path": "repo",
+                    "fetch-depth": 0,
+                },
+                enable_post=False,
+            ).with_secret_input("token", "divvun", "github.token"),
+            enabled=not CONFIG.index_read_only,
+        )
+        .with_additional_repo(
+            os.environ["GIT_URL"],
+            "${HOME}/tasks/${TASK_ID}/repo",
+            enabled=CONFIG.index_read_only,
+        )
+        .with_gha(
+            "Set CWD", GithubActionScript(f"echo ::set-cwd::$HOME/tasks/$TASK_ID/repo")
+        )
     )
 
 
@@ -91,17 +129,43 @@ def windows_task(name, clone_self=True):
         .with_script("mkdir %HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\_temp")
         .with_features("taskclusterProxy")
         .with_git()
-        .with_additional_repo(os.environ["CI_REPO_URL"], "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\ci", branch=os.environ["CI_REPO_REF"])
-        .with_gha("clone", GithubAction("actions/checkout", {
-            "repository": os.environ["REPO_FULL_NAME"],
-            "path": "repo",
-            "fetch-depth": 0
-        }, enable_post=False).with_secret_input("token", "divvun", "github.token"), enabled=not CONFIG.index_read_only)
-        .with_additional_repo(os.environ["GIT_URL"], "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\repo", enabled=CONFIG.index_read_only)
+        .with_additional_repo(
+            os.environ["CI_REPO_URL"],
+            "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\ci",
+            branch=os.environ["CI_REPO_REF"],
+        )
+        .with_gha(
+            "clone",
+            GithubAction(
+                "actions/checkout",
+                {
+                    "repository": os.environ["REPO_FULL_NAME"],
+                    "path": "repo",
+                    "fetch-depth": 0,
+                },
+                enable_post=False,
+            ).with_secret_input("token", "divvun", "github.token"),
+            enabled=not CONFIG.index_read_only,
+        )
+        .with_additional_repo(
+            os.environ["GIT_URL"],
+            "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\repo",
+            enabled=CONFIG.index_read_only,
+        )
         .with_python3()
         .with_script("pip install --user taskcluster")
-        .with_gha("Set CWD", GithubActionScript(f"echo ::set-cwd::%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\repo"), enabled=clone_self)
-        .with_gha("Set CWD", GithubActionScript(f"echo ::set-cwd::%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%"), enabled=not clone_self)
+        .with_gha(
+            "Set CWD",
+            GithubActionScript(
+                f"echo ::set-cwd::%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\repo"
+            ),
+            enabled=clone_self,
+        )
+        .with_gha(
+            "Set CWD",
+            GithubActionScript(f"echo ::set-cwd::%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%"),
+            enabled=not clone_self,
+        )
     )
 
 
@@ -121,6 +185,7 @@ def gha_pahkat(packages: List[str]):
         },
     )
 
+
 def rust_task_for_os(os_):
     if os_ == "windows":
         install_rust = GithubAction(
@@ -134,7 +199,8 @@ def rust_task_for_os(os_):
             },
         )
         return lambda name: (
-            windows_task(name).with_cmake()
+            windows_task(name)
+            .with_cmake()
             .with_gha(
                 "install_rustup",
                 GithubActionScript(
@@ -165,9 +231,13 @@ def rust_task_for_os(os_):
                 "target": "x86_64-unknown-linux-musl",
             },
         )
-        return lambda name: linux_build_task(name).with_gha(
-            "setup_linux", GithubActionScript("apt install -y musl musl-tools")
-        ).with_gha("install_rust", install_rust)
+        return (
+            lambda name: linux_build_task(name)
+            .with_gha(
+                "setup_linux", GithubActionScript("apt install -y musl musl-tools")
+            )
+            .with_gha("install_rust", install_rust)
+        )
     else:
         raise NotImplementedError
 
@@ -184,7 +254,7 @@ def _generic_rust_build_upload_task(
     rename_binary,
     features,
     version_action,
-    repository
+    repository,
 ):
     if os_ == "windows":
         target_dir = "\\".join(target_dir.split("/"))
@@ -305,17 +375,20 @@ def generic_rust_build_upload_task(
     bin_name: str,
     env: Dict[str, Any],
     setup_uploader: Callable[[str], GithubAction],
-    rename_binary: Optional[str]=None,
-    get_features: Optional[Callable[[str], GithubAction]]=None,
-    version_action: Optional[GithubAction]=None,
-    only_os: Optional[List[str]]=None,
+    rename_binary: Optional[str] = None,
+    get_features: Optional[Callable[[str], GithubAction]] = None,
+    version_action: Optional[GithubAction] = None,
+    only_os: Optional[List[str]] = None,
     *,
-    repository: str="devtools",
+    repository: str = "devtools",
 ):
     if rename_binary is None:
         rename_binary = bin_name
     if version_action is None:
-        version_action = GithubAction("Eijebong/divvun-actions/version", {"cargo": cargo_toml_path, "nightly": "main, develop"}).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN")
+        version_action = GithubAction(
+            "Eijebong/divvun-actions/version",
+            {"cargo": cargo_toml_path, "nightly": "main, develop"},
+        ).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN")
     if only_os is None:
         only_os = ["macos", "windows", "linux"]
 

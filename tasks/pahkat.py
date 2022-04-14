@@ -5,7 +5,7 @@ from .common import (
     gha_setup,
     gha_pahkat,
     PAHKAT_REPO,
-    generic_rust_build_upload_task
+    generic_rust_build_upload_task,
 )
 
 PAHKAT_RUST_ENV = {
@@ -16,6 +16,7 @@ PAHKAT_RUST_ENV = {
     "RUST_BACKTRACE": "full",
     "LZMA_API_STATIC": "1",
 }
+
 
 def create_pahkat_tasks():
     create_pahkat_uploader_tasks()
@@ -30,7 +31,7 @@ def create_pahkat_prefix_cli_tasks():
         """
         Enable this and change URLs when Brendan decides that pain is necessary...
         """
-        BOOTSTRAP_VERSION="0.2.0-nightly.20220203T084729034Z"
+        BOOTSTRAP_VERSION = "0.2.0-nightly.20220203T084729034Z"
         if os_ == "macos":
             url = f"https://divvun.ams3.cdn.digitaloceanspaces.com/pahkat/artifacts/pahkat-uploader_{BOOTSTRAP_VERSION}_macos_x86_64.txz"
             temp = "${RUNNER_TEMP}"
@@ -43,13 +44,16 @@ def create_pahkat_prefix_cli_tasks():
         else:
             raise NotImplementedError
 
-        return GithubActionScript(f"""
+        return GithubActionScript(
+            f"""
             curl {url} -o uploader.txz
             xz -d uploader.txz
             tar xvf uploader.tar -C {temp}
             echo ::add-path::{temp}/bin
-        """)
-    #setup_uploader = get_bootstrap_uploader
+        """
+        )
+
+    # setup_uploader = get_bootstrap_uploader
     setup_uploader = lambda _: gha_pahkat(["pahkat-uploader"])
     get_features = lambda _: "--features prefix"
 
@@ -62,8 +66,9 @@ def create_pahkat_prefix_cli_tasks():
         env=PAHKAT_RUST_ENV,
         setup_uploader=setup_uploader,
         rename_binary="pahkat-prefix",
-        get_features=get_features
+        get_features=get_features,
     )
+
 
 def create_pahkat_uploader_tasks():
     # We're self boostrapping so add the dist directory in the path
@@ -78,6 +83,7 @@ def create_pahkat_uploader_tasks():
         env=PAHKAT_RUST_ENV,
         setup_uploader=setup_uploader,
     )
+
 
 def create_pahkat_repomgr_tasks():
     setup_uploader = lambda _: gha_pahkat(["pahkat-uploader"])
@@ -244,6 +250,7 @@ def create_pahkat_service_windows_task():
         .find_or_create(f"build.pahkat.service_windows.{CONFIG.index_path}")
     )
 
+
 def create_pahkat_windows_cli_task():
     setup_uploader = lambda _: gha_pahkat(["pahkat-uploader"])
     get_features = lambda _: "--features windows"
@@ -258,5 +265,5 @@ def create_pahkat_windows_cli_task():
         setup_uploader=setup_uploader,
         rename_binary="pahkat-windows",
         get_features=get_features,
-        only_os=["windows"]
+        only_os=["windows"],
     )
