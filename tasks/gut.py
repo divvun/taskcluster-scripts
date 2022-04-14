@@ -20,10 +20,12 @@ def create_gut_tasks():
 def create_gut_lint_tasks():
     def add_lints(task):
         return task.with_gha(
+            "clippy",
             GithubAction(
                 "actions-rs/cargo", {"command": "clippy", "args": "-- -D warnings"}
             )
         ).with_gha(
+            "fmt",
             GithubAction(
                 "actions-rs/cargo", {"command": "fmt", "args": "--all -- --check"}
             )
@@ -34,7 +36,7 @@ def create_gut_lint_tasks():
 
 def create_gut_test_tasks():
     def add_lints(task):
-        return task.with_gha(GithubAction("actions-rs/cargo", {"command": "test"}))
+        return task.with_gha("test", GithubAction("actions-rs/cargo", {"command": "test"}))
 
     return generic_rust_task("Gut lints", add_lints)
 
