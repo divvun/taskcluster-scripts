@@ -38,6 +38,7 @@ def linux_build_task(name, bundle_dest="repo", with_secrets=True, clone_self=Tru
         .with_apt_install("curl", "git", "python3", "python3-pip")
         .with_pip_install("taskcluster", "pyYAML")
         .with_apt_install("wget", "nodejs", "awscli")
+        .with_apt_install("pkg-config", "libssl-dev")
         .with_additional_repo(
             os.environ["CI_REPO_URL"],
             "${HOME}/tasks/${TASK_ID}/ci",
