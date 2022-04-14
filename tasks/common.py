@@ -264,7 +264,7 @@ def _generic_rust_build_upload_task(
             "actions-rs/cargo",
             {
                 "command": "build",
-                "args": f"--release {features} --manifest-path {cargo_toml_path} --target i686-pc-windows-msvc",
+                "args": f"--release {features} --manifest-path {cargo_toml_path} --target i686-pc-windows-msvc --verbose",
             },
         )
         dist = GithubActionScript(
