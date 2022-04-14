@@ -96,6 +96,7 @@ def create_pahkat_repomgr_tasks():
 def create_pahkat_service_windows_task():
     return (
         windows_task("Pahkat service (Windows)")
+        .with_cmake()
         .with_gha("setup", gha_setup())
         .with_gha(
             "version",
