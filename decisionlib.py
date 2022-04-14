@@ -719,7 +719,6 @@ class WindowsGenericWorkerTask(GenericWorkerTask):
             assert_truthy(fetch_url),
             assert_truthy(fetch_ref),
             assert_truthy(checkout_sha),
-            assert_truthy(checkout_sha),
         )
         return self.with_git().with_script(git)
 

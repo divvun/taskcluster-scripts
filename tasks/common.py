@@ -376,7 +376,7 @@ def generic_rust_build_upload_task(
     env: Dict[str, Any],
     setup_uploader: Callable[[str], GithubAction],
     rename_binary: Optional[str] = None,
-    get_features: Optional[Callable[[str], GithubAction]] = None,
+    get_features: Optional[Callable[[str], str]] = None,
     version_action: Optional[GithubAction] = None,
     only_os: Optional[List[str]] = None,
     *,
