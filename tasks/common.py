@@ -121,6 +121,57 @@ def gha_pahkat(packages: List[str]):
         },
     )
 
+def rust_task_for_os(os_):
+    if os_ == "windows":
+        install_rust = GithubAction(
+            "actions-rs/toolchain",
+            {
+                "toolchain": "stable",
+                "profile": "minimal",
+                "override": "true",
+                "components": "rustfmt",
+                "target": "i686-pc-windows-msvc",
+            },
+        )
+        return lambda name: (
+            windows_task(name).with_cmake()
+            .with_gha(
+                "install_rustup",
+                GithubActionScript(
+                    "choco install -y --force rustup.install && echo ::add-path::${HOME}/.cargo/bin"
+                ),
+            )
+            .with_gha("install_rust", install_rust)
+        )
+    elif os_ == "macos":
+        install_rust = GithubAction(
+            "actions-rs/toolchain",
+            {
+                "toolchain": "stable",
+                "profile": "minimal",
+                "override": "true",
+                "components": "rustfmt",
+            },
+        )
+        return lambda name: macos_task(name).with_gha("install_rust", install_rust)
+    elif os_ == "linux":
+        install_rust = GithubAction(
+            "actions-rs/toolchain",
+            {
+                "toolchain": "stable",
+                "profile": "minimal",
+                "override": "true",
+                "components": "rustfmt",
+                "target": "x86_64-unknown-linux-musl",
+            },
+        )
+        return lambda name: linux_build_task(name).with_gha(
+            "setup_linux", GithubActionScript("apt install -y musl musl-tools")
+        ).with_gha("install_rust", install_rust)
+    else:
+        raise NotImplementedError
+
+
 def _generic_rust_build_upload_task(
     os_,
     task_name,
@@ -132,21 +183,11 @@ def _generic_rust_build_upload_task(
     setup_uploader,
     rename_binary,
     features,
-    version_action
+    version_action,
+    repository
 ):
     if os_ == "windows":
         target_dir = "\\".join(target_dir.split("/"))
-        task_new = lambda name: windows_task(name).with_cmake()
-        install_rust = GithubAction(
-            "actions-rs/toolchain",
-            {
-                "toolchain": "stable",
-                "profile": "minimal",
-                "override": "true",
-                "components": "rustfmt",
-                "target": "i686-pc-windows-msvc",
-            },
-        )
         build = GithubAction(
             "actions-rs/cargo",
             {
@@ -168,23 +209,13 @@ def _generic_rust_build_upload_task(
                 "type": "TarballPackage",
                 "platform": "windows",
                 "arch": "i686",
-                "repo": PAHKAT_REPO + "devtools/",
+                "repo": PAHKAT_REPO + repository + "/",
                 "version": "${{ steps.version.outputs.version }}",
                 "channel": "${{ steps.version.outputs.channel }}",
                 "payload-path": "${{ steps.tarball.outputs['txz-path'] }}",
             },
         )
     elif os_ == "macos":
-        task_new = macos_task
-        install_rust = GithubAction(
-            "actions-rs/toolchain",
-            {
-                "toolchain": "stable",
-                "profile": "minimal",
-                "override": "true",
-                "components": "rustfmt",
-            },
-        )
         build = GithubAction(
             "actions-rs/cargo",
             {
@@ -205,26 +236,13 @@ def _generic_rust_build_upload_task(
                 "type": "TarballPackage",
                 "platform": "macos",
                 "arch": "x86_64",
-                "repo": PAHKAT_REPO + "devtools/",
+                "repo": PAHKAT_REPO + repository + "/",
                 "version": "${{ steps.version.outputs.version }}",
                 "channel": "${{ steps.version.outputs.channel }}",
                 "payload-path": "${{ steps.tarball.outputs['txz-path'] }}",
             },
         )
     elif os_ == "linux":
-        task_new = lambda name: linux_build_task(name).with_gha(
-            "setup_linux", GithubActionScript("apt install -y musl musl-tools")
-        )
-        install_rust = GithubAction(
-            "actions-rs/toolchain",
-            {
-                "toolchain": "stable",
-                "profile": "minimal",
-                "override": "true",
-                "components": "rustfmt",
-                "target": "x86_64-unknown-linux-musl",
-            },
-        )
         build = GithubAction(
             "actions-rs/cargo",
             {
@@ -243,7 +261,7 @@ def _generic_rust_build_upload_task(
                 "type": "TarballPackage",
                 "platform": "linux",
                 "arch": "x86_64",
-                "repo": PAHKAT_REPO + "devtools/",
+                "repo": PAHKAT_REPO + repository + "/",
                 "version": "${{ steps.version.outputs.version }}",
                 "channel": "${{ steps.version.outputs.channel }}",
                 "payload-path": "${{ steps.tarball.outputs['txz-path'] }}",
@@ -253,7 +271,7 @@ def _generic_rust_build_upload_task(
         raise NotImplementedError
 
     return (
-        task_new(f"{task_name}: {os_}")
+        rust_task_for_os(os_)(f"{task_name}: {os_}")
         .with_env(**env)
         .with_script(
             r'call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7\Tools\VsDevCmd.bat"'
@@ -262,15 +280,7 @@ def _generic_rust_build_upload_task(
         )
         .with_gha("setup", gha_setup())
         # The actions-rs action is broken on windows
-        .with_gha(
-            "install_rustup",
-            GithubActionScript(
-                "choco install -y --force rustup.install && echo ::add-path::${HOME}/.cargo/bin"
-            ),
-            enabled=(os_ == "windows"),
-        )
         .with_gha("version", version_action)
-        .with_gha("install_rust", install_rust)
         .with_gha("build", build)
         .with_gha("dist", dist)
         .with_gha("sign", sign)
@@ -298,7 +308,9 @@ def generic_rust_build_upload_task(
     rename_binary: Optional[str]=None,
     get_features: Optional[Callable[[str], GithubAction]]=None,
     version_action: Optional[GithubAction]=None,
-    only_os: Optional[List[str]]=None
+    only_os: Optional[List[str]]=None,
+    *,
+    repository: str="devtools",
 ):
     if rename_binary is None:
         rename_binary = bin_name
@@ -323,6 +335,13 @@ def generic_rust_build_upload_task(
             setup_uploader(os_),
             rename_binary,
             features,
-            version_action
+            version_action,
+            repository,
         )
 
+
+def generic_rust_task(name, setup_fn):
+    oses = ["macos", "windows", "linux"]
+    for os_ in oses:
+        task = rust_task_for_os(os_)(name)
+        setup_fn(task)

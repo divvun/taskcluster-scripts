@@ -82,11 +82,14 @@ def tasks(task_for: str):
     if repo_name == "windivvun-service":
         create_windivvun_tasks()
 
-    if repo_name in "divvun-keyboard":
+    if repo_name == "divvun-keyboard":
         create_divvun_keyboard_tasks("divvun.kbdgen", is_dev=False)
 
-    if repo_name in "divvun-dev-keyboard":
+    if repo_name == "divvun-dev-keyboard":
         create_divvun_keyboard_tasks("divvun-dev.kbdgen", is_dev=True)
+
+    if repo_name == "gut":
+        create_gut_tasks()
 
 
 task_for = os.environ["TASK_FOR"]
