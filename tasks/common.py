@@ -420,7 +420,10 @@ def generic_rust_build_upload_task(
 
 def generic_rust_task(index_name, name, setup_fn):
     oses = ["macos", "windows", "linux"]
+    tasks = []
     for os_ in oses:
         task = rust_task_for_os(os_)("%s: %s" % (name, os_))
         setup_fn(task)
-        task.find_or_create(f"build.{index_name}.{os_}.{CONFIG.index_path}")
+        task_id = task.find_or_create(f"build.{index_name}.{os_}.{CONFIG.index_path}")
+        task.append(task_id)
+    return tasks
