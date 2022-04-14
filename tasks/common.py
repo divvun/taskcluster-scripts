@@ -255,6 +255,7 @@ def _generic_rust_build_upload_task(
     features,
     version_action,
     repository,
+    depends_on,
 ):
     if os_ == "windows":
         target_dir = "\\".join(target_dir.split("/"))
@@ -363,6 +364,7 @@ def _generic_rust_build_upload_task(
             "deploy",
             deploy.with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN"),
         )
+        .with_dependencies(*depends_on)
         .find_or_create(f"build.{bin_name}.{os_}.{CONFIG.index_path}")
     )
 
@@ -381,6 +383,7 @@ def generic_rust_build_upload_task(
     only_os: Optional[List[str]] = None,
     *,
     repository: str = "devtools",
+    depends_on: List[str] = []
 ):
     if rename_binary is None:
         rename_binary = bin_name
@@ -410,11 +413,13 @@ def generic_rust_build_upload_task(
             features,
             version_action,
             repository,
+            depends_on,
         )
 
 
-def generic_rust_task(name, setup_fn):
+def generic_rust_task(index_name, name, setup_fn):
     oses = ["macos", "windows", "linux"]
     for os_ in oses:
         task = rust_task_for_os(os_)(name)
         setup_fn(task)
+        task.find_or_create(f"build.{index_name}.{os_}.{CONFIG.index_path}")
