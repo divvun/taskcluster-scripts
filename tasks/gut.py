@@ -31,14 +31,14 @@ def create_gut_lint_tasks():
             )
         )
 
-    return generic_rust_task("gut", "Gut lints", add_lints)
+    return generic_rust_task("gut.lints", "Gut lints", add_lints)
 
 
 def create_gut_test_tasks():
     def add_lints(task):
         return task.with_gha("test", GithubAction("actions-rs/cargo", {"command": "test"}))
 
-    return generic_rust_task("gut", "Gut tests", add_lints)
+    return generic_rust_task("gut.tests", "Gut tests", add_lints)
 
 
 def create_gut_deploy_tasks(depends_on):
@@ -52,4 +52,5 @@ def create_gut_deploy_tasks(depends_on):
         bin_name="gut",
         env=RUST_ENV,
         setup_uploader=setup_uploader,
+        depends_on=depends_on
     )

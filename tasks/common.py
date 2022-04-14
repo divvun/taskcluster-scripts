@@ -366,7 +366,7 @@ def _generic_rust_build_upload_task(
             deploy.with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN"),
         )
         .with_dependencies(*depends_on)
-        .find_or_create(f"build.{bin_name}.{os_}.{CONFIG.index_path}")
+        .find_or_create(f"build.{bin_name}.deploy.{os_}.{CONFIG.index_path}")
     )
 
 
