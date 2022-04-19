@@ -1,4 +1,5 @@
 from .common import gha_pahkat, generic_rust_task, generic_rust_build_upload_task
+from decisionlib import CONFIG
 from gha import GithubAction
 
 RUST_ENV = {
@@ -14,6 +15,11 @@ RUST_ENV = {
 def create_gut_tasks():
     test_tasks = create_gut_test_tasks()
     create_gut_lint_tasks()
+
+    if CONFIG.index_read_only:
+        return
+
+    # Branch only tasks
     create_gut_deploy_tasks(test_tasks)
 
 

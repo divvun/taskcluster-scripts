@@ -30,6 +30,9 @@ def tasks(task_for: str):
         if repo_name.startswith("lang-"):
             create_lang_tasks(repo_name)
 
+        if repo_name == "gut":
+            create_gut_tasks()
+
         return
 
     if task_for == "daily":
