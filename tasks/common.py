@@ -8,7 +8,6 @@ import os
 
 BUILD_ARTIFACTS_EXPIRE_IN = "1 week"
 PAHKAT_REPO = "https://pahkat.uit.no/"
-NIGHTLY_CHANNEL = "nightly"
 RUST_ENV = {
     "RUST_VERSION": "stable",
     "CARGO_INCREMENTAL": "0",
@@ -17,7 +16,7 @@ RUST_ENV = {
     "RUST_BACKTRACE": "full",
     "LZMA_API_STATIC": "1",
 }
-
+NIGHTLY_CHANNEL = "test-pahkat"
 
 def linux_build_task(name, bundle_dest="repo", with_secrets=True, clone_self=True):
     task = (
