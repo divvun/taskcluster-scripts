@@ -1,8 +1,8 @@
 import os.path
 
 from gha import GithubAction, GithubActionScript
-from decisionlib import CONFIG, NIGHTLY_CHANNEL
-from .common import linux_build_task, macos_task, windows_task
+from decisionlib import CONFIG
+from .common import linux_build_task, macos_task, windows_task, NIGHTLY_CHANNEL
 
 NO_DEPLOY_LANG = {
     "zxx",  # No linguistic data
