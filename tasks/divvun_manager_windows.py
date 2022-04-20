@@ -15,9 +15,10 @@ def create_divvun_manager_windows_tasks():
             "setup_nugget",
             GithubAction("NuGet/setup-nuget@main", {"nuget-version": "5.x"}),
         )
+        .with_script("echo $null >> ${HOME}/${TASK_ID}/_temp/github_env", as_gha=True)
         .with_gha(
             "nerdbank_version",
-            GithubAction("dotnet/nbgv", {"setCommonVars": "true"}),
+            GithubAction("dotnet/nbgv", {"setCommonVars": "true"}).with_env("GITHUB_ENV", "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\_temp\\github_env"),
         )
         .with_gha(
             "install_rustup",
@@ -106,7 +107,7 @@ def create_divvun_manager_windows_tasks():
           nuget restore "Divvun.Installer.sln"
           MSBuild.exe "Divvun.Installer.sln" /p:Configuration=Release /p:Platform=x86 /m  || exit /b !ERRORLEVEL!
         """
-            ),
+            ).with_env("GITHUB_ENV", "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\_temp\\github_env"),
         )
         .with_gha(
             "package_oneclick",
@@ -119,7 +120,7 @@ def create_divvun_manager_windows_tasks():
           cargo -vV
           cargo xtask
         """
-            ),
+            ).with_env("GITHUB_ENV", "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\_temp\\github_env"),
         )
         .with_gha(
             "sign_divvun_manager",
