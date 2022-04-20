@@ -450,7 +450,7 @@ class Task:
             self.with_additional_repo(gha.git_fetch_url, os.path.join(SHARED.task_root_for(self.platform()), gha.repo_name))
             self.action_paths.add(gha.git_fetch_url)
 
-        if not any(CONFIG.git_ref == "refs/head/%s" % branch for branch in DEPLOY_BRANCHES) and not CONFIG.git_ref.startswith("refs/tags/"):
+        if not any(CONFIG.git_ref == "refs/heads/%s" % branch for branch in DEPLOY_BRANCHES) and not CONFIG.git_ref.startswith("refs/tags/"):
             gha = gha.with_env("PAHKAT_NO_DEPLOY", "true")
 
         if "[no deploy]" in CONFIG.commit_message:
