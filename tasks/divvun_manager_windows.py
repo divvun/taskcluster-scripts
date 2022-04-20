@@ -16,7 +16,7 @@ def create_divvun_manager_windows_tasks():
             GithubAction("NuGet/setup-nuget@main", {"nuget-version": "5.x"}),
         )
         .with_gha(
-            "Nerdbank.GitVersioning",
+            "nerdbank_version",
             GithubAction("dotnet/nbgv", {"setCommonVars": "true"}),
         )
         .with_gha(
@@ -48,7 +48,8 @@ def create_divvun_manager_windows_tasks():
             GithubAction(
                 "Eijebong/divvun-actions/version",
                 { "csharp": "true", "stable-channel": "beta", "nightly-channel": NIGHTLY_CHANNEL },
-            ).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN"),
+            ).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN")
+             .with_env("GitBuildVersionSimple", "${{ steps.nerdbank_version.outputs.SimpleVersion }}")
         )
         .with_gha(
             "pahkat",
