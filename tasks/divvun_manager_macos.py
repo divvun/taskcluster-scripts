@@ -1,4 +1,4 @@
-from .common import macos_task, gha_pahkat, gha_setup, PAHKAT_REPO
+from .common import macos_task, gha_pahkat, gha_setup, PAHKAT_REPO, NIGHTLY_CHANNEL
 from decisionlib import CONFIG
 from gha import GithubAction, GithubActionScript
 
@@ -26,14 +26,15 @@ def create_divvun_manager_macos_task():
                 {
                     "xcode": ".",
                     "stable-channel": "beta",
+                    "nightly-channel": NIGHTLY_CHANNEL,
                 },
             ).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN"),
         )
         .with_gha(
             "self_update_channel",
             GithubActionScript(
-                "echo ::set-output name=channel::nightly",
-                run_if="${{ steps.version.outputs.channel == 'nightly' }}",
+                f"echo ::set-output name=channel::{NIGHTLY_CHANNEL}",
+                run_if=f"${{{{ steps.version.outputs.channel == '{NIGHTLY_CHANNEL}' }}}}",
             ),
         )
         .with_gha(

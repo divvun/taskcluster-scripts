@@ -8,6 +8,7 @@ import os
 
 BUILD_ARTIFACTS_EXPIRE_IN = "1 week"
 PAHKAT_REPO = "https://pahkat.uit.no/"
+NIGHTLY_CHANNEL = "nightly"
 
 
 def linux_build_task(name, bundle_dest="repo", with_secrets=True, clone_self=True):
@@ -181,7 +182,7 @@ def gha_pahkat(packages: List[str]):
         "Eijebong/divvun-actions/pahkat/init",
         {
             "repo": "https://pahkat.uit.no/devtools/",
-            "channel": "nightly",
+            "channel": NIGHTLY_CHANNEL,
             "packages": ",".join(packages),
         },
     )
@@ -391,7 +392,7 @@ def generic_rust_build_upload_task(
     if version_action is None:
         version_action = GithubAction(
             "Eijebong/divvun-actions/version",
-            {"cargo": cargo_toml_path, "nightly": "main, develop"},
+            {"cargo": cargo_toml_path, "nightly-channel": NIGHTLY_CHANNEL},
         ).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN")
     if only_os is None:
         only_os = ["macos", "windows", "linux"]

@@ -5,6 +5,7 @@ from .common import (
     gha_setup,
     gha_pahkat,
     PAHKAT_REPO,
+    NIGHTLY_CHANNEL,
     generic_rust_build_upload_task,
 )
 
@@ -108,7 +109,7 @@ def create_pahkat_service_windows_task():
             "version",
             GithubAction(
                 "Eijebong/divvun-actions/version",
-                {"cargo": "pahkat-rpc/Cargo.toml", "stable-channel": "beta"},
+                {"cargo": "pahkat-rpc/Cargo.toml", "stable-channel": "beta", "nightly-channel": NIGHTLY_CHANNEL},
             ).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN"),
         )
         .with_gha("pahkat_setup", gha_pahkat(["pahkat-uploader"]))
@@ -135,8 +136,8 @@ def create_pahkat_service_windows_task():
         .with_gha(
             "self_update_channel",
             GithubActionScript(
-                "Write-Host ::set-output name=channel::nightly",
-                run_if="${{ steps.version.outputs.channel == 'nightly' }}",
+                f"Write-Host ::set-output name=channel::{NIGHTLY_CHANNEL}",
+                run_if=f"${{{{ steps.version.outputs.channel == '{NIGHTLY_CHANNEL}' }}}}",
             ),
         )
         .with_gha(

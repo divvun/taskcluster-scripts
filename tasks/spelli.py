@@ -1,5 +1,5 @@
 from decisionlib import CONFIG
-from .common import windows_task, gha_setup, gha_pahkat, PAHKAT_REPO
+from .common import windows_task, gha_setup, gha_pahkat, PAHKAT_REPO, NIGHTLY_CHANNEL
 from gha import GithubAction, GithubActionScript
 
 
@@ -26,7 +26,7 @@ def create_spelli_task():
             "version",
             GithubAction(
                 "Eijebong/divvun-actions/version",
-                {"cargo": "true"},
+                {"cargo": "true", "nightly-channel": NIGHTLY_CHANNEL},
             ).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN"),
         )
         .with_gha(
@@ -36,13 +36,13 @@ def create_spelli_task():
         .with_gha(
             "get_oxt_nightly",
             GithubActionScript(
-                """
-                curl -Ls "https://pahkat.uit.no/devtools/download/divvunspell-libreoffice-oxt?platform=windows&channel=nightly" -o divvunspell-libreoffice-oxt.txz
+                f"""
+                curl -Ls "https://pahkat.uit.no/devtools/download/divvunspell-libreoffice-oxt?platform=windows&channel={NIGHTLY_CHANNEL}" -o divvunspell-libreoffice-oxt.txz
                 xz -d divvunspell-libreoffice-oxt.txz
                 tar xvf divvunspell-libreoffice-oxt.tar
                 mv divvunspell.oxt divvunspell-libreoffice.oxt
         """,
-                run_if="${{ steps.version.outputs.channel == 'nightly' }}",
+                run_if=f"${{{{ steps.version.outputs.channel == '{NIGHTLY_CHANNEL}' }}}}",
             ),
         )
         .with_gha(
@@ -54,7 +54,7 @@ def create_spelli_task():
                 tar xvf divvunspell-libreoffice-oxt.tar
                 mv divvunspell.oxt divvunspell-libreoffice.oxt
         """,
-                run_if="${{ steps.version.outputs.channel != 'nightly' }}",
+                run_if=f"${{{{ steps.version.outputs.channel != '{NIGHTLY_CHANNEL}' }}}}",
             ),
         )
         .with_gha(

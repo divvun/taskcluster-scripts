@@ -1,4 +1,4 @@
-from .common import windows_task, gha_setup, gha_pahkat
+from .common import windows_task, gha_setup, gha_pahkat, NIGHTLY_CHANNEL
 from decisionlib import CONFIG
 from gha import GithubAction, GithubActionScript
 
@@ -40,6 +40,7 @@ def create_windivvun_tasks():
                 "Eijebong/divvun-actions/version",
                 {
                     "cargo": "true",
+                    "nightly-channel": NIGHTLY_CHANNEL,
                 },
             ).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN"),
         )
@@ -54,20 +55,20 @@ def create_windivvun_tasks():
             tar xvf spelli.exe.tar
             mv bin/spelli.exe .
         """,
-                run_if="${{ steps.version.outputs.channel != 'nightly' }}",
+                run_if=f"${{{{ steps.version.outputs.channel != '{NIGHTLY_CHANNEL}' }}}}",
             ),
         )
         .with_gha(
             "download_spelli_nightly",
             GithubActionScript(
-                """
-            curl -Ls "https://pahkat.uit.no/devtools/download/spelli?platform=windows&channel=nightly" -o artifacts\\spelli.exe.txz
+                f"""
+            curl -Ls "https://pahkat.uit.no/devtools/download/spelli?platform=windows&channel={NIGHTLY_CHANNEL}" -o artifacts\\spelli.exe.txz
             cd artifacts
             xz -d spelli.exe.txz
             tar xvf spelli.exe.tar
             mv bin/spelli.exe .
         """,
-                run_if="${{ steps.version.outputs.channel == 'nightly' }}",
+                run_if=f"${{{{ steps.version.outputs.channel == '{NIGHTLY_CHANNEL}' }}}}",
             ),
         )
         .with_gha(

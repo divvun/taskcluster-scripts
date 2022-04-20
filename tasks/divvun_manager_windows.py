@@ -1,5 +1,5 @@
 from decisionlib import CONFIG
-from .common import windows_task, gha_setup, gha_pahkat
+from .common import windows_task, gha_setup, gha_pahkat, NIGHTLY_CHANNEL
 from gha import GithubAction, GithubActionScript
 
 
@@ -47,7 +47,7 @@ def create_divvun_manager_windows_tasks():
             "version",
             GithubAction(
                 "Eijebong/divvun-actions/version",
-                {"csharp": "true", "stable-channel": "beta"},
+                { "csharp": "true", "stable-channel": "beta", "nightly-channel": NIGHTLY_CHANNEL },
             ).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN"),
         )
         .with_gha(
@@ -72,15 +72,15 @@ def create_divvun_manager_windows_tasks():
         .with_gha(
             "get_pahkat_service_nightly",
             GithubActionScript(
-                """
+                f"""
             mkdir pahkat-config
-            echo \"[\"\"https://pahkat.uit.no/divvun-installer/\"\"]`nchannel = \"\"nightly\"\"\" > ./pahkat-config/repos.toml
+            echo \"[\"\"https://pahkat.uit.no/divvun-installer/\"\"]`nchannel = \"\"{NIGHTLY_CHANNEL}\"\"\" > ./pahkat-config/repos.toml
             ls pahkat-config
             cat pahkat-config/repos.toml
             pahkat-windows download https://pahkat.uit.no/divvun-installer/packages/pahkat-service --output ./pahkat-service -c pahkat-config
             move pahkat-service\\* pahkat-service-setup.exe
         """,
-                run_if="${{ steps.version.outputs.channel == 'nightly' }}",
+                run_if=f"${{{{ steps.version.outputs.channel == '{NIGHTLY_CHANNEL}' }}}}",
             ),
         )
         .with_gha(
@@ -94,7 +94,7 @@ def create_divvun_manager_windows_tasks():
             pahkat-windows download https://pahkat.uit.no/divvun-installer/packages/pahkat-service --output ./pahkat-service -c pahkat-config
             move pahkat-service\\* pahkat-service-setup.exe
         """,
-                run_if="${{ steps.version.outputs.channel != 'nightly' }}",
+                run_if=f"${{{{ steps.version.outputs.channel != '{NIGHTLY_CHANNEL}' }}}}",
             ),
         )
         .with_gha(

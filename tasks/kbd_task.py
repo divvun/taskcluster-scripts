@@ -1,6 +1,6 @@
 from gha import GithubAction
 from decisionlib import CONFIG
-from .common import macos_task, windows_task, gha_setup, gha_pahkat
+from .common import macos_task, windows_task, gha_setup, gha_pahkat, NIGHTLY_CHANNEL
 
 
 def create_kbd_task(os_name):
@@ -14,7 +14,7 @@ def create_kbd_task(os_name):
                 "build",
                 GithubAction(
                     "Eijebong/divvun-actions/keyboard/build",
-                    {"keyboard-type": "keyboard-windows"},
+                    {"keyboard-type": "keyboard-windows", "nightly-channel": NIGHTLY_CHANNEL},
                 ),
             )
             .with_gha(
@@ -49,7 +49,7 @@ def create_kbd_task(os_name):
                 "build",
                 GithubAction(
                     "Eijebong/divvun-actions/keyboard/build",
-                    {"keyboard-type": "keyboard-macos"},
+                    {"keyboard-type": "keyboard-macos", "nightly-channel": NIGHTLY_CHANNEL},
                 ),
             )
             .with_gha(
