@@ -42,7 +42,7 @@ __all__ = [
 ]
 
 
-DEPLOY_BRANCHES = ["main", "master"]
+DEPLOY_BRANCHES = ["features/tokio-1"]
 
 
 class Config:
