@@ -54,8 +54,8 @@ def create_pahkat_prefix_cli_tasks():
         """
         )
 
-    setup_uploader = get_bootstrap_uploader
-    # setup_uploader = lambda _: gha_pahkat(["pahkat-uploader"])
+    # setup_uploader = get_bootstrap_uploader
+    setup_uploader = lambda _: gha_pahkat(["pahkat-uploader"])
     get_features = lambda _: "--features prefix"
 
     return generic_rust_build_upload_task(
