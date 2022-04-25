@@ -126,6 +126,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
                         "version": "${{ steps.version.outputs.version }}",
                         "channel": "${{ steps.version.outputs.channel }}",
                         "repo": "https://pahkat.uit.no/main/",
+                        "nightly-channel": NIGHTLY_CHANNEL
                     },
                 ),
             )
