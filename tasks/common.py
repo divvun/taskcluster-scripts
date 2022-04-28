@@ -272,36 +272,36 @@ def _generic_rust_build_upload_task(
 ):
     if os_ in ["windows", "windows_3264"]:
         target_dir = "\\".join(target_dir.split("/"))
-        build = [GithubAction(
+        build = [("build", GithubAction(
             "actions-rs/cargo",
             {
                 "command": "build",
                 "args": f"--release {features} --manifest-path {cargo_toml_path} --target i686-pc-windows-msvc --verbose",
             },
-        )]
-        dist = [GithubActionScript(
+        ))]
+        dist = [("dist", GithubActionScript(
             f"mkdir dist\\bin && move {target_dir}\\i686-pc-windows-msvc\\release\\{bin_name}.exe dist\\bin\\{rename_binary}.exe"
-        )]
-        sign = [GithubAction(
+        ))]
+        sign = [("sign", GithubAction(
             "Eijebong/divvun-actions/codesign",
             {"path": f"dist/bin/{rename_binary}.exe"},
-        )]
+        ))]
 
         if os_ == "windows_3264":
-            build.append(GithubAction(
+            build.append(("build32", GithubAction(
                 "actions-rs/cargo",
                 {
                     "command": "build",
                     "args": f"--release {features} --manifest-path {cargo_toml_path} --target x86_64-pc-windows-msvc --verbose",
                 },
-            ))
-            dist.append(GithubActionScript(
+            )))
+            dist.append(("dist32", GithubActionScript(
                 f"move {target_dir}\\x86_64-pc-windows-msvc\\release\\{bin_name}.exe dist\\bin\\{rename_binary}-x64.exe"
-            ))
-            sign.append(GithubAction(
+            )))
+            sign.append(("sign32", GithubAction(
                 "Eijebong/divvun-actions/codesign",
                 {"path": f"dist/bin/{rename_binary}-x64.exe"},
-            ))
+            )))
 
         deploy = GithubAction(
             "Eijebong/divvun-actions/deploy",
@@ -317,19 +317,19 @@ def _generic_rust_build_upload_task(
             },
         )
     elif os_ == "macos":
-        build = [GithubAction(
+        build = [("build", GithubAction(
             "actions-rs/cargo",
             {
                 "command": "build",
                 "args": f"--release {features} --manifest-path {cargo_toml_path}",
             },
-        )]
-        dist = [GithubActionScript(
+        ))]
+        dist = [("dist", GithubActionScript(
             f"mkdir -p dist/bin && mv {target_dir}/release/{bin_name} dist/bin/{rename_binary}"
-        )]
-        sign = [GithubAction(
+        ))]
+        sign = [("sign", GithubAction(
             "Eijebong/divvun-actions/codesign", {"path": f"dist/bin/{rename_binary}"}
-        )]
+        ))]
         deploy = GithubAction(
             "Eijebong/divvun-actions/deploy",
             {
@@ -344,17 +344,17 @@ def _generic_rust_build_upload_task(
             },
         )
     elif os_ == "linux":
-        build = [GithubAction(
+        build = [("build", GithubAction(
             "actions-rs/cargo",
             {
                 "command": "build",
                 "args": f"--release {features} --manifest-path {cargo_toml_path}",
             },
-        )]
-        dist = [GithubActionScript(
+            ))]
+        dist = [("dist", GithubActionScript(
             f"mkdir -p dist/bin && mv {target_dir}/release/{bin_name} dist/bin/{rename_binary}"
-        )]
-        sign = [GithubActionScript('echo "No code signing on linux"')]
+        ))]
+        sign = [("sign", GithubActionScript('echo "No code signing on linux"'))]
         deploy = GithubAction(
             "Eijebong/divvun-actions/deploy",
             {
@@ -382,9 +382,9 @@ def _generic_rust_build_upload_task(
         .with_gha("setup", gha_setup())
         # The actions-rs action is broken on windows
         .with_gha("version", version_action)
-        .with_ghas("build", build)
-        .with_ghas("dist", dist)
-        .with_ghas("sign", sign)
+        .with_ghas(build)
+        .with_ghas(dist)
+        .with_ghas(sign)
         .with_gha(
             "tarball",
             GithubAction("Eijebong/divvun-actions/create-txz", {"path": "dist"}),
