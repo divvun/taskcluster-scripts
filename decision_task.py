@@ -94,6 +94,9 @@ def tasks(task_for: str):
     if repo_name == "gut":
         create_gut_tasks()
 
+    if repo_name == "kbdi":
+        create_kbdi_tasks()
+
 
 task_for = os.environ["TASK_FOR"]
 repo_name = os.environ["REPO_NAME"]

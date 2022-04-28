@@ -442,6 +442,11 @@ class Task:
             **kwargs,
         )
 
+    def with_ghas(self, actions: List[Tuple[str, gha.GithubAction]], enabled=True):
+        for name, action in actions:
+            self.with_gha(name, action, enabled)
+        return self
+
     def with_gha(self, name: str, gha: gha.GithubAction, enabled=True):
         if not enabled:
             return self
