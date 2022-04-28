@@ -21,7 +21,8 @@ def create_kbdi_deploy_task():
 
     return generic_rust_build_upload_task(
         "Kbdi build",
-        "Cargo.toml --bin kbdi",
+        "Cargo.toml",
+        get_features=lambda _: "--bin kbdi",
         package_id="kbdi",
         target_dir="target",
         only_os=["windows_3264"],
@@ -35,7 +36,8 @@ def create_kbdi_legacy_deploy_task():
 
     return generic_rust_build_upload_task(
         "Kbdi legacy build",
-        "Cargo.toml --bin kbdi-legacy",
+        "Cargo.toml",
+        get_features=lambda _: "--bin kbdi-legacy",
         package_id="kbdi-legacy",
         target_dir="target",
         only_os=["windows"],
