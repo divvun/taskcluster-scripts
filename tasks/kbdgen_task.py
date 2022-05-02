@@ -24,7 +24,7 @@ def create_kbdgen_deploy_tasks():
         "Cargo.toml",
         package_id="kbdgen2",
         target_dir="target",
-        bin_name="kbdgen2",
+        bin_name="kbdgen",
         env=RUST_ENV,
         setup_uploader=setup_uploader,
     )
