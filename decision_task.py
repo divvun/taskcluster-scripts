@@ -97,7 +97,7 @@ def tasks(task_for: str):
     if repo_name == "kbdi":
         create_kbdi_tasks()
 
-    if repo_name == "kbdgen":
+    if repo_name == "kbdgen2":
         create_kbdgen_tasks()
 
 
