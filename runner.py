@@ -273,7 +273,6 @@ def get_env_for(step_name: str, step: Dict[str, Any]):
     # Take milliseconds so we can start hight than the current github run id at the time of writing
     env["GITHUB_RUN_NUMBER"] = str(int(time.time() * 1000))
 
-
     if EXTRA_PATH:
         if platform.system() == "Windows":
             env["PATH"] = env["PATH"] + ";" + ";".join(EXTRA_PATH)
@@ -302,11 +301,11 @@ async def run_action(action_name: str, action: Dict[str, Any], post=False):
 
     extra_args = {}
 
-    cwd = action.get('cwd')
+    cwd = action.get("cwd")
     if platform.system() == "Windows":
         shell = action.get("shell", "pwsh")
         if shell == "cmd":
-            tmp = tempfile.NamedTemporaryFile("w", suffix=".bat", delete=False);
+            tmp = tempfile.NamedTemporaryFile("w", suffix=".bat", delete=False)
             tmp.write(action[script_index])
             cmdargs = ["cmd", "/C", "call " + tmp.name]
             print("Writing", action[script_index], " to", tmp.name)
@@ -323,7 +322,7 @@ async def run_action(action_name: str, action: Dict[str, Any], post=False):
             cwd=cwd,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-            limit=1024*256,
+            limit=1024 * 256,
             **extra_args,
         )
     else:
@@ -335,7 +334,7 @@ async def run_action(action_name: str, action: Dict[str, Any], post=False):
             action[script_index],
             env=env,
             cwd=cwd,
-            limit=1024*256,
+            limit=1024 * 256,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             **extra_args,
@@ -564,7 +563,6 @@ async def main():
     finally:
         for (name, action) in post_actions:
             await run_action(name, action, post=True)
-
 
 
 if __name__ == "__main__":

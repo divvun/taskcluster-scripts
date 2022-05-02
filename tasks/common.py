@@ -280,36 +280,66 @@ def _generic_rust_build_upload_task(
 ):
     if os_ in ["windows", "windows_3264"]:
         target_dir = "\\".join(target_dir.split("/"))
-        build = [("build", GithubAction(
-            "actions-rs/cargo",
-            {
-                "command": "build",
-                "args": f"--release {features} --manifest-path {cargo_toml_path} --target i686-pc-windows-msvc --verbose",
-            },
-        ))]
-        dist = [("dist", GithubActionScript(
-            f"mkdir dist\\bin && move {target_dir}\\i686-pc-windows-msvc\\release\\{bin_name}.exe dist\\bin\\{rename_binary}.exe"
-        ))]
-        sign = [("sign", GithubAction(
-            "Eijebong/divvun-actions/codesign",
-            {"path": f"dist/bin/{rename_binary}.exe"},
-        ))]
+        build = [
+            (
+                "build",
+                GithubAction(
+                    "actions-rs/cargo",
+                    {
+                        "command": "build",
+                        "args": f"--release {features} --manifest-path {cargo_toml_path} --target i686-pc-windows-msvc --verbose",
+                    },
+                ),
+            )
+        ]
+        dist = [
+            (
+                "dist",
+                GithubActionScript(
+                    f"mkdir dist\\bin && move {target_dir}\\i686-pc-windows-msvc\\release\\{bin_name}.exe dist\\bin\\{rename_binary}.exe"
+                ),
+            )
+        ]
+        sign = [
+            (
+                "sign",
+                GithubAction(
+                    "Eijebong/divvun-actions/codesign",
+                    {"path": f"dist/bin/{rename_binary}.exe"},
+                ),
+            )
+        ]
 
         if os_ == "windows_3264":
-            build.append(("build32", GithubAction(
-                "actions-rs/cargo",
-                {
-                    "command": "build",
-                    "args": f"--release {features} --manifest-path {cargo_toml_path} --target x86_64-pc-windows-msvc --verbose",
-                },
-            )))
-            dist.append(("dist32", GithubActionScript(
-                f"move {target_dir}\\x86_64-pc-windows-msvc\\release\\{bin_name}.exe dist\\bin\\{rename_binary}-x64.exe"
-            )))
-            sign.append(("sign32", GithubAction(
-                "Eijebong/divvun-actions/codesign",
-                {"path": f"dist/bin/{rename_binary}-x64.exe"},
-            )))
+            build.append(
+                (
+                    "build32",
+                    GithubAction(
+                        "actions-rs/cargo",
+                        {
+                            "command": "build",
+                            "args": f"--release {features} --manifest-path {cargo_toml_path} --target x86_64-pc-windows-msvc --verbose",
+                        },
+                    ),
+                )
+            )
+            dist.append(
+                (
+                    "dist32",
+                    GithubActionScript(
+                        f"move {target_dir}\\x86_64-pc-windows-msvc\\release\\{bin_name}.exe dist\\bin\\{rename_binary}-x64.exe"
+                    ),
+                )
+            )
+            sign.append(
+                (
+                    "sign32",
+                    GithubAction(
+                        "Eijebong/divvun-actions/codesign",
+                        {"path": f"dist/bin/{rename_binary}-x64.exe"},
+                    ),
+                )
+            )
 
         deploy = GithubAction(
             "Eijebong/divvun-actions/deploy",
@@ -325,19 +355,35 @@ def _generic_rust_build_upload_task(
             },
         )
     elif os_ == "macos":
-        build = [("build", GithubAction(
-            "actions-rs/cargo",
-            {
-                "command": "build",
-                "args": f"--release {features} --manifest-path {cargo_toml_path}",
-            },
-        ))]
-        dist = [("dist", GithubActionScript(
-            f"mkdir -p dist/bin && mv {target_dir}/release/{bin_name} dist/bin/{rename_binary}"
-        ))]
-        sign = [("sign", GithubAction(
-            "Eijebong/divvun-actions/codesign", {"path": f"dist/bin/{rename_binary}"}
-        ))]
+        build = [
+            (
+                "build",
+                GithubAction(
+                    "actions-rs/cargo",
+                    {
+                        "command": "build",
+                        "args": f"--release {features} --manifest-path {cargo_toml_path}",
+                    },
+                ),
+            )
+        ]
+        dist = [
+            (
+                "dist",
+                GithubActionScript(
+                    f"mkdir -p dist/bin && mv {target_dir}/release/{bin_name} dist/bin/{rename_binary}"
+                ),
+            )
+        ]
+        sign = [
+            (
+                "sign",
+                GithubAction(
+                    "Eijebong/divvun-actions/codesign",
+                    {"path": f"dist/bin/{rename_binary}"},
+                ),
+            )
+        ]
         deploy = GithubAction(
             "Eijebong/divvun-actions/deploy",
             {
@@ -352,16 +398,26 @@ def _generic_rust_build_upload_task(
             },
         )
     elif os_ == "linux":
-        build = [("build", GithubAction(
-            "actions-rs/cargo",
-            {
-                "command": "build",
-                "args": f"--release {features} --manifest-path {cargo_toml_path}",
-            },
-            ))]
-        dist = [("dist", GithubActionScript(
-            f"mkdir -p dist/bin && mv {target_dir}/release/{bin_name} dist/bin/{rename_binary}"
-        ))]
+        build = [
+            (
+                "build",
+                GithubAction(
+                    "actions-rs/cargo",
+                    {
+                        "command": "build",
+                        "args": f"--release {features} --manifest-path {cargo_toml_path}",
+                    },
+                ),
+            )
+        ]
+        dist = [
+            (
+                "dist",
+                GithubActionScript(
+                    f"mkdir -p dist/bin && mv {target_dir}/release/{bin_name} dist/bin/{rename_binary}"
+                ),
+            )
+        ]
         sign = [("sign", GithubActionScript('echo "No code signing on linux"'))]
         deploy = GithubAction(
             "Eijebong/divvun-actions/deploy",
@@ -403,7 +459,9 @@ def _generic_rust_build_upload_task(
             deploy.with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN"),
         )
         .with_dependencies(*depends_on)
-        .find_or_create(f"build.{package_id}__{bin_name}.deploy.{os_}.{CONFIG.index_path}")
+        .find_or_create(
+            f"build.{package_id}__{bin_name}.deploy.{os_}.{CONFIG.index_path}"
+        )
     )
 
 
@@ -421,7 +479,7 @@ def generic_rust_build_upload_task(
     only_os: Optional[List[str]] = None,
     *,
     repository: str = "devtools",
-    depends_on: List[str] = []
+    depends_on: List[str] = [],
 ):
     if rename_binary is None:
         rename_binary = bin_name

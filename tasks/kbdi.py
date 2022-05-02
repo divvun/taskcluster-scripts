@@ -1,4 +1,9 @@
-from .common import gha_pahkat, generic_rust_task, generic_rust_build_upload_task, RUST_ENV
+from .common import (
+    gha_pahkat,
+    generic_rust_task,
+    generic_rust_build_upload_task,
+    RUST_ENV,
+)
 from decisionlib import CONFIG
 from gha import GithubAction
 
@@ -6,6 +11,7 @@ from gha import GithubAction
 def create_kbdi_tasks():
     create_kbdi_deploy_task()
     create_kbdi_legacy_deploy_task()
+
 
 def create_kbdi_deploy_task():
     setup_uploader = lambda _: gha_pahkat(["pahkat-uploader"])
@@ -21,6 +27,7 @@ def create_kbdi_deploy_task():
         env=RUST_ENV,
         setup_uploader=setup_uploader,
     )
+
 
 def create_kbdi_legacy_deploy_task():
     setup_uploader = lambda _: gha_pahkat(["pahkat-uploader"])

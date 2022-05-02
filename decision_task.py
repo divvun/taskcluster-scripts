@@ -10,6 +10,7 @@ import decisionlib
 from decisionlib import CONFIG
 from tasks import *
 
+
 def tasks(task_for: str):
     repo_name = os.environ["REPO_NAME"]
     if "[ci skip]" in CONFIG.commit_message:

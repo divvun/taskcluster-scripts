@@ -18,7 +18,9 @@ def create_divvun_manager_windows_tasks():
         .with_script("echo $null >> ${HOME}/${TASK_ID}/_temp/github_env", as_gha=True)
         .with_gha(
             "nerdbank_version",
-            GithubAction("dotnet/nbgv", {"setCommonVars": "true"}).with_env("GITHUB_ENV", "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\_temp\\github_env"),
+            GithubAction("dotnet/nbgv", {"setCommonVars": "true"}).with_env(
+                "GITHUB_ENV", "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\_temp\\github_env"
+            ),
         )
         .with_gha(
             "install_rustup",
@@ -48,9 +50,17 @@ def create_divvun_manager_windows_tasks():
             "version",
             GithubAction(
                 "Eijebong/divvun-actions/version",
-                { "csharp": "true", "stable-channel": "beta", "nightly-channel": NIGHTLY_CHANNEL },
-            ).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN")
-             .with_env("GitBuildVersionSimple", "${{ steps.nerdbank_version.outputs.SimpleVersion }}")
+                {
+                    "csharp": "true",
+                    "stable-channel": "beta",
+                    "nightly-channel": NIGHTLY_CHANNEL,
+                },
+            )
+            .with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN")
+            .with_env(
+                "GitBuildVersionSimple",
+                "${{ steps.nerdbank_version.outputs.SimpleVersion }}",
+            ),
         )
         .with_gha(
             "pahkat",
@@ -107,7 +117,9 @@ def create_divvun_manager_windows_tasks():
           nuget restore "Divvun.Installer.sln"
           MSBuild.exe "Divvun.Installer.sln" /p:Configuration=Release /p:Platform=x86 /m  || exit /b !ERRORLEVEL!
         """
-            ).with_env("GITHUB_ENV", "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\_temp\\github_env"),
+            ).with_env(
+                "GITHUB_ENV", "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\_temp\\github_env"
+            ),
         )
         .with_gha(
             "package_oneclick",
@@ -120,7 +132,9 @@ def create_divvun_manager_windows_tasks():
           cargo -vV
           cargo xtask
         """
-            ).with_env("GITHUB_ENV", "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\_temp\\github_env"),
+            ).with_env(
+                "GITHUB_ENV", "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\_temp\\github_env"
+            ),
         )
         .with_gha(
             "sign_divvun_manager",

@@ -44,6 +44,7 @@ __all__ = [
 
 DEPLOY_BRANCHES = ["main", "master"]
 
+
 class Config:
     """
     Global configuration, for users of the library to modify.
@@ -102,8 +103,12 @@ class Config:
     def commit_message(self):
         if self._commit_message is None:
             print("Getting commit message")
-            print(f"https://github.com/{os.environ['REPO_FULL_NAME']}/commit/{self.git_sha}.patch")
-            commit =  requests.get(f"https://github.com/{os.environ['REPO_FULL_NAME']}/commit/{self.git_sha}.patch").text
+            print(
+                f"https://github.com/{os.environ['REPO_FULL_NAME']}/commit/{self.git_sha}.patch"
+            )
+            commit = requests.get(
+                f"https://github.com/{os.environ['REPO_FULL_NAME']}/commit/{self.git_sha}.patch"
+            ).text
             print(commit)
             self._commit_message = commit.split("diff --git a/")[0]
             print(self._commit_message)
@@ -138,7 +143,6 @@ class Shared:
             return "%HOMEDRIVE%%HOMEPATH%\\_temp"
         else:
             raise NotImplementedError
-
 
 
 CONFIG = Config()
@@ -234,9 +238,10 @@ class Task:
 
     def with_script(self, *script: str, as_gha=False):
         if as_gha:
-            self.with_gha("script_%s" % len(self.gh_actions), gha.GithubActionScript(
-                "\n".join(script)
-            ))
+            self.with_gha(
+                "script_%s" % len(self.gh_actions),
+                gha.GithubActionScript("\n".join(script)),
+            )
         else:
             self.scripts.extend(script)
         return self
@@ -345,7 +350,15 @@ class Task:
 
     def create_index_at(self, index_path: str, task_id: str):
         full_index_path = "%s.%s" % (CONFIG.index_prefix, index_path)
-        SHARED.index_service.insertTask(full_index_path, { "taskId": task_id, "data": {}, "expires": SHARED.from_now_json(self.index_and_artifacts_expire_in), "rank": 0})
+        SHARED.index_service.insertTask(
+            full_index_path,
+            {
+                "taskId": task_id,
+                "data": {},
+                "expires": SHARED.from_now_json(self.index_and_artifacts_expire_in),
+                "rank": 0,
+            },
+        )
 
     def find_or_create(self, index_path: str) -> str:
         """
@@ -381,7 +394,9 @@ class Task:
         SHARED.found_or_created_indexed_tasks[index_path] = task_id
         return task_id
 
-    def with_additional_repo(self, repo_url: str, target: str, enabled=True, branch=None):
+    def with_additional_repo(
+        self, repo_url: str, target: str, enabled=True, branch=None
+    ):
         if not enabled:
             return self
 
@@ -402,7 +417,7 @@ class Task:
             curl --compressed --ssl-no-revoke --retry 5 --connect-timeout 10 -Lf "%s" -o "%s"
         """
             % (url, file_path),
-            as_gha=as_gha
+            as_gha=as_gha,
         )
 
     def with_curl_artifact_script(
@@ -413,27 +428,30 @@ class Task:
         directory="public",
         rename=None,
         extract=False,
-        as_gha=False
+        as_gha=False,
     ):
         queue_service = self.get_proxy_url() + "/api/queue"
         ret = self.with_dependencies(task_id).with_curl_script(
             queue_service
             + "/v1/task/%s/artifacts/%s/%s" % (task_id, directory, artifact_name),
             os.path.join(out_directory, rename or url_basename(artifact_name)),
-            as_gha=as_gha
+            as_gha=as_gha,
         )
         if extract:
             ret = self.with_script(
                 "tar xvf %s"
                 % os.path.join(out_directory, rename or url_basename(artifact_name)),
-                as_gha=as_gha
+                as_gha=as_gha,
             )
 
         return ret
 
     def with_repo_bundle(self, name, dest, **kwargs):
         return self.with_curl_artifact_script(
-            CONFIG.decision_task_id, f"{name}.bundle", "$HOME/tasks/$TASK_ID", directory="private"
+            CONFIG.decision_task_id,
+            f"{name}.bundle",
+            "$HOME/tasks/$TASK_ID",
+            directory="private",
         ).with_repo(
             "$HOME/tasks/$TASK_ID/" + dest,
             f"$HOME/tasks/$TASK_ID/{name}.bundle",
@@ -452,10 +470,15 @@ class Task:
             return self
 
         if gha.git_fetch_url and gha.git_fetch_url not in self.action_paths:
-            self.with_additional_repo(gha.git_fetch_url, os.path.join(SHARED.task_root_for(self.platform()), gha.repo_name))
+            self.with_additional_repo(
+                gha.git_fetch_url,
+                os.path.join(SHARED.task_root_for(self.platform()), gha.repo_name),
+            )
             self.action_paths.add(gha.git_fetch_url)
 
-        if not any(CONFIG.git_ref == "refs/heads/%s" % branch for branch in DEPLOY_BRANCHES) and not CONFIG.git_ref.startswith("refs/tags/"):
+        if not any(
+            CONFIG.git_ref == "refs/heads/%s" % branch for branch in DEPLOY_BRANCHES
+        ) and not CONFIG.git_ref.startswith("refs/tags/"):
             gha = gha.with_env("PAHKAT_NO_DEPLOY", "true")
 
         if "[no deploy]" in CONFIG.commit_message:
@@ -641,6 +664,7 @@ class WindowsGenericWorkerTask(GenericWorkerTask):
 
     Scripts are written as `.bat` files executed with `cmd.exe`.
     """
+
     def platform(self):
         return "win"
 
@@ -673,7 +697,11 @@ class WindowsGenericWorkerTask(GenericWorkerTask):
         )
 
     def build_command(self):
-        return ['cmd.exe /C "{}"'.format(deindent("\n".join(self.scripts + self.late_scripts)))]
+        return [
+            'cmd.exe /C "{}"'.format(
+                deindent("\n".join(self.scripts + self.late_scripts))
+            )
+        ]
 
     def with_path_from_homedir(self, *paths: str):
         """
@@ -760,10 +788,11 @@ class WindowsGenericWorkerTask(GenericWorkerTask):
         )
 
     def with_cmake(self):
-        return (
-            self
-            .with_path_from_homedir("cmake\\cmake-3.23.1-windows-x86_64\\bin")
-            .with_directory_mount("https://github.com/Kitware/CMake/releases/download/v3.23.1/cmake-3.23.1-windows-x86_64.zip", path="cmake")
+        return self.with_path_from_homedir(
+            "cmake\\cmake-3.23.1-windows-x86_64\\bin"
+        ).with_directory_mount(
+            "https://github.com/Kitware/CMake/releases/download/v3.23.1/cmake-3.23.1-windows-x86_64.zip",
+            path="cmake",
         )
 
     def with_curl_script(self, url, file_path, as_gha=False):
@@ -1078,7 +1107,9 @@ def make_repo_bundle(path: str, bundle_name: str, sha: str, *, shallow=True):
     if shallow:
         subprocess.check_call(["git", "config", "user.name", "Decision task"])
         subprocess.check_call(["git", "config", "user.email", "nobody@divvun.no"])
-        tree = subprocess.check_output(["git", "show", sha, "--pretty=%T", "--no-patch"])
+        tree = subprocess.check_output(
+            ["git", "show", sha, "--pretty=%T", "--no-patch"]
+        )
         message = "Shallow version of commit " + sha
         commit = subprocess.check_output(
             ["git", "commit-tree", tree.strip(), "-m", message]
@@ -1094,19 +1125,11 @@ def make_repo_bundle(path: str, bundle_name: str, sha: str, *, shallow=True):
             "create",
             f"../{bundle_name}",
             CONFIG.git_bundle_shallow_ref,
-            ]
+        ]
     else:
         subprocess.check_call(["git", "fetch", "--unshallow", CONFIG.git_url])
-        subprocess.check_call(
-            ["git", "update-ref", CONFIG.git_bundle_shallow_ref, sha]
-        )
-        create = [
-            "git",
-            "bundle",
-            "create",
-            f"../{bundle_name}",
-            "--all"
-        ]
+        subprocess.check_call(["git", "update-ref", CONFIG.git_bundle_shallow_ref, sha])
+        create = ["git", "bundle", "create", f"../{bundle_name}", "--all"]
 
     with subprocess.Popen(create) as p:
         os.chdir(cwd)

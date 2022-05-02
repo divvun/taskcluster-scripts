@@ -1,4 +1,11 @@
-from .common import linux_build_task, windows_task, gha_setup, gha_pahkat, PAHKAT_REPO, NIGHTLY_CHANNEL
+from .common import (
+    linux_build_task,
+    windows_task,
+    gha_setup,
+    gha_pahkat,
+    PAHKAT_REPO,
+    NIGHTLY_CHANNEL,
+)
 from decisionlib import CONFIG
 from gha import GithubAction, GithubActionScript
 
@@ -23,10 +30,7 @@ def create_libreoffice_tasks():
             "version",
             GithubAction(
                 "Eijebong/divvun-actions/version",
-                {
-                    "filepath": "VERSION",
-                    "nightly-channel": NIGHTLY_CHANNEL
-                },
+                {"filepath": "VERSION", "nightly-channel": NIGHTLY_CHANNEL},
             ),
         )
         .with_apt_install("zip")

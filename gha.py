@@ -12,11 +12,11 @@ class GithubAction:
         Args will all be put in the env as INPUT_{key} = {value}
         """
         # Path can be None from GithubActionScript
-        if path and '@' in path:
-            self.path, self.version = path.split('@', 1)
+        if path and "@" in path:
+            self.path, self.version = path.split("@", 1)
         else:
             self.path = path
-            self.version = 'master'
+            self.version = "master"
         self.args = {}
         self.post_path = None
         self.run_path = "index.js"

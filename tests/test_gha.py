@@ -29,7 +29,8 @@ class TestGithubActionPaths(unittest.TestCase):
             "node ${HOME}/${TASK_ID}/_temp/actions-rs/toolchain/dist/index.js",
         )
         self.assertEqual(
-            self.action_deep.gen_script("win"), "node ${HOME}/${TASK_ID}/_temp/divvun/action/pahkat/index.js",
+            self.action_deep.gen_script("win"),
+            "node ${HOME}/${TASK_ID}/_temp/divvun/action/pahkat/index.js",
         )
 
     def test_action_path(self):
@@ -304,4 +305,10 @@ class TestRunnerGetValueFromStr(BaseRunnerTest):
         self.assertEqual(value, "false")
 
     def test_should_run(self):
-        self.assertEqual(runner.parse_value_from("${{ steps.step_1.outputs.channel == 'nightly' }}", {"step_1": {"channel": "nightly"}}), "true")
+        self.assertEqual(
+            runner.parse_value_from(
+                "${{ steps.step_1.outputs.channel == 'nightly' }}",
+                {"step_1": {"channel": "nightly"}},
+            ),
+            "true",
+        )

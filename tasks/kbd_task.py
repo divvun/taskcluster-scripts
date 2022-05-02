@@ -14,7 +14,10 @@ def create_kbd_task(os_name):
                 "build",
                 GithubAction(
                     "Eijebong/divvun-actions/keyboard/build",
-                    {"keyboard-type": "keyboard-windows", "nightly-channel": NIGHTLY_CHANNEL},
+                    {
+                        "keyboard-type": "keyboard-windows",
+                        "nightly-channel": NIGHTLY_CHANNEL,
+                    },
                 ),
             )
             .with_gha(
@@ -49,7 +52,10 @@ def create_kbd_task(os_name):
                 "build",
                 GithubAction(
                     "Eijebong/divvun-actions/keyboard/build",
-                    {"keyboard-type": "keyboard-macos", "nightly-channel": NIGHTLY_CHANNEL},
+                    {
+                        "keyboard-type": "keyboard-macos",
+                        "nightly-channel": NIGHTLY_CHANNEL,
+                    },
                 ),
             )
             .with_gha(
