@@ -97,6 +97,9 @@ def tasks(task_for: str):
     if repo_name == "kbdi":
         create_kbdi_tasks()
 
+    if repo_name == "kbdgen":
+        create_kbdgen_tasks()
+
 
 task_for = os.environ["TASK_FOR"]
 repo_name = os.environ["REPO_NAME"]

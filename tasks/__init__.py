@@ -14,3 +14,4 @@ from .windivvun import create_windivvun_tasks
 from .divvun_keyboard import create_divvun_keyboard_tasks
 from .gut import create_gut_tasks
 from .kbdi import create_kbdi_tasks
+from .kbdgen_task import create_kbdgen_tasks
