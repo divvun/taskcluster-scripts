@@ -1,15 +1,6 @@
-from .common import gha_pahkat, generic_rust_task, generic_rust_build_upload_task
+from .common import gha_pahkat, generic_rust_task, generic_rust_build_upload_task, RUST_ENV
 from decisionlib import CONFIG
 from gha import GithubAction
-
-RUST_ENV = {
-    "RUST_VERSION": "stable",
-    "CARGO_INCREMENTAL": "0",
-    "RUSTUP_MAX_RETRIES": "10",
-    "CARGO_NET_RETRY": "10",
-    "RUST_BACKTRACE": "full",
-    "LZMA_API_STATIC": "1",
-}
 
 
 def create_kbdi_tasks():

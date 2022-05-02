@@ -9,6 +9,14 @@ import os
 BUILD_ARTIFACTS_EXPIRE_IN = "1 week"
 PAHKAT_REPO = "https://pahkat.uit.no/"
 NIGHTLY_CHANNEL = "nightly"
+RUST_ENV = {
+    "RUST_VERSION": "stable",
+    "CARGO_INCREMENTAL": "0",
+    "RUSTUP_MAX_RETRIES": "10",
+    "CARGO_NET_RETRY": "10",
+    "RUST_BACKTRACE": "full",
+    "LZMA_API_STATIC": "1",
+}
 
 
 def linux_build_task(name, bundle_dest="repo", with_secrets=True, clone_self=True):

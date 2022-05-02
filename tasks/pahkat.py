@@ -7,16 +7,8 @@ from .common import (
     PAHKAT_REPO,
     NIGHTLY_CHANNEL,
     generic_rust_build_upload_task,
+    RUST_ENV
 )
-
-PAHKAT_RUST_ENV = {
-    "RUST_VERSION": "stable",
-    "CARGO_INCREMENTAL": "0",
-    "RUSTUP_MAX_RETRIES": "10",
-    "CARGO_NET_RETRY": "10",
-    "RUST_BACKTRACE": "full",
-    "LZMA_API_STATIC": "1",
-}
 
 
 def create_pahkat_tasks():
@@ -64,7 +56,7 @@ def create_pahkat_prefix_cli_tasks():
         package_id="pahkat-prefix-cli",
         target_dir="target",
         bin_name="pahkat-cli",
-        env=PAHKAT_RUST_ENV,
+        env=RUST_ENV,
         setup_uploader=setup_uploader,
         rename_binary="pahkat-prefix",
         get_features=get_features,
@@ -81,7 +73,7 @@ def create_pahkat_uploader_tasks():
         package_id="pahkat-uploader",
         target_dir="pahkat-uploader/target",
         bin_name="pahkat-uploader",
-        env=PAHKAT_RUST_ENV,
+        env=RUST_ENV,
         setup_uploader=setup_uploader,
     )
 
@@ -95,7 +87,7 @@ def create_pahkat_repomgr_tasks():
         package_id="pahkat-repomgr",
         target_dir="target",
         bin_name="repomgr",
-        env=PAHKAT_RUST_ENV,
+        env=RUST_ENV,
         setup_uploader=setup_uploader,
     )
 
@@ -262,7 +254,7 @@ def create_pahkat_windows_cli_task():
         package_id="pahkat-windows-cli",
         target_dir="target",
         bin_name="pahkat-cli",
-        env=PAHKAT_RUST_ENV,
+        env=RUST_ENV,
         setup_uploader=setup_uploader,
         rename_binary="pahkat-windows",
         get_features=get_features,
