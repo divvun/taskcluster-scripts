@@ -15,3 +15,4 @@ from .divvun_keyboard import create_divvun_keyboard_tasks
 from .gut import create_gut_tasks
 from .kbdi import create_kbdi_tasks
 from .kbdgen import create_kbdgen_tasks
+from .mso_resources import create_mso_resources_tasks
