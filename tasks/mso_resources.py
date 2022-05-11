@@ -18,6 +18,7 @@ def create_patch_gen_task():
         .with_gha("setup", gha_setup())
         .with_gha("install_rustup", GithubAction("actions-rs/toolchain", {"toolchain": "nightly", "overried": "true"}))
         .with_gha("build_patcher", GithubActionScript("cd mso-patcher && npm install && npm run build"))
+        .with_gha("build_rust", GithubAction("actions-rs/cargo", {"command": "build"}))
         .with_gha("download_office", GithubActionScript(r"""
           for MSO_URL in $(node mso-patcher/dist/unpatched.js); do
               export MSO_VER=$(echo $MSO_URL | sed -e 's/https:\/\/officecdn-microsoft-com.akamaized.net\/pr\/C1297A47-86C4-4C1F-97FA-950631F94777\/MacAutoupdate\/Microsoft_Word_\(.*\)_Installer\.pkg/\1/')
@@ -29,6 +30,5 @@ def create_patch_gen_task():
               echo $MSO_VER
           done
           """))
-        .with_gha("build_rust", GithubAction("actions-rs/cargo", {"command": "build"}))
         .find_or_create(f"build.mso_resources.patches.{CONFIG.index_path}"))
 
