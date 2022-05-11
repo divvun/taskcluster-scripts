@@ -28,6 +28,7 @@ def create_patch_gen_task():
               rm -f mso.pkg
               sudo mv "/Applications/Microsoft Word.app" $MSO_VER
               echo $MSO_VER
+              break
           done
           """))
         .find_or_create(f"build.mso_resources.patches.{CONFIG.index_path}"))
