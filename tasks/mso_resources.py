@@ -19,10 +19,11 @@ def create_patch_gen_task():
         .with_gha("install_rustup", GithubAction("actions-rs/toolchain", {"toolchain": "nightly", "overried": "true"}))
         .with_gha("build_patcher", GithubActionScript("cd mso-patcher && npm install && npm run build"))
         .with_gha("download_office", GithubActionScript(r"""
+          set -e
           export MSO_VER=$(echo $MSO_URL | sed -e 's/https:\/\/officecdn-microsoft-com.akamaized.net\/pr\/C1297A47-86C4-4C1F-97FA-950631F94777\/MacAutoupdate\/Microsoft_Word_\(.*\)_Installer\.pkg/\1/')
           wget -o mso.pkg "$MSO_URL"
-          sudo installer -verbose -pkg mso.pkg -target /
-          rm mso.pkg
+          installer -verbose -pkg mso.pkg -target /
+          rm -f mso.pkg
           sudo mv "/Applications/Microsoft Word.app" $MSO_VER
           echo $MSO_VER
           """))
