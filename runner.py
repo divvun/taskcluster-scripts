@@ -371,6 +371,7 @@ def should_run(condition, step):
 def parse_value_from(s, outputs):
     remainder = s
     out = ""
+    secrets_service = helper.TaskclusterConfig().get_service("secrets")
 
     while remainder:
         start_index = remainder.find("${{")
@@ -393,8 +394,16 @@ def parse_value_from(s, outputs):
                 return CURRENT_STATUS
 
             var_name = parts[0].split(".")
-            if var_name[0] != "steps":
+            if var_name[0] not in ["steps", "secrets"]:
                 raise ValueError(f"Unsupported operation in {remainder}")
+
+            if var_name[0] == "secrets":
+                if len(parts) < 3:
+                    raise ValueError("Secret definition is invalid for {remainder}")
+                res = secrets_service.get(var_name[1])["secret"]
+                for part in var_name[2:]:
+                    res = res[part]
+                return res
 
             if len(var_name) == 3:
                 # ${{ steps.step_name.outputs['foo'] }}
