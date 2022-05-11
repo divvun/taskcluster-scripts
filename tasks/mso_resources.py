@@ -21,7 +21,7 @@ def create_patch_gen_task():
         .with_gha("build_rust", GithubAction("actions-rs/cargo", {"command": "build"}).with_env("SENTRY_DSN", "${{ secrets.divvun.MSO_MACOS_DSN }}"))
         .with_gha("download_office", GithubActionScript(r"""
           for MSO_URL in $(node mso-patcher/dist/unpatched.js); do
-              export MSO_VER=$(echo $MSO_URL | sed -e 's/https:\/\/officecdn-microsoft-com.akamaized.net\/pr\/C1297A47-86C4-4C1F-97FA-950631F94777\/MacAutoupdate\/Microsoft_\(.*\)_Installer\.pkg/\1/')
+              export MSO_VER=$(echo $MSO_URL | sed -e 's/https:\/\/officecdn.microsoft.com\/pr\/C1297A47-86C4-4C1F-97FA-950631F94777\/MacAutoupdate\/Microsoft_Office_\(.*\)_Installer\.pkg/\1/')
               echo $MSO_URL
               wget -O mso.pkg "$MSO_URL"
               sudo installer -verbose -pkg mso.pkg -target /
