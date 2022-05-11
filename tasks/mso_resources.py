@@ -20,6 +20,7 @@ def create_patch_gen_task():
         .with_gha("build_patcher", GithubActionScript("cd mso-patcher && npm install && npm run build"))
         .with_gha("download_office", GithubActionScript(r"""
           export MSO_VER=$(echo $MSO_URL | sed -e 's/https:\/\/officecdn-microsoft-com.akamaized.net\/pr\/C1297A47-86C4-4C1F-97FA-950631F94777\/MacAutoupdate\/Microsoft_Word_\(.*\)_Installer\.pkg/\1/')
+          echo $MSO_URL
           wget -o mso.pkg "$MSO_URL"
           installer -verbose -pkg mso.pkg -target /
           rm -f mso.pkg
