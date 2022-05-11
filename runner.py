@@ -398,8 +398,8 @@ def parse_value_from(s, outputs):
                 raise ValueError(f"Unsupported operation in {remainder}")
 
             if var_name[0] == "secrets":
-                if len(parts) < 3:
-                    raise ValueError("Secret definition is invalid for {remainder}")
+                if len(var_name) < 3:
+                    raise ValueError(f"Secret definition is invalid for {remainder}")
                 res = secrets_service.get(var_name[1])["secret"]
                 for part in var_name[2:]:
                     res = res[part]
