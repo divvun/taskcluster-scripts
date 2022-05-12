@@ -20,7 +20,9 @@ def create_patch_gen_task():
         .with_gha("build_patcher", GithubActionScript("cd mso-patcher && npm install && npm run build"))
         .with_gha("build_rust", GithubAction("actions-rs/cargo", {"command": "build", "args": "--release"}).with_env("SENTRY_DSN", "${{ secrets.divvun.MSO_MACOS_DSN }}"))
         .with_gha("build_rust_aarch64", GithubAction("actions-rs/cargo", {"command": "build", "args": "--release --target aarch64-apple-darwin"}).with_env("SENTRY_DSN", "${{ secrets.divvun.MSO_MACOS_DSN }}"))
+        .with_gha("version", GithubAction("Eijebong/divvun-actions/version", {"cargo": "divvunspell-mso/Cargo.toml", "nightly-channel": NIGHTLY_CHANNEL}).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN"))
         .with_gha("download_office", GithubActionScript(r"""
+          mkdir -p mso
           for MSO_URL in $(node mso-patcher/dist/unpatched.js); do
               export MSO_VER=$(echo $MSO_URL | sed -e 's/https:\/\/officecdn.microsoft.com\/pr\/C1297A47-86C4-4C1F-97FA-950631F94777\/MacAutoupdate\/Microsoft_Office_\(.*\)_Installer\.pkg/\1/')
               echo $MSO_URL
@@ -28,8 +30,9 @@ def create_patch_gen_task():
               sudo installer -verbose -pkg mso.pkg -target /
               rm -f mso.pkg
               ls /Applications
-              sudo mv "/Applications/Microsoft Word.app" $MSO_VER
-              chmod 777 -R $MSO_VER
+              sudo mv "/Applications/Microsoft Word.app" mso/$MSO_VER
+              chmod -R 777 mso/$MSO_VER
+              export MSO="$MSO --mso $PWD/mso/$MSO_VER"
               break
           done
           lipo -create -output patcher ./target/release/patcher ./target/aarch64-apple-darwin/release/patcher
@@ -41,9 +44,10 @@ def create_patch_gen_task():
           -n "$DEVELOPER_ACCOUNT" -p "$DEVELOPER_PASSWORD_CHAIN_ITEM" \
           -H "Divvunspell MSOffice" -t osx msoffice_checker \
           --lib ./libdivvunspellmso.dylib \
-          --mso_patches "./patches" $MSO_VER
+          --mso_patches "./patches" $MSO
+
 
           git status
-          """))
+          """).with_env("VERSION", "${{ steps.version.outputs.version }}").with_env("SENTRY_DSN", "${{ secrets.divvun.MSO_MACOS_DSN }}"))
         .find_or_create(f"build.mso_resources.patches.{CONFIG.index_path}"))
 
