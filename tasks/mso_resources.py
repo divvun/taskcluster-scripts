@@ -16,9 +16,10 @@ def create_mso_resources_tasks():
 def create_patch_gen_task():
     (macos_task("Generate MSO patches")
         .with_gha("setup", gha_setup())
-        .with_gha("install_rustup", GithubAction("actions-rs/toolchain", {"toolchain": "nightly", "override": "true"}))
+        .with_gha("install_rustup", GithubAction("actions-rs/toolchain", {"toolchain": "nightly", "override": "true", "target": "aarch64-apple-darwin"}))
         .with_gha("build_patcher", GithubActionScript("cd mso-patcher && npm install && npm run build"))
-        .with_gha("build_rust", GithubAction("actions-rs/cargo", {"command": "build"}).with_env("SENTRY_DSN", "${{ secrets.divvun.MSO_MACOS_DSN }}"))
+        .with_gha("build_rust", GithubAction("actions-rs/cargo", {"command": "build", "args": "--release"}).with_env("SENTRY_DSN", "${{ secrets.divvun.MSO_MACOS_DSN }}"))
+        .with_gha("build_rust_aarch64", GithubAction("actions-rs/cargo", {"command": "build", "args": "--release --target aarch64-apple-darwin"}).with_env("SENTRY_DSN", "${{ secrets.divvun.MSO_MACOS_DSN }}"))
         .with_gha("download_office", GithubActionScript(r"""
           for MSO_URL in $(node mso-patcher/dist/unpatched.js); do
               export MSO_VER=$(echo $MSO_URL | sed -e 's/https:\/\/officecdn.microsoft.com\/pr\/C1297A47-86C4-4C1F-97FA-950631F94777\/MacAutoupdate\/Microsoft_Office_\(.*\)_Installer\.pkg/\1/')
@@ -28,9 +29,21 @@ def create_patch_gen_task():
               rm -f mso.pkg
               ls /Applications
               sudo mv "/Applications/Microsoft Word.app" $MSO_VER
-              echo $MSO_VER
+              chmod 777 -R $MSO_VER
               break
           done
+          lipo -create -output patcher ./target/release/patcher ./target/aarch64-apple-darwin/release/patcher
+          lipo -create -output libdivvunspellmso.dylib ./target/aarch64-apple-darwin/release/libdivvunspellmso.dylib ./target/release/libdivvunspellmso.dylib
+
+          ./target/release/divvun-bundler-mso -V $VERSION \
+          -o outputs \
+          -R -a "Developer ID Application: The University of Tromso (2K5J2584NX)" -i "Developer ID Installer: The University of Tromso (2K5J2584NX)" \
+          -n "$DEVELOPER_ACCOUNT" -p "$DEVELOPER_PASSWORD_CHAIN_ITEM" \
+          -H "Divvunspell MSOffice" -t osx msoffice_checker \
+          --lib ./libdivvunspellmso.dylib \
+          --mso_patches "./patches" $MSO_VER
+
+          git status
           """))
         .find_or_create(f"build.mso_resources.patches.{CONFIG.index_path}"))
 
