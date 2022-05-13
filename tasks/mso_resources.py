@@ -37,7 +37,9 @@ def create_patch_gen_task():
           done
           lipo -create -output patcher ./target/release/patcher ./target/aarch64-apple-darwin/release/patcher
           lipo -create -output libdivvunspellmso.dylib ./target/aarch64-apple-darwin/release/libdivvunspellmso.dylib ./target/release/libdivvunspellmso.dylib
+          wget -O sentry-cli https://github.com/getsentry/sentry-cli/releases/download/2.0.4/sentry-cli-Darwin-universal
           export PATCHER_PATH=./patcher
+          export SENTRY_CLI_PATH=./sentry-cli
 
           ./target/release/divvun-bundler-mso -V $VERSION \
           -o outputs \
