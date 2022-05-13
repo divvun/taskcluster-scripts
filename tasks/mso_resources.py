@@ -31,12 +31,13 @@ def create_patch_gen_task():
               rm -f mso.pkg
               ls /Applications
               sudo mv "/Applications/Microsoft Word.app" mso/$MSO_VER
-              chmod -R 777 mso/$MSO_VER
+              sudo chmod -R 777 mso/$MSO_VER
               export MSO="$MSO --mso $PWD/mso/$MSO_VER"
               break
           done
           lipo -create -output patcher ./target/release/patcher ./target/aarch64-apple-darwin/release/patcher
           lipo -create -output libdivvunspellmso.dylib ./target/aarch64-apple-darwin/release/libdivvunspellmso.dylib ./target/release/libdivvunspellmso.dylib
+          export PATCHER_PATH=./patcher
 
           ./target/release/divvun-bundler-mso -V $VERSION \
           -o outputs \
