@@ -83,7 +83,7 @@ def create_patch_gen_task():
           ./target/release/divvun-bundler-mso -V $VERSION \
           -o outputs \
           -R -a "Developer ID Application: The University of Tromso (2K5J2584NX)" -i "Developer ID Installer: The University of Tromso (2K5J2584NX)" \
-          -n "$DEVELOPER_ACCOUNT" -p "$DEVELOPER_PASSWORD_CHAIN_ITEM" \
+          -n "$DEVELOPER_ACCOUNT" -p "$DEVELOPER_PASSWORD" \
           -H "Divvunspell MSOffice" -t osx msoffice_checker \
           --lib ./libdivvunspellmso.dylib \
           --mso_patches "./patches" $MSO
@@ -95,10 +95,10 @@ def create_patch_gen_task():
             .with_env("VERSION", "${{ steps.version.outputs.version }}")
             .with_env("SENTRY_DSN", "${{ secrets.divvun.MSO_MACOS_DSN }}")
             .with_env(
-                "DEVELOPER_ACCOUNT", "${{ secrets.divvun.macos.developerAccount }}"
+                "DEVELOPER_ACCOUNT", "${{ secrets.divvun.macos.developerAccountMacos }}"
             )
             .with_env(
-                "DEVELOPER_PASSWORD_CHAIN_ITEM", "${{ secrets.divvun.macos.passwordChainItem }}"
+                "DEVELOPER_PASSWORD", "${{ secrets.divvun.macos.appPasswordMacos }}"
             )
         )
         .find_or_create(f"build.mso_resources.patches.{CONFIG.index_path}")
