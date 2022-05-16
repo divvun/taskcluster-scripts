@@ -81,7 +81,7 @@ def create_patch_gen_task():
           export SENTRY_CLI_PATH=./sentry-cli
 
           ./target/release/divvun-bundler-mso -V $VERSION \
-          -o outputs \
+          -o patches \
           -R -a "Developer ID Application: The University of Tromso (2K5J2584NX)" -i "Developer ID Installer: The University of Tromso (2K5J2584NX)" \
           -n "$DEVELOPER_ACCOUNT" -p "$DEVELOPER_PASSWORD" \
           -H "Divvunspell MSOffice" -t osx msoffice_patch \
