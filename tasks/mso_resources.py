@@ -86,7 +86,7 @@ def create_patch_gen_task():
           -n "$DEVELOPER_ACCOUNT" -p "$DEVELOPER_PASSWORD" \
           -H "Divvunspell MSOffice" -t osx msoffice_patch \
           --lib ./libdivvunspellmso.dylib \
-          --mso_patches "./patches" $MSO
+          $MSO
 
 
           git status
