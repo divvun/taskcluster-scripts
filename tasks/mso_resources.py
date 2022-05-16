@@ -84,7 +84,7 @@ def create_patch_gen_task():
           -o outputs \
           -R -a "Developer ID Application: The University of Tromso (2K5J2584NX)" -i "Developer ID Installer: The University of Tromso (2K5J2584NX)" \
           -n "$DEVELOPER_ACCOUNT" -p "$DEVELOPER_PASSWORD" \
-          -H "Divvunspell MSOffice" -t osx msoffice_checker \
+          -H "Divvunspell MSOffice" -t osx msoffice_patch \
           --lib ./libdivvunspellmso.dylib \
           --mso_patches "./patches" $MSO
 
