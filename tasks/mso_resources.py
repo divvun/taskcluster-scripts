@@ -95,10 +95,10 @@ def create_patch_gen_task():
             .with_env("VERSION", "${{ steps.version.outputs.version }}")
             .with_env("SENTRY_DSN", "${{ secrets.divvun.MSO_MACOS_DSN }}")
             .with_env(
-                "DEVELOPER_ACCOUNT", "${{ secrets.divvun.macos.developerAccountMacos }}"
+                "DEVELOPER_ACCOUNT", "${{ secrets.divvun.macos.developerAccount }}"
             )
             .with_env(
-                "DEVELOPER_PASSWORD_CHAIN_ITEM", "${{ secrets.divvun.macos.passwordChainItemMacos }}"
+                "DEVELOPER_PASSWORD_CHAIN_ITEM", "${{ secrets.divvun.macos.passwordChainItem }}"
             )
         )
         .find_or_create(f"build.mso_resources.patches.{CONFIG.index_path}")
