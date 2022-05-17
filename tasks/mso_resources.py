@@ -106,6 +106,7 @@ def create_patch_gen_task():
             git add patches/install
             git add patches/uninstall
             git commit -m "[CD] Refresh patches"
+            git clean -fdx
         """))
         .with_gha("create_mr", GithubAction("peter-evans/create-pull-request@v4", {
             "branch": "refresh-patches",
