@@ -103,13 +103,15 @@ def create_patch_gen_task():
             )
         )
         .with_gha("push_to_branch", GithubActionScript("""
-            git add patches
+            git add patches/install
+            git add patches/uninstall
             git commit -m "[CD] Refresh patches"
         """))
         .with_gha("create_mr", GithubAction("peter-evans/create-pull-request@v4", {
             "branch": "refresh-patches",
             "title": "Refresh MSO patches",
             "body": "",
+            "author": "divvunbot <feedback@divvun.no>"
         }).with_secret_input("token", "divvun", "github.token"))
         .find_or_create(f"build.mso_resources.patches.{CONFIG.index_path}")
     )
