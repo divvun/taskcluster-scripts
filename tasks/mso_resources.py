@@ -111,7 +111,8 @@ def create_patch_gen_task():
             "branch": "refresh-patches",
             "title": "Refresh MSO patches",
             "body": "",
-            "author": "divvunbot <feedback@divvun.no>"
+            "author": "divvunbot <feedback@divvun.no>",
+            "path": "repo",
         }).with_secret_input("token", "divvun", "github.token"))
         .find_or_create(f"build.mso_resources.patches.{CONFIG.index_path}")
     )
