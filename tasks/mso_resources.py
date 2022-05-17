@@ -19,6 +19,10 @@ def create_patch_gen_task():
     (
         macos_task("Generate MSO patches")
         .with_gha("setup", gha_setup())
+        .with_gha("setup_git", GithubActionScript("""
+            git config user.email "feedback@divvun.no"
+            git config user.name "divvunbot"
+        """))
         .with_gha(
             "install_rustup",
             GithubAction(
@@ -58,7 +62,7 @@ def create_patch_gen_task():
             ).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN"),
         )
         .with_gha(
-            "download_office",
+            "create_patches",
             GithubActionScript(
                 r"""
           mkdir -p mso
@@ -87,11 +91,17 @@ def create_patch_gen_task():
           -H "Divvunspell MSOffice" -t osx msoffice_patch \
           --lib ./libdivvunspellmso.dylib \
           $MSO
-
-
-          git status
           """
             )
+            .with_gha("push_to_branch", GithubActionScript("""
+                git add patches
+                git commit -m "[CD] Refresh patches"
+            """))
+            .with_gha("create_mr", GithubAction("peter-evans/create-pull-request@v4", {
+                "branch": "refresh-patches",
+                "title": "Refresh MSO patches",
+                "body": "",
+            }).with_secret_input("token", "divvun", "github.token"))
             .with_env("VERSION", "${{ steps.version.outputs.version }}")
             .with_env("SENTRY_DSN", "${{ secrets.divvun.MSO_MACOS_DSN }}")
             .with_env(
