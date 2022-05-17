@@ -93,15 +93,6 @@ def create_patch_gen_task():
           $MSO
           """
             )
-            .with_gha("push_to_branch", GithubActionScript("""
-                git add patches
-                git commit -m "[CD] Refresh patches"
-            """))
-            .with_gha("create_mr", GithubAction("peter-evans/create-pull-request@v4", {
-                "branch": "refresh-patches",
-                "title": "Refresh MSO patches",
-                "body": "",
-            }).with_secret_input("token", "divvun", "github.token"))
             .with_env("VERSION", "${{ steps.version.outputs.version }}")
             .with_env("SENTRY_DSN", "${{ secrets.divvun.MSO_MACOS_DSN }}")
             .with_env(
@@ -111,5 +102,14 @@ def create_patch_gen_task():
                 "DEVELOPER_PASSWORD", "${{ secrets.divvun.macos.appPasswordMacos }}"
             )
         )
+        .with_gha("push_to_branch", GithubActionScript("""
+            git add patches
+            git commit -m "[CD] Refresh patches"
+        """))
+        .with_gha("create_mr", GithubAction("peter-evans/create-pull-request@v4", {
+            "branch": "refresh-patches",
+            "title": "Refresh MSO patches",
+            "body": "",
+        }).with_secret_input("token", "divvun", "github.token"))
         .find_or_create(f"build.mso_resources.patches.{CONFIG.index_path}")
     )
