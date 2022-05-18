@@ -1,7 +1,5 @@
 from .common import (
-    linux_build_task,
-    windows_task,
-    gha_setup,
+    macos_task,
     gha_pahkat,
     PAHKAT_REPO,
     NIGHTLY_CHANNEL,
@@ -11,8 +9,8 @@ from gha import GithubAction, GithubActionScript
 
 
 def create_libreoffice_tasks():
-    oxt_task = (
-        linux_build_task("Build OXT")
+    return (
+        macos_task("Build OXT")
         .with_gha(
             "Download artifacts",
             GithubAction(
@@ -41,7 +39,50 @@ def create_libreoffice_tasks():
         mkdir -p lib/win32-amd64
         mv *.dll lib/win32-amd64
         zip -r divvunspell.zip *
+        rm -Rf lib
         mv divvunspell.zip /divvunspell.oxt
+        cd /
+        tar caf divvunspell.oxt.txz divvunspell.oxt
+        """
+            ),
+        )
+        .with_gha("Prepare macos OXT", GithubActionScript("""
+        mkdir -p lib/darwin-x86_64
+        mkdir -p lib/darwin-arm64
+        """))
+        .with_gha(
+            "Download artifacts macos",
+            GithubAction(
+                "dawidd6/action-download-artifact@v2",
+                {
+                    "workflow": "ci.yml",
+                    "branch": "main",
+                    "name": "lib-darwin-aarch64",
+                    "repo": "divvun/divvunspell",
+                    "path": "lib/darwin-arm64",
+                },
+            ).with_secret_input("github_token", "divvun", "github.token"),
+        )
+        .with_gha(
+            "Download artifacts macos (x64)",
+            GithubAction(
+                "dawidd6/action-download-artifact@v2",
+                {
+                    "workflow": "ci.yml",
+                    "branch": "main",
+                    "name": "lib-darwin-x86_64",
+                    "repo": "divvun/divvunspell",
+                    "path": "lib/darwin-x86_64",
+                },
+            ).with_secret_input("github_token", "divvun", "github.token"),
+        )
+        .with_gha(
+            "Create macos OXT",
+            GithubActionScript(
+                """
+        zip -r divvunspell.zip *
+        rm -Rf lib
+        mv divvunspell.zip /divvunspell-macos.oxt
         cd /
         tar caf divvunspell.oxt.txz divvunspell.oxt
         """
@@ -63,5 +104,6 @@ def create_libreoffice_tasks():
             ),
         )
         .with_artifacts("/divvunspell.oxt")
+        .with_artifacts("/divvunspell-macos.oxt")
         .find_or_create(f"build.libreoffice.linux_x64.{CONFIG.index_path}")
     )
