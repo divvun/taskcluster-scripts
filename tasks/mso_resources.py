@@ -109,6 +109,6 @@ def create_patch_gen_task():
             "body": "",
             "author": "divvunbot <feedback@divvun.no>",
             "path": "repo",
-        }, enabled=False).with_secret_input("token", "divvun", "github.token"))
+        }).with_secret_input("token", "divvun", "github.token"), enabled=False)
         .find_or_create(f"build.mso_resources.patches.{CONFIG.index_path}")
     )
