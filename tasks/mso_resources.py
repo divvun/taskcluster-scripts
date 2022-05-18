@@ -76,7 +76,6 @@ def create_patch_gen_task():
               sudo mv "/Applications/Microsoft Word.app" mso/$MSO_VER
               sudo chmod -R 777 mso/$MSO_VER
               export MSO="$MSO --mso $PWD/mso/$MSO_VER"
-              break
           done
 
           ./target/release/divvun-bundler-mso -V $VERSION \
@@ -109,6 +108,6 @@ def create_patch_gen_task():
             "body": "",
             "author": "divvunbot <feedback@divvun.no>",
             "path": "repo",
-        }).with_secret_input("token", "divvun", "github.token"), enabled=False)
+        }).with_secret_input("token", "divvun", "github.token"))
         .find_or_create(f"build.mso_resources.patches.{CONFIG.index_path}")
     )
