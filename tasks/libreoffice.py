@@ -39,7 +39,7 @@ def create_libreoffice_tasks():
         mv *.dll lib/win32-amd64
         zip -r divvunspell.zip *
         rm -Rf lib
-        mv divvunspell.zip $HOME
+        mv divvunspell.zip $HOME/divvunspell.oxt
         cd $HOME
         tar caf divvunspell.oxt.txz divvunspell.oxt
         """
