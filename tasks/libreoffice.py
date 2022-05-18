@@ -39,8 +39,8 @@ def create_libreoffice_tasks():
         mv *.dll lib/win32-amd64
         zip -r divvunspell.zip *
         rm -Rf lib
-        mv divvunspell.zip /divvunspell.oxt
-        cd /
+        mv divvunspell.zip $HOME
+        cd $HOME
         tar caf divvunspell.oxt.txz divvunspell.oxt
         """
             ),
@@ -81,9 +81,9 @@ def create_libreoffice_tasks():
                 """
         zip -r divvunspell.zip *
         rm -Rf lib
-        mv divvunspell.zip /divvunspell-macos.oxt
-        cd /
-        tar caf divvunspell.oxt.txz divvunspell.oxt
+        mv divvunspell.zip $HOME/divvunspell-macos.oxt
+        cd $HOME
+        tar caf divvunspell-macos.oxt.txz divvunspell-macos.oxt
         """
             ),
         )
@@ -98,11 +98,11 @@ def create_libreoffice_tasks():
                     "repo": PAHKAT_REPO + "devtools/",
                     "version": "${{ steps.version.outputs.version }}",
                     "channel": "${{ steps.version.outputs.channel }}",
-                    "payload-path": "/divvunspell.oxt.txz",
+                    "payload-path": "/$HOME/divvunspell.oxt.txz",
                 },
             ),
         )
-        .with_artifacts("/divvunspell.oxt")
-        .with_artifacts("/divvunspell-macos.oxt")
+        .with_artifacts("/$HOME/divvunspell.oxt")
+        .with_artifacts("/$HOME/divvunspell-macos.oxt")
         .find_or_create(f"build.libreoffice.linux_x64.{CONFIG.index_path}")
     )
