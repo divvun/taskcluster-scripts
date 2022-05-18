@@ -31,7 +31,6 @@ def create_libreoffice_tasks():
                 {"filepath": "VERSION", "nightly-channel": NIGHTLY_CHANNEL},
             ),
         )
-        .with_apt_install("zip")
         .with_gha(
             "Create OXT",
             GithubActionScript(
