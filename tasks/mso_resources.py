@@ -78,11 +78,6 @@ def create_patch_gen_task():
               export MSO="$MSO --mso $PWD/mso/$MSO_VER"
               break
           done
-          lipo -create -output patcher ./target/release/patcher ./target/aarch64-apple-darwin/release/patcher
-          lipo -create -output libdivvunspellmso.dylib ./target/aarch64-apple-darwin/release/libdivvunspellmso.dylib ./target/release/libdivvunspellmso.dylib
-          wget -O sentry-cli https://github.com/getsentry/sentry-cli/releases/download/2.0.4/sentry-cli-Darwin-universal
-          export PATCHER_PATH=./patcher
-          export SENTRY_CLI_PATH=./sentry-cli
 
           ./target/release/divvun-bundler-mso -V $VERSION \
           -o patches \
@@ -102,7 +97,7 @@ def create_patch_gen_task():
                 "DEVELOPER_PASSWORD", "${{ secrets.divvun.macos.appPasswordMacos }}"
             )
         )
-        .with_gha("push_to_branch", GithubActionScript("""
+        .with_gha("create_commit", GithubActionScript("""
             git add patches/install
             git add patches/uninstall
             git commit -m "[CD] Refresh patches"
@@ -114,6 +109,6 @@ def create_patch_gen_task():
             "body": "",
             "author": "divvunbot <feedback@divvun.no>",
             "path": "repo",
-        }).with_secret_input("token", "divvun", "github.token"))
+        }, enabled=False).with_secret_input("token", "divvun", "github.token"))
         .find_or_create(f"build.mso_resources.patches.{CONFIG.index_path}")
     )
