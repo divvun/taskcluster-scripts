@@ -39,13 +39,30 @@ def create_libreoffice_tasks():
         mv *.dll lib/win32-amd64
         zip -r divvunspell.zip *
         rm -Rf lib
-        mv divvunspell.zip $HOME/divvunspell.oxt
-        cd $HOME
+        mv divvunspell.zip $GITHUB_WORKSPACE/divvunspell.oxt
+        cd $GITHUB_WORKSPACE
         tar caf divvunspell.oxt.txz divvunspell.oxt
         """
             ),
         )
+        .with_gha(
+            "deploy",
+            GithubAction(
+                "Eijebong/divvun-actions/deploy",
+                {
+                    "package-id": "divvunspell-libreoffice-oxt",
+                    "type": "TarballPackage",
+                    "platform": "windows",
+                    "repo": PAHKAT_REPO + "devtools/",
+                    "version": "${{ steps.version.outputs.version }}",
+                    "channel": "${{ steps.version.outputs.channel }}",
+                    "payload-path": "$GITHUB_WORKSPACE/divvunspell.oxt.txz",
+                },
+            ),
+        )
         .with_gha("Prepare macos OXT", GithubActionScript("""
+        rm -f *.oxt
+        rm -f *.txz
         mkdir -p lib/darwin-x86_64
         mkdir -p lib/darwin-arm64
         """))
@@ -81,25 +98,10 @@ def create_libreoffice_tasks():
                 """
         zip -r divvunspell.zip *
         rm -Rf lib
-        mv divvunspell.zip $HOME/divvunspell-macos.oxt
-        cd $HOME
+        mv divvunspell.zip $GITHUB_WORKSPACE/divvunspell-macos.oxt
+        cd $GITHUB_WORKSPACE
         tar caf divvunspell-macos.oxt.txz divvunspell-macos.oxt
         """
-            ),
-        )
-        .with_gha(
-            "deploy",
-            GithubAction(
-                "Eijebong/divvun-actions/deploy",
-                {
-                    "package-id": "divvunspell-libreoffice-oxt",
-                    "type": "TarballPackage",
-                    "platform": "windows",
-                    "repo": PAHKAT_REPO + "devtools/",
-                    "version": "${{ steps.version.outputs.version }}",
-                    "channel": "${{ steps.version.outputs.channel }}",
-                    "payload-path": "/$HOME/divvunspell.oxt.txz",
-                },
             ),
         )
         .with_gha(
@@ -113,7 +115,7 @@ def create_libreoffice_tasks():
                     "repo": PAHKAT_REPO + "devtools/",
                     "version": "${{ steps.version.outputs.version }}",
                     "channel": "${{ steps.version.outputs.channel }}",
-                    "payload-path": "/$HOME/divvunspell-macos.oxt.txz",
+                    "payload-path": "$GITHUB_WORKSPACE/divvunspell-macos.oxt.txz",
                 },
             ),
         )
