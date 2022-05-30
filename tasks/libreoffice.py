@@ -102,7 +102,22 @@ def create_libreoffice_tasks():
                 },
             ),
         )
-        .with_artifacts("/$HOME/divvunspell.oxt")
-        .with_artifacts("/$HOME/divvunspell-macos.oxt")
+        .with_gha(
+            "deploy_macos",
+            GithubAction(
+                "Eijebong/divvun-actions/deploy",
+                {
+                    "package-id": "divvunspell-libreoffice-oxt",
+                    "type": "TarballPackage",
+                    "platform": "macos",
+                    "repo": PAHKAT_REPO + "devtools/",
+                    "version": "${{ steps.version.outputs.version }}",
+                    "channel": "${{ steps.version.outputs.channel }}",
+                    "payload-path": "/$HOME/divvunspell-macos.oxt.txz",
+                },
+            ),
+        )
+        .with_artifacts("divvunspell.oxt")
+        .with_artifacts("divvunspell-macos.oxt")
         .find_or_create(f"build.libreoffice.linux_x64.{CONFIG.index_path}")
     )
