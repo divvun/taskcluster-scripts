@@ -83,6 +83,9 @@ CURRENT_STATUS = None
 _ORIG_PRINT = print
 TC_TASK_DIR=os.getcwd()
 
+# Put it in our environment so we can use it in task inputs
+os.environ["TC_TASK_DIR"] = TC_TASK_DIR
+
 
 def filtered_print(*args):
     """
