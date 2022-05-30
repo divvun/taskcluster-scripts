@@ -81,6 +81,7 @@ OUTPUTS: defaultdict[str, Dict[str, str]] = defaultdict(lambda: {})
 EXTRA_PATH: List[str] = []
 CURRENT_STATUS = None
 _ORIG_PRINT = print
+TC_TASK_DIR=os.getcwd()
 
 
 def filtered_print(*args):
@@ -254,6 +255,8 @@ def get_env_for(step_name: str, step: Dict[str, Any]):
         env[name] = to_string(res)
 
     env["GITHUB_ACTION"] = step_name
+    env["TC_TASK_DIR"] = TC_TASK_DIR
+
     if platform.system() == "Darwin":
         # Macos builders don't run as root so the proxy listens on :8080 instead of :80
         env["TASKCLUSTER_PROXY_URL"] = "http://taskcluster:8080"
