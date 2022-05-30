@@ -42,9 +42,6 @@ def create_libreoffice_tasks():
         mv divvunspell.zip $TC_TASK_DIR/divvunspell.oxt
         cd $TC_TASK_DIR
         tar caf divvunspell.oxt.txz divvunspell.oxt
-        pwd
-        ls
-        env
         """
             ),
         )
@@ -59,7 +56,7 @@ def create_libreoffice_tasks():
                     "repo": PAHKAT_REPO + "devtools/",
                     "version": "${{ steps.version.outputs.version }}",
                     "channel": "${{ steps.version.outputs.channel }}",
-                    "payload-path": "${TC_TASK_DIR}/divvunspell.oxt.txz",
+                    "payload-path": "$TC_TASK_DIR/divvunspell.oxt.txz",
                 },
             ),
         )
@@ -116,7 +113,7 @@ def create_libreoffice_tasks():
                     "repo": PAHKAT_REPO + "devtools/",
                     "version": "${{ steps.version.outputs.version }}",
                     "channel": "${{ steps.version.outputs.channel }}",
-                    "payload-path": "${TC_TASK_DIR}/divvunspell-macos.oxt.txz",
+                    "payload-path": "$TC_TASK_DIR/divvunspell-macos.oxt.txz",
                 },
             ),
         )
