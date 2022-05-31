@@ -64,7 +64,7 @@ def create_divvunspell_tasks():
                 GithubAction(
                     "Eijebong/divvun-actions/deploy",
                     {
-                        "package-id": "divvunspell",
+                        "package-id": "libdivvunspell",
                         "type": "TarballPackage",
                         "platform": "android",
                         "repo": PAHKAT_REPO + "devtools/",
