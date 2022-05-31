@@ -101,6 +101,9 @@ def tasks(task_for: str):
     if repo_name == "kbdgen2":
         create_kbdgen_tasks()
 
+    if repo_name == "divvunspell":
+        create_divvunspell_tasks()
+
     # Only run this task for master as it pushes to a branch on the same repo
     if repo_name == "mso-nda-resources" and CONFIG.git_ref == "refs/heads/master":
         create_mso_resources_tasks()
