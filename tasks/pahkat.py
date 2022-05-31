@@ -49,8 +49,8 @@ def create_pahkat_android_client_task():
             """))
             .with_gha("build", GithubAction("actions-rs/cargo", {
                 "command": "ndk",
-                "args": "-t armeabi-v7a -t arm64-v8a -o ./jniLibs build -vv --features ffi,prefix --release --manifest-path pahkat-client-core/Cargo.toml",
-            }).with_env("ANDROID_NDK_HOME", "$GITHUB_WORKSPACE/android-ndk-r21e"))
+                "args": "-t armeabi-v7a -t arm64-v8a -o ./jniLibs build -vv --features ffi,prefix --release",
+            }).with_env("ANDROID_NDK_HOME", "$GITHUB_WORKSPACE/android-ndk-r21e").with_cwd("pahkat-client-core"))
             .find_or_create(f"build.pahkat.client_android.{CONFIG.index_path}")
     )
 
