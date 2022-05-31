@@ -77,7 +77,7 @@ def create_pahkat_android_client_task():
                         "repo": PAHKAT_REPO + "devtools/",
                         "version": "${{ steps.version.outputs.version }}",
                         "channel": "${{ steps.version.outputs.channel }}",
-                        "payload-path": "${{ steps.bundle_dll.outputs['txz-path'] }}",
+                        "payload-path": "${{ steps.bundle_lib.outputs['txz-path'] }}",
                     },
                 ),
             )
