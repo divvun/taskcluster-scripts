@@ -2,6 +2,7 @@ from decisionlib import CONFIG
 from gha import GithubAction, GithubActionScript
 from .common import (
     windows_task,
+    linux_build_task,
     gha_setup,
     gha_pahkat,
     PAHKAT_REPO,
@@ -12,11 +13,40 @@ from .common import (
 
 
 def create_pahkat_tasks():
-    create_pahkat_uploader_tasks()
-    create_pahkat_windows_cli_task()
-    create_pahkat_repomgr_tasks()
-    create_pahkat_prefix_cli_tasks()
-    create_pahkat_service_windows_task()
+    #create_pahkat_uploader_tasks()
+    #create_pahkat_windows_cli_task()
+    #create_pahkat_repomgr_tasks()
+    #create_pahkat_prefix_cli_tasks()
+    #create_pahkat_service_windows_task()
+    create_pahkat_android_client_task()
+
+def create_pahkat_android_client_task():
+    return (
+        linux_build_task("Android pahkat client build")
+            .with_gha("setup", gha_setup())
+            .with_gha("download_ndk", GithubActionScript("""
+                cd $GITHUB_WORKSPACE
+                curl -o android-ndk.zip https://dl.google.com/android/repository/android-ndk-r21e-linux-x86_64.zip
+                unzip android-sdk.zip
+            """))
+            .with_gha(
+                "install_rust",
+                GithubAction(
+                    "actions-rs/toolchain",
+                    {
+                        "toolchain": "stable",
+                        "profile": "minimal",
+                        "override": "true",
+                        "target": "aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-android",
+                    },
+                ),
+            )
+            .with_gha("build", GithubAction("actions-rs/cargo", {
+                "command": "ndk",
+                "args": "-t armeabi-v7a -t arm64-v8a -o ./jniLibs build -vv --features ffi,prefix --release --manifest-path pahkat-client-core/Cargo.toml",
+            }).with_env("ANDROID_NDK_HOME", "$GITHUB_WORKSPACE/android-ndk-r21e"))
+            .find_or_create(f"build.pahkat.client_android.{CONFIG.index_path}")
+    )
 
 
 def create_pahkat_prefix_cli_tasks():
