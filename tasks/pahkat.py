@@ -64,7 +64,7 @@ def create_pahkat_android_client_task():
             }).with_env("ANDROID_NDK_HOME", "$GITHUB_WORKSPACE/android-ndk-r21e").with_cwd("pahkat-client-core"))
             .with_gha("prepare_lib", GithubActionScript("""
                 mkdir -p pahkat-client-core/lib/lib
-                mv pahkat-client-core/lib/* pahkat-client-core/lib/lib
+                mv pahkat-client-core/lib/arm* pahkat-client-core/lib/lib
             """))
             .with_gha(
                 "bundle_lib",
