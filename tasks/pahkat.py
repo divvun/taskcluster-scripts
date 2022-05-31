@@ -44,6 +44,9 @@ def create_pahkat_android_client_task():
             .with_gha("add_targets", GithubActionScript("""
                 rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-android
             """))
+            .with_gha("install_cargo_ndk", GithubActionScript("""
+                cargo install cargo-ndk
+            """))
             .with_gha("build", GithubAction("actions-rs/cargo", {
                 "command": "ndk",
                 "args": "-t armeabi-v7a -t arm64-v8a -o ./jniLibs build -vv --features ffi,prefix --release --manifest-path pahkat-client-core/Cargo.toml",
