@@ -23,6 +23,7 @@ def create_pahkat_tasks():
 def create_pahkat_android_client_task():
     return (
         linux_build_task("Android pahkat client build")
+            .with_apt_install("unzip")
             .with_gha("setup", gha_setup())
             .with_gha("download_ndk", GithubActionScript("""
                 cd $GITHUB_WORKSPACE
