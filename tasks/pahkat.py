@@ -65,7 +65,7 @@ def create_pahkat_android_client_task():
             .with_gha("prepare_lib", GithubActionScript("""
                 mkdir -p pahkat-client-core/lib/lib
                 mv pahkat-client-core/lib/* pahkat-client-core/lib/lib
-            """)
+            """))
             .with_gha(
                 "bundle_lib",
                 GithubAction("Eijebong/divvun-actions/create-txz", {"path": "pahkat-client-core/lib"}),
