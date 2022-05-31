@@ -25,6 +25,7 @@ def create_pahkat_android_client_task():
         linux_build_task("Android pahkat client build")
             .with_apt_install("unzip")
             .with_gha("setup", gha_setup())
+            .with_gha("install_deps", gha_pahkat(["pahkat-uploader"]))
             .with_gha(
                 "version",
                 GithubAction(

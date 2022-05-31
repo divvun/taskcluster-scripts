@@ -2,6 +2,7 @@ from decisionlib import CONFIG
 from gha import GithubAction, GithubActionScript
 from .common import (
     linux_build_task,
+    gha_pahkat,
     gha_setup,
     PAHKAT_REPO,
     NIGHTLY_CHANNEL,
@@ -12,6 +13,7 @@ def create_divvunspell_tasks():
         linux_build_task("Android divvunspell build")
             .with_apt_install("unzip")
             .with_gha("setup", gha_setup())
+            .with_gha("install_deps", gha_pahkat(["pahkat-uploader"]))
             .with_gha(
                 "version",
                 GithubAction(
