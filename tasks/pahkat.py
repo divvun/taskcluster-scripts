@@ -13,11 +13,11 @@ from .common import (
 
 
 def create_pahkat_tasks():
-    #create_pahkat_uploader_tasks()
-    #create_pahkat_windows_cli_task()
-    #create_pahkat_repomgr_tasks()
-    #create_pahkat_prefix_cli_tasks()
-    #create_pahkat_service_windows_task()
+    create_pahkat_uploader_tasks()
+    create_pahkat_windows_cli_task()
+    create_pahkat_repomgr_tasks()
+    create_pahkat_prefix_cli_tasks()
+    create_pahkat_service_windows_task()
     create_pahkat_android_client_task()
 
 def create_pahkat_android_client_task():
