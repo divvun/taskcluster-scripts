@@ -62,6 +62,10 @@ def create_pahkat_android_client_task():
                 "command": "ndk",
                 "args": "-t armeabi-v7a -t arm64-v8a -o ./lib build -vv --features ffi,prefix --release",
             }).with_env("ANDROID_NDK_HOME", "$GITHUB_WORKSPACE/android-ndk-r21e").with_cwd("pahkat-client-core"))
+            .with_gha("prepare_lib", GithubActionScript("""
+                mkdir -p pahkat-client-core/lib/lib
+                mv pahkat-client-core/lib/* pahkat-client-core/lib/lib
+            """)
             .with_gha(
                 "bundle_lib",
                 GithubAction("Eijebong/divvun-actions/create-txz", {"path": "pahkat-client-core/lib"}),
