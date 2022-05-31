@@ -25,6 +25,17 @@ def create_pahkat_android_client_task():
         linux_build_task("Android pahkat client build")
             .with_apt_install("unzip")
             .with_gha("setup", gha_setup())
+            .with_gha(
+                "version",
+                GithubAction(
+                    "Eijebong/divvun-actions/version",
+                    {
+                        "cargo": "pahkat-client-core/Cargo.toml",
+                        "stable-channel": "beta",
+                        "nightly-channel": NIGHTLY_CHANNEL,
+                    },
+                ).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN"),
+            )
             .with_gha("download_ndk", GithubActionScript("""
                 cd $GITHUB_WORKSPACE
                 curl -o android-ndk.zip https://dl.google.com/android/repository/android-ndk-r21e-linux-x86_64.zip
@@ -51,6 +62,25 @@ def create_pahkat_android_client_task():
                 "command": "ndk",
                 "args": "-t armeabi-v7a -t arm64-v8a -o ./jniLibs build -vv --features ffi,prefix --release",
             }).with_env("ANDROID_NDK_HOME", "$GITHUB_WORKSPACE/android-ndk-r21e").with_cwd("pahkat-client-core"))
+            .with_gha(
+                "bundle_lib",
+                GithubAction("Eijebong/divvun-actions/create-txz", {"path": "pahkat-client-core/lib"}),
+            )
+            .with_gha(
+                "deploy_lib",
+                GithubAction(
+                    "Eijebong/divvun-actions/deploy",
+                    {
+                        "package-id": "libpahkat_client",
+                        "type": "TarballPackage",
+                        "platform": "android",
+                        "repo": PAHKAT_REPO + "devtools/",
+                        "version": "${{ steps.version.outputs.version }}",
+                        "channel": "${{ steps.version.outputs.channel }}",
+                        "payload-path": "${{ steps.bundle_dll.outputs['txz-path'] }}",
+                    },
+                ),
+            )
             .find_or_create(f"build.pahkat.client_android.{CONFIG.index_path}")
     )
 
