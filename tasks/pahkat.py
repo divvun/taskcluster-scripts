@@ -28,7 +28,7 @@ def create_pahkat_android_client_task():
             .with_gha("download_ndk", GithubActionScript("""
                 cd $GITHUB_WORKSPACE
                 curl -o android-ndk.zip https://dl.google.com/android/repository/android-ndk-r21e-linux-x86_64.zip
-                unzip android-sdk.zip
+                unzip android-ndk.zip
             """))
             .with_gha(
                 "install_rust",
