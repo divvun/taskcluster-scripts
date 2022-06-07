@@ -35,11 +35,13 @@ def create_libreoffice_tasks():
             "Create OXT",
             GithubActionScript(
                 """
-        mkdir -p lib/win32-amd64
-        mv *.dll lib/win32-amd64
+        mkdir -p src/lib/win32-amd64
+        mv *.dll src/lib/win32-amd64
+        cd src
         zip -r divvunspell.zip *
-        rm -Rf lib
-        mv divvunspell.zip $TC_TASK_DIR/divvunspell.oxt
+        cd ..
+        rm -Rf src/lib
+        mv src/divvunspell.zip $TC_TASK_DIR/divvunspell.oxt
         cd $TC_TASK_DIR
         tar caf divvunspell.oxt.txz divvunspell.oxt
         """
@@ -86,7 +88,7 @@ def create_libreoffice_tasks():
                     "branch": "main",
                     "name": "lib-darwin-x86_64",
                     "repo": "divvun/divvunspell",
-                    "path": "lib/darwin-x86_64",
+                    "path": "src/lib/darwin-x86_64",
                 },
             ).with_secret_input("github_token", "divvun", "github.token"),
         )
@@ -94,9 +96,11 @@ def create_libreoffice_tasks():
             "Create macos OXT",
             GithubActionScript(
                 """
+        cd src
         zip -r divvunspell.zip *
-        rm -Rf lib
-        mv divvunspell.zip $TC_TASK_DIR/divvunspell-macos.oxt
+        cd ..
+        rm -Rf src/lib
+        mv src/divvunspell.zip $TC_TASK_DIR/divvunspell-macos.oxt
         cd $TC_TASK_DIR
         tar caf divvunspell-macos.oxt.txz divvunspell-macos.oxt
         """
