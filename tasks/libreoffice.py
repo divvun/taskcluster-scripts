@@ -28,7 +28,7 @@ def create_libreoffice_tasks():
             "version",
             GithubAction(
                 "Eijebong/divvun-actions/version",
-                {"filepath": "VERSION", "nightly-channel": NIGHTLY_CHANNEL},
+                {"filepath": "src/VERSION", "nightly-channel": NIGHTLY_CHANNEL},
             ),
         )
         .with_gha(
