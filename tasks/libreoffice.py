@@ -75,7 +75,7 @@ def create_libreoffice_tasks():
                     "branch": "main",
                     "name": "lib-darwin-aarch64",
                     "repo": "divvun/divvunspell",
-                    "path": "lib/darwin-arm64",
+                    "path": "src/lib/darwin-arm64",
                 },
             ).with_secret_input("github_token", "divvun", "github.token"),
         )
