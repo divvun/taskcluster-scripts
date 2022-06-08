@@ -23,7 +23,7 @@ def create_libreoffice_tasks():
                 },
             ).with_secret_input("github_token", "divvun", "github.token"),
         )
-        .with_gha("setup_pahkat", gha_pahkat(["pahkat-uploader"]))
+        .with_gha("setup_pahkat", gha_pahkat(["pahkat-uploader", "xcnotary"]))
         .with_gha(
             "version",
             GithubAction(
