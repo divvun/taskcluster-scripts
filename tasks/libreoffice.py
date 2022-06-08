@@ -131,13 +131,14 @@ def create_libreoffice_tasks():
         )
         .with_gha("codesign macos installer", GithubAction("Eijebong/divvun-actions/codesign", {"path": "macos/LibreOfficeOXT.pkg" }))
         .with_gha(
-            "deploy_macos",
+            "deploy_macos_installer",
             GithubAction(
                 "Eijebong/divvun-actions/deploy",
                 {
                     "package-id": "divvunspell-libreoffice",
                     "type": "MacOSPackage",
                     "platform": "macos",
+                    "macos-pkg-id": "no.divvun.LibreOfficeOXT",
                     "repo": PAHKAT_REPO + "tools/",
                     "version": "${{ steps.version.outputs.version }}",
                     "channel": "${{ steps.version.outputs.channel }}",
