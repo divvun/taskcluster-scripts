@@ -121,7 +121,18 @@ def create_libreoffice_tasks():
                 },
             ),
         )
+        .with_gha("Create macos installer",
+            GithubActionScript(
+            """
+                cp $TC_TASK_DIR/divvunspell-macos.oxt divvunspell.oxt
+                ./macos/build.sh
+                cp LibreOfficeOXT.pkg $TC_TASK_DIR
+            """)
+            .with_env("MACOS_NOTARIZATION_APP_PWD", "${{ secrets.divvun.macos.appPasswordMacos }}")
+            .with_env("MACOS_DEVELOPER_ACCOUNT", "${{ secrets.divvun.macos.developerAccountMacos }}")
+        )
         .with_artifacts("divvunspell.oxt")
         .with_artifacts("divvunspell-macos.oxt")
+        .with_artifacts("LibreOfficeOXT.pkg")
         .find_or_create(f"build.libreoffice.linux_x64.{CONFIG.index_path}")
     )
