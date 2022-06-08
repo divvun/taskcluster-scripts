@@ -124,8 +124,9 @@ def create_libreoffice_tasks():
         .with_gha("Create macos installer",
             GithubActionScript(
             """
-                cp $TC_TASK_DIR/divvunspell-macos.oxt divvunspell.oxt
-                ./macos/build.sh
+                cp $TC_TASK_DIR/divvunspell-macos.oxt macos/divvunspell.oxt
+                cd macos
+                ./build.sh
                 cp LibreOfficeOXT.pkg $TC_TASK_DIR
             """)
             .with_env("MACOS_NOTARIZATION_APP_PWD", "${{ secrets.divvun.macos.appPasswordMacos }}")
