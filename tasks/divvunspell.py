@@ -55,8 +55,30 @@ def create_macos_build():
             ),
         )
         .with_gha("prepare_lib", GithubActionScript("""
-            ls -lah target/release
+            mkdir -p lib/lib/aarch64
+            mkdir -p lib/lib/x86_64
+            mv target/aarch64-apple-darwin/release/*.dylib lib/lib/aarch64
+            mv target/release/*.dylib lib/lib/x86_64
         """))
+        .with_gha(
+            "bundle_lib",
+            GithubAction("Eijebong/divvun-actions/create-txz", {"path": "lib"}),
+        )
+        .with_gha(
+            "deploy_lib",
+            GithubAction(
+                "Eijebong/divvun-actions/deploy",
+                {
+                    "package-id": "libdivvunspell",
+                    "type": "TarballPackage",
+                    "platform": "macos",
+                    "repo": PAHKAT_REPO + "devtools/",
+                    "version": "${{ steps.version.outputs.version }}",
+                    "channel": "${{ steps.version.outputs.channel }}",
+                    "payload-path": "${{ steps.bundle_lib.outputs['txz-path'] }}",
+                },
+            ),
+        )
         .find_or_create(f"build.divvunspell.macos.{CONFIG.index_path}")
     )
 
