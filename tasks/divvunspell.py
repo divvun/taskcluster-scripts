@@ -44,14 +44,14 @@ def create_macos_build():
         .with_gha(
             "build_rust",
             GithubAction(
-                "actions-rs/cargo", {"command": "build", "args": "--release"}
+                "actions-rs/cargo", {"command": "build", "args": "--release --lib --features compression,internal_ffi"}
             ),
         )
         .with_gha(
             "build_rust_aarch64",
             GithubAction(
                 "actions-rs/cargo",
-                {"command": "build", "args": "--release --target aarch64-apple-darwin"},
+                {"command": "build", "args": "--release --target aarch64-apple-darwin --lib --features compression,internal_ffi"},
             ),
         )
         .with_gha("prepare_lib", GithubActionScript("""
