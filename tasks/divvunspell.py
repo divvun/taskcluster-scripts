@@ -2,6 +2,7 @@ from decisionlib import CONFIG
 from gha import GithubAction, GithubActionScript
 from .common import (
     linux_build_task,
+    macos_task,
     gha_pahkat,
     gha_setup,
     PAHKAT_REPO,
@@ -9,6 +10,59 @@ from .common import (
 )
 
 def create_divvunspell_tasks():
+    create_android_build()
+    create_macos_build()
+
+def create_macos_build():
+    return (
+        macos_task("MacOS divvunspell build")
+        .with_gha("setup", gha_setup())
+        .with_gha("install_deps", gha_pahkat(["pahkat-uploader"]))
+        .with_gha(
+            "version",
+            GithubAction(
+                "Eijebong/divvun-actions/version",
+                {
+                    "cargo": "divvunspell/Cargo.toml",
+                    "stable-channel": "beta",
+                    "nightly-channel": NIGHTLY_CHANNEL,
+                },
+            ).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN"),
+        )
+        .with_gha(
+            "install_rust",
+            GithubAction(
+                "actions-rs/toolchain",
+                {
+                    "toolchain": "stable",
+                    "profile": "minimal",
+                    "override": "true",
+                    "target": "aarch64-apple-darwin",
+                },
+            ),
+        )
+        .with_gha(
+            "build_rust",
+            GithubAction(
+                "actions-rs/cargo", {"command": "build", "args": "--release"}
+            ),
+        )
+        .with_gha(
+            "build_rust_aarch64",
+            GithubAction(
+                "actions-rs/cargo",
+                {"command": "build", "args": "--release --target aarch64-apple-darwin"},
+            ),
+        )
+        .with_gha("prepare_lib", GithubActionScript("""
+            ls -lah target/release
+        """))
+        .find_or_create(f"build.divvunspell.macos.{CONFIG.index_path}")
+    )
+
+
+
+def create_android_build():
     return (
         linux_build_task("Android divvunspell build")
             .with_apt_install("unzip")
