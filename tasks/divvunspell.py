@@ -54,6 +54,8 @@ def create_macos_build():
                 {"command": "build", "args": "--release --target aarch64-apple-darwin --lib --features compression,internal_ffi"},
             ),
         )
+        .with_gha("codesign aarch64", GithubAction("Eijebong/divvun-actions/codesign", {"path": "target/aarch64-apple-darwin/release/libdivvunspell.dylib" }))
+        .with_gha("codesign x86_64", GithubAction("Eijebong/divvun-actions/codesign", {"path": "target/release/libdivvunspell.dylib" }))
         .with_gha("prepare_lib", GithubActionScript("""
             mkdir -p lib/lib/aarch64
             mkdir -p lib/lib/x86_64
