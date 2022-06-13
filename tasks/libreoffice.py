@@ -62,35 +62,19 @@ def create_libreoffice_tasks():
                 },
             ),
         )
-        .with_gha("Prepare macos OXT", GithubActionScript("""
-        mkdir -p lib/darwin-x86_64
-        mkdir -p lib/darwin-arm64
-        """))
         .with_gha(
-            "Download artifacts macos",
-            GithubAction(
-                "dawidd6/action-download-artifact@v2",
-                {
-                    "workflow": "ci.yml",
-                    "branch": "main",
-                    "name": "lib-darwin-aarch64",
-                    "repo": "divvun/divvunspell",
-                    "path": "src/lib/darwin-arm64",
-                },
-            ).with_secret_input("github_token", "divvun", "github.token"),
-        )
-        .with_gha(
-            "Download artifacts macos (x64)",
-            GithubAction(
-                "dawidd6/action-download-artifact@v2",
-                {
-                    "workflow": "ci.yml",
-                    "branch": "main",
-                    "name": "lib-darwin-x86_64",
-                    "repo": "divvun/divvunspell",
-                    "path": "src/lib/darwin-x86_64",
-                },
-            ).with_secret_input("github_token", "divvun", "github.token"),
+            "get_divvunspell_nightly",
+            GithubActionScript(
+                f"""
+                curl -Ls "https://pahkat.uit.no/devtools/download/libdivvunspell?platform=windows&channel={NIGHTLY_CHANNEL}" -o libdivvunspell.txz
+                xz -d libdivvunspell.txz
+                tar xvf divvunspell-libreoffice-oxt.tar
+                mkdir -p src/lib/darwin-x86_64
+                mkdir -p src/lib/darwin-arm64
+                mv lib/x86_64/* src/lib/darwin-x86_64
+                mv lib/aarch64/* src/lib/darwin-arm64
+                rm -Rf lib
+        """,
         )
         .with_gha(
             "Create macos OXT",
