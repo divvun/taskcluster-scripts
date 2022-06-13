@@ -74,7 +74,8 @@ def create_libreoffice_tasks():
                 mv lib/x86_64/* src/lib/darwin-x86_64
                 mv lib/aarch64/* src/lib/darwin-arm64
                 rm -Rf lib
-        """,
+            """
+            ),
         )
         .with_gha(
             "Create macos OXT",
