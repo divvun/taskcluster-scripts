@@ -63,10 +63,10 @@ def create_libreoffice_tasks():
             ),
         )
         .with_gha(
-            "get_divvunspell_nightly",
+            "get_divvunspell_nightly_macos",
             GithubActionScript(
                 f"""
-                curl -Ls "https://pahkat.uit.no/devtools/download/libdivvunspell?platform=windows&channel={NIGHTLY_CHANNEL}" -o libdivvunspell.txz
+                curl -Ls "https://pahkat.uit.no/devtools/download/libdivvunspell?platform=macos&channel={NIGHTLY_CHANNEL}" -o libdivvunspell.txz
                 xz -d libdivvunspell.txz
                 tar xvf divvunspell-libreoffice-oxt.tar
                 mkdir -p src/lib/darwin-x86_64
