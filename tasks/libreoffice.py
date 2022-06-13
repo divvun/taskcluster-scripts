@@ -68,7 +68,7 @@ def create_libreoffice_tasks():
                 f"""
                 curl -Ls "https://pahkat.uit.no/devtools/download/libdivvunspell?platform=macos&channel={NIGHTLY_CHANNEL}" -o libdivvunspell.txz
                 xz -d libdivvunspell.txz
-                tar xvf divvunspell-libreoffice-oxt.tar
+                tar xvf libdivvunspell.tar
                 mkdir -p src/lib/darwin-x86_64
                 mkdir -p src/lib/darwin-arm64
                 mv lib/x86_64/* src/lib/darwin-x86_64
