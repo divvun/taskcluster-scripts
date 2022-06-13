@@ -25,6 +25,12 @@ def create_libreoffice_tasks():
         )
         .with_gha("setup_pahkat", gha_pahkat(["pahkat-uploader", "xcnotary"]))
         .with_gha(
+            "setup",
+            GithubAction("Eijebong/divvun-actions/setup", {}).with_secret_input(
+                "key", "divvun", "DIVVUN_KEY"
+            ),
+        )
+        .with_gha(
             "version",
             GithubAction(
                 "Eijebong/divvun-actions/version",

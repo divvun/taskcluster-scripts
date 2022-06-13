@@ -2,7 +2,7 @@ import os.path
 
 from gha import GithubAction, GithubActionScript
 from decisionlib import CONFIG
-from .common import linux_build_task, macos_task, windows_task, NIGHTLY_CHANNEL
+from .common import linux_build_task, macos_task, windows_task, NIGHTLY_CHANNEL, gha_setup
 
 NO_DEPLOY_LANG = {
     "zxx",  # No linguistic data
@@ -102,12 +102,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
                     },
                 ),
             )
-            .with_gha(
-                "setup",
-                GithubAction("Eijebong/divvun-actions/setup", {}).with_secret_input(
-                    "key", "divvun", "DIVVUN_KEY"
-                ),
-            )
+            .with_gha("setup", gha_setup())
             .with_gha(
                 "version",
                 GithubAction(
