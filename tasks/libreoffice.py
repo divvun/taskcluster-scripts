@@ -120,7 +120,7 @@ def create_libreoffice_tasks():
                 ./build.sh
             """)
         )
-        .with_gha("codesign macos installer", GithubAction("Eijebong/divvun-actions/codesign", {"path": "macos/LibreOfficeOXT.pkg" }))
+        .with_gha("codesign macos installer", GithubAction("Eijebong/divvun-actions/codesign", {"path": "macos/LibreOfficeOXT.pkg", "isInstaller": "true" }))
         .with_gha(
             "deploy_macos_installer",
             GithubAction(
