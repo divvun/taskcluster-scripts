@@ -13,6 +13,7 @@ def create_divvun_manager_macos_task():
                 {
                     "repository": "divvun/pahkat",
                     "path": "${HOME}/tasks/${TASK_ID}/repo/pahkat",
+                    "ref": "feature/tokio-1",
                     "fetch-depth": 0,
                 },
                 enable_post=False,
