@@ -39,6 +39,7 @@ def create_omegat_tasks():
             ),
         )
         .with_gha("build_jna", GithubActionScript("""
+            cd jna
             ./build.sh
             cp ./build/jna-jpms.jar ../sdk/libs/jna.jar
         """))
