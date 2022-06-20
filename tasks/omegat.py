@@ -45,11 +45,11 @@ def create_omegat_tasks():
         """))
         .with_gha("build_sdk", GithubActionScript("""
             cd sdk
-            ./gradlew
-            cp build/divvun.jar ../libs/divvun.jar
+            ./gradlew build
+            cp build/libs/divvunspell-sdk-java*.jar ../libs/divvun.jar
         """))
         .with_gha("build_plugin", GithubActionScript("""
-            ./gradlew
+            ./gradlew build
         """))
         .find_or_create(f"build.omegat.linux.{CONFIG.index_path}"))
 
