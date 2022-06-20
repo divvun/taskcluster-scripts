@@ -108,6 +108,9 @@ def tasks(task_for: str):
     if repo_name == "mso-nda-resources" and CONFIG.git_ref == "refs/heads/master":
         create_mso_resources_tasks()
 
+    if repo_name == "divvun-omegat-poc":
+        create_omegat_tasks()
+
 
 task_for = os.environ["TASK_FOR"]
 repo_name = os.environ["REPO_NAME"]

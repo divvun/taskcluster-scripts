@@ -17,3 +17,4 @@ from .kbdi import create_kbdi_tasks
 from .kbdgen import create_kbdgen_tasks
 from .mso_resources import create_mso_resources_tasks
 from .divvunspell import create_divvunspell_tasks
+from .omegat import create_omegat_tasks
