@@ -522,3 +522,13 @@ def generic_rust_task(index_name, name, setup_fn):
         task_id = task.find_or_create(f"build.{index_name}.{os_}.{CONFIG.index_path}")
         tasks.append(task_id)
     return tasks
+
+def task_builder_for(os_):
+    if os_ == "linux":
+        return linux_build_task
+    elif os_ == "windows":
+        return windows_task
+    elif os_ == "macos":
+        return macos_task
+    else:
+        raise NotImplementedError()
