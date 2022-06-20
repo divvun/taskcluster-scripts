@@ -5,6 +5,7 @@ from decisionlib import CONFIG
 
 def create_omegat_tasks():
     return (linux_build_task("OmegaT plugin linux build")
+        .with_apt_install("ant")
         .with_gha(
             "clone_jna",
             GithubAction(
