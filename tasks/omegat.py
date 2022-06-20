@@ -43,15 +43,14 @@ def create_omegat_tasks():
             ant native
             ant jar
             cp ./build/jna-jpms.jar ../sdk/libs/jna.jar
-        """)
+        """))
         .with_gha("build_sdk", GithubActionScript("""
             cd sdk
             ./gradlew
             cp build/divvun.jar ../libs/divvun.jar
-        """)
+        """))
         .with_gha("build_plugin", GithubActionScript("""
             ./gradlew
-        """)
-        .find_or_create(f"build.omegat.linux.{CONFIG.index_path}")
-    )
+        """))
+        .find_or_create(f"build.omegat.linux.{CONFIG.index_path}"))
 
