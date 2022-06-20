@@ -4,10 +4,12 @@ from decisionlib import CONFIG
 
 
 def create_omegat_tasks():
-    for os_ in ("linux", "macos"):
+    for os_ in ("linux", "macos", "windows"):
         task = task_builder_for(os_)(f"OmegaT plugin {os_} build")
         if os_ == "linux":
             task.with_apt_install("ant", "autoconf", "gcc", "libtool", "texinfo")
+        if os_ == "windows":
+            task.with_directory_mount("https://archive.apache.org/dist/ant/binaries/apache-ant-1.10.0-bin.zip", path="ant").with_path_from_homedir("ant\\bin")
 
         (task
             .with_gha(
@@ -44,7 +46,7 @@ def create_omegat_tasks():
             )
             .with_gha("build_jna", GithubActionScript("""
                 cd jna
-                ./build.sh
+                bash ./build.sh
                 cp ./build/jna-jpms.jar ../sdk/libs/jna.jar
             """))
             .with_gha("build_sdk", GithubActionScript("""
