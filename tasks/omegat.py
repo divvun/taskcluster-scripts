@@ -17,7 +17,7 @@ def create_omegat_tasks():
                 GithubAction(
                     "actions/checkout",
                     {
-                        "repository": "lenguyenthanh/jna",
+                        "repository": "Eijebong/jna",
                         "path": "${GITHUB_WORKSPACE}/repo/jna",
                         "fetch-depth": 0,
                     },
