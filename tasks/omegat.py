@@ -9,7 +9,7 @@ def create_omegat_tasks():
         if os_ == "linux":
             task.with_apt_install("ant", "autoconf", "gcc", "libtool", "texinfo")
         if os_ == "windows":
-            task.with_directory_mount("https://archive.apache.org/dist/ant/binaries/apache-ant-1.10.0-bin.zip", path="ant").with_path_from_homedir("ant\\bin")
+            task.with_directory_mount("https://archive.apache.org/dist/ant/binaries/apache-ant-1.10.0-bin.zip", path="ant").with_path_from_homedir("ant\\apache-ant-1.10.0\\bin")
 
         (task
             .with_gha(
