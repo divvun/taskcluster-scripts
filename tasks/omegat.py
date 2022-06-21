@@ -44,18 +44,24 @@ def create_omegat_tasks():
                     {"distribution": "temurin", "java-version": "8"},
                 ),
             )
-            .with_gha("build_jna", GithubActionScript("""
+            .with_gha("build_jna_unix", GithubActionScript("""
                 cd jna
-                bash ./build.sh
+                bash -ex ./build.sh
                 cp ./build/jna-jpms.jar ../sdk/libs/jna.jar
-            """))
+            """), enabled=(os_ != "windows"))
+            .with_gha("build_jna_windows", GithubActionScript("""
+                cd jna
+                call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Auxiliary\\Build\\vcvars64.bat"
+                bash -ex ./build.sh
+                cp ./build/jna-jpms.jar ../sdk/libs/jna.jar
+            """), enabled=(os_ == "windows"))
             .with_gha("build_sdk", GithubActionScript("""
                 cd sdk
-                ./gradlew build
+                ./gradlew --no-daemon build
                 cp build/libs/divvunspell-sdk-java*.jar ../libs/divvun.jar
             """))
             .with_gha("build_plugin", GithubActionScript("""
-                ./gradlew build
+                ./gradlew --no-daemon build
             """))
             .find_or_create(f"build.omegat.{os_}.{CONFIG.index_path}"))
 
