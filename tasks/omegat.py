@@ -18,7 +18,7 @@ def create_omegat_tasks():
                     "actions/checkout",
                     {
                         "repository": "lenguyenthanh/jna",
-                        "path": "${HOME}/tasks/${TASK_ID}/repo/jna",
+                        "path": "${GITHUB_WORKSPACE}/repo/jna",
                         "fetch-depth": 0,
                     },
                     enable_post=False,
@@ -30,7 +30,7 @@ def create_omegat_tasks():
                     "actions/checkout",
                     {
                         "repository": "divvun/divvunspell-sdk-java",
-                        "path": "${HOME}/tasks/${TASK_ID}/repo/sdk",
+                        "path": "${GITHUB_WORKSPACE}/repo/sdk",
                         "fetch-depth": 0,
                         "ref": "poc-for-divvun-omegaT",
                     },

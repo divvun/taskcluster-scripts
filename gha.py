@@ -49,7 +49,7 @@ class GithubAction:
         elif platform == "win":
             env = {
                 "RUNNER_TEMP": "${HOME}/${TASK_ID}/_temp",
-                "GITHUB_WORKSPACE": "${HOME}/tasks/${TASK_ID}",
+                "GITHUB_WORKSPACE": "${HOME}/${TASK_ID}",
                 "GITHUB_REF": os.environ["GIT_REF"],
             }
 
