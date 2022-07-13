@@ -18,6 +18,7 @@ def create_mso_resources_tasks():
 def create_patch_gen_task():
     (
         macos_task("Generate MSO patches")
+        .with_max_run_time_minutes(600)
         .with_gha("setup", gha_setup())
         .with_gha("setup_git", GithubActionScript("""
             git config user.email "feedback@divvun.no"
