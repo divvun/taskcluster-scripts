@@ -67,7 +67,7 @@ class Config:
         self.task_source = os.environ.get("TASK_SOURCE")
         self.git_url = os.environ.get("GIT_URL")
         self.git_ref = os.environ["GIT_REF"]
-        self.git_sha = os.environ["GIT_SHA"] or os.environ["GIT_REF"]
+        self.git_sha = os.environ.get("GIT_SHA", os.environ["GIT_REF"])
         self.git_bundle_shallow_ref = "refs/heads/shallow"
 
         self.tc_root_url = os.environ.get("TASKCLUSTER_ROOT_URL")
