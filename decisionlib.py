@@ -373,6 +373,7 @@ class Task:
 
         <https://docs.taskcluster.net/docs/reference/core/taskcluster-index/references/api#findTask>
         """
+        index_path += "." + CONFIG.decision_task_id
         task_id = SHARED.found_or_created_indexed_tasks.get(index_path)
         if task_id is not None:
             return task_id
