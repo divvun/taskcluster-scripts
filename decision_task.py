@@ -40,6 +40,11 @@ def tasks(task_for: str):
         # Put any daily task here.
         return
 
+    if task_for == "refresh_mso_patches":
+        create_mso_resources_tasks()
+
+
+
     is_tag = False
     tag_name = ""
     if CONFIG.git_ref.startswith("refs/tags/"):
@@ -103,10 +108,6 @@ def tasks(task_for: str):
 
     if repo_name == "divvunspell":
         create_divvunspell_tasks()
-
-    # Only run this task for master as it pushes to a branch on the same repo
-    if repo_name == "mso-nda-resources" and CONFIG.git_ref == "refs/heads/master":
-        create_mso_resources_tasks()
 
     if repo_name == "divvun-omegat-poc":
         create_omegat_tasks()
