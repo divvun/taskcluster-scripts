@@ -99,7 +99,7 @@ def create_patch_gen_task():
         .with_gha("create_commit", GithubActionScript("""
             git add patches/install
             git add patches/uninstall
-            git commit -m "[CD] Refresh patches"
+            git commit -m "[CD] Refresh patches" || exit 0
             git clean -fdx
         """))
         .with_gha("create_mr", GithubAction("peter-evans/create-pull-request@v4", {
