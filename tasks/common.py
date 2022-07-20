@@ -44,7 +44,7 @@ def linux_build_task(name, bundle_dest="repo", with_secrets=True, clone_self=Tru
         .with_script("mkdir -p $HOME/tasks/$TASK_ID")
         .with_script("mkdir -p $HOME/tasks/$TASK_ID/_temp")
         .with_apt_update()
-        .with_apt_install("curl", "git", "python3", "python3-pip")
+        .with_apt_install("curl", "git", "python3", "python3-pip", "lsb-release")
         .with_pip_install("taskcluster", "pyYAML")
         .with_apt_install("wget", "nodejs", "awscli")
         .with_apt_install("pkg-config", "libssl-dev")
