@@ -24,7 +24,7 @@ def linux_build_task(name, bundle_dest="repo", with_secrets=True, clone_self=Tru
         decisionlib.DockerWorkerTask(name)
         .with_worker_type("linux")
         .with_provisioner_id("divvun")
-        .with_docker_image("ubuntu:21.10")
+        .with_docker_image("ubuntu:22.04")
         # https://docs.taskcluster.net/docs/reference/workers/docker-worker/docs/caches
         .with_scopes("docker-worker:cache:divvun-*")
         .with_scopes("queue:get-artifact:private/*")
