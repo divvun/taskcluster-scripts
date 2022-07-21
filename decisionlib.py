@@ -94,6 +94,8 @@ class Config:
     def index_path(self):
         if self.git_ref.startswith("refs/tags/"):
             index = CONFIG.git_ref[len("refs/tags/") :]
+        elif self.git_ref.startswith("refs/heads/"):
+            index = CONFIG.git_ref[len("refs/heads/") :]
         else:
             index = self.git_sha
 
