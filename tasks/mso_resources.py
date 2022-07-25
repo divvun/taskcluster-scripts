@@ -12,10 +12,25 @@ from .common import (
 
 
 def create_mso_resources_tasks():
-    create_patch_gen_task()
+    create_lang_bundler_task()
+
+def create_lang_bundler_task():
+    setup_uploader = lambda _: gha_pahkat(["pahkat-uploader"])
+
+    return generic_rust_build_upload_task(
+        "Lange bundler build",
+        "divvun-bundler-mso/Cargo.toml",
+        package_id="divvun-bundler",
+        target_dir="target",
+        only_os=["macos"],
+        bin_name="divvun-bundler-mso",
+        rename_binary="divvun-bundler",
+        env=RUST_ENV,
+        setup_uploader=setup_uploader,
+    )
 
 
-def create_patch_gen_task():
+def create_mso_patch_gen_task():
     (
         macos_task("Generate MSO patches")
         .with_max_run_time_minutes(600)

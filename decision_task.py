@@ -41,9 +41,7 @@ def tasks(task_for: str):
         return
 
     if task_for == "refresh_mso_patches":
-        create_mso_resources_tasks()
-
-
+        create_mso_patch_gen_task()
 
     is_tag = False
     tag_name = ""
@@ -111,6 +109,9 @@ def tasks(task_for: str):
 
     if repo_name == "divvun-omegat-poc":
         create_omegat_tasks()
+
+    if repo_name == "mso-nda-resources":
+        create_mso_resources_tasks()
 
 
 task_for = os.environ["TASK_FOR"]
