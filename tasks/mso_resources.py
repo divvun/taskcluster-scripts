@@ -18,7 +18,7 @@ def create_lang_bundler_task():
     setup_uploader = lambda _: gha_pahkat(["pahkat-uploader"])
 
     return generic_rust_build_upload_task(
-        "Lange bundler build",
+        "Lang bundler build",
         "divvun-bundler-mso/Cargo.toml",
         package_id="divvun-bundler",
         target_dir="target",
