@@ -13,7 +13,7 @@ from .common import (
 
 def create_mirror_cleanup_task():
     return (
-        linux_build_task("Cleanup pahkat mirrors")
+        linux_build_task("Cleanup pahkat mirrors", clone_self=False)
         .with_scopes("secrets:get:divvun-deploy")
         .with_gha("setup_git", GithubActionScript("""
             git config user.email "feedback@divvun.no"
@@ -29,6 +29,10 @@ def create_mirror_cleanup_task():
         .with_script("ssh-keyscan github.com > ~/.ssh/known_hosts")
         .with_additional_repo(
             "git@github.com:divvun/pahkat.uit.no-index", "index"
+        )
+        .with_gha(
+            "Set CWD",
+            GithubActionScript(f"echo ::set-cwd::$HOME/tasks/$TASK_ID/pahkat"),
         )
         .with_gha(
             "install_rust",
