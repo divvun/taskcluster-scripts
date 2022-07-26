@@ -30,6 +30,32 @@ def create_mirror_cleanup_task():
         .with_additional_repo(
             "git@github.com:divvun/pahkat.uit.no-index", "index"
         )
-        .with_script("cd repo && git pull origin main")
+        .with_gha(
+            "install_rust",
+            GithubAction(
+                "actions-rs/toolchain",
+                {
+                    "toolchain": "stable",
+                    "profile": "minimal",
+                    "override": "true",
+                },
+            ),
+        )
+        .with_gha(
+            "build",
+            GithubAction(
+                "actions-rs/cargo",
+                {
+                    "command": "build",
+                    "args": f"--release --verbose -p pahkat-repomgr",
+                },
+            ),
+        )
+        .with_script("ssh root@pahkat.uit.no systemctl stop pahkat-reposrv", as_gha=True)
+        .with_script("cd index && git pull origin main", as_gha=True)
+        .with_script("ssh root@pahkat.uit.no systemctl start pahkat-reposrv", as_gha=True)
+        .with_script("ssh root@pahkat.uit.no cd /pahkat-index && sudo -u pahkat-reposrv git pull", as_gha=True)
+        .with_script("ssh root@pahkat.uit.no systemctl start pahkat-reposrv", as_gha=True)
+        .with_script("sleep 2 && ssh root@pahkat.uit.no systemctl restart pahkat-reposrv", as_gha=True)
         .find_or_create(f"cleanup.pahkat.uit.no.{CONFIG.index_path}")
     )
