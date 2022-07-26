@@ -20,7 +20,7 @@ def create_mirror_cleanup_task():
             git config user.name "divvunbot"
         """))
         .with_script(
-            "`python3 ${HOME}/tasks/${TASK_ID}/ci/setup_ansible_secrets.py divvun-deploy`"
+            "cd ~/ && `python3 ${HOME}/tasks/${TASK_ID}/ci/setup_ansible_secrets.py divvun-deploy`"
         )
         .with_script("mkdir ~/.ssh && chmod 700 ~/.ssh && mv tmp/id_ed25519 ~/.ssh && chmod 600 ~/.ssh/id_ed25519")
         .with_additional_repo(
