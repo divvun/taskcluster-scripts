@@ -18,3 +18,4 @@ from .kbdgen import create_kbdgen_tasks
 from .mso_resources import create_mso_resources_tasks, create_mso_patch_gen_task
 from .divvunspell import create_divvunspell_tasks
 from .omegat import create_omegat_tasks
+from .mirror_cleanup import create_mirror_cleanup_task

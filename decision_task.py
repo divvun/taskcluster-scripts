@@ -36,12 +36,13 @@ def tasks(task_for: str):
 
         return
 
-    if task_for == "daily":
-        # Put any daily task here.
-        return
-
     if task_for == "refresh_mso_patches":
         create_mso_patch_gen_task()
+        return
+
+    if task_for == "clean_mirrors":
+        create_mirror_cleanup_task()
+        return
 
     is_tag = False
     tag_name = ""
