@@ -29,6 +29,7 @@ def create_mirror_cleanup_task():
         .with_additional_repo(
             "https://github.com/divvun/pahkat.uit.no-index", "index"
         )
+        .with_script("ssh-keyscan github.com")
         .with_script("cd repo && git pull origin main")
         .find_or_create(f"cleanup.pahkat.uit.no.{CONFIG.index_path}")
     )
