@@ -14,6 +14,7 @@ from .common import (
 def create_mirror_cleanup_task():
     return (
         linux_build_task("Cleanup pahkat mirrors")
+        .with_scopes("secrets:get:divvun-deploy")
         .with_gha("setup_git", GithubActionScript("""
             git config user.email "feedback@divvun.no"
             git config user.name "divvunbot"
