@@ -64,10 +64,9 @@ def create_mirror_cleanup_task():
             /root/pahkat/target/release/repomgr nuke package nightlies -k 5 -r ./devtools
             git commit -a -m "[CI] Cleanup old nightlies"
             git push origin main
-            """
+            """, post_script="sleep 2 && ssh root@pahkat.uit.no systemctl restart pahkat-reposrv"
         ))
         .with_script("ssh root@pahkat.uit.no \"cd /pahkat-index && sudo -u pahkat-reposrv git pull\"", as_gha=True)
         .with_script("ssh root@pahkat.uit.no systemctl start pahkat-reposrv", as_gha=True)
-        .with_gha("restart", GithubActionScript("sleep 2 && ssh root@pahkat.uit.no systemctl restart pahkat-reposrv", is_post=True))
         .find_or_create(f"cleanup.pahkat.uit.no.{CONFIG.index_path}")
     )

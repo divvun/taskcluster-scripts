@@ -162,15 +162,11 @@ class GithubAction:
 
 
 class GithubActionScript(GithubAction):
-    def __init__(self, script, *, run_if=None, is_post=False):
+    def __init__(self, script, *, run_if=None, post_script=None):
         super().__init__(None, {}, run_if=run_if)
-        self.enable_post = is_post
-        if is_post:
-            self.script = ""
-            self.post_script = script
-        else:
-            self.script = script
-            self.post_script = ""
+        self.enable_post = post_script is not None
+        self.script = script
+        self.post_script = post_script
 
     def gen_script(self, _platform):
         return re.sub("\n +", "\n ", self.script).strip()
