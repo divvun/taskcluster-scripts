@@ -56,4 +56,4 @@ packages_to_remove = packages_in_bucket - packages_in_index - exceptions
 for package in packages_to_remove:
     path = "pahkat/" + package[1:]
     print(path)
-    client.delete_object(Bucket='divvun', Key=path)
+    #client.delete_object(Bucket='divvun', Key=path)
