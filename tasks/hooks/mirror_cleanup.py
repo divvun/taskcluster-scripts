@@ -52,7 +52,7 @@ def create_mirror_cleanup_task():
             ),
         )
         .with_script("ssh root@pahkat.uit.no systemctl stop pahkat-reposrv", as_gha=True)
-        .with_gha("nuke_nighlies", GithubActionScript(
+        .with_gha("nuke_nightlies", GithubActionScript(
             """
             cd /root/index
             git config user.email "feedback@divvun.no"
