@@ -22,7 +22,7 @@ def create_mirror_cleanup_task():
         .with_additional_repo(
             "https://github.com/divvun/pahkat", "pahkat"
         )
-        .with_script("ssh-keyscan github.com > ~/.ssh/known_hosts")
+        .with_script("ssh-keyscan github.com pahkat.uit.no > ~/.ssh/known_hosts")
         .with_additional_repo(
             "git@github.com:divvun/pahkat.uit.no-index", "index"
         )
