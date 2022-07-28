@@ -164,11 +164,10 @@ class GithubAction:
 class GithubActionScript(GithubAction):
     def __init__(self, script, *, run_if=None, is_post=False):
         super().__init__(None, {}, run_if=run_if)
+        self.enable_post = is_post
         if is_post:
             self.script = ""
             self.post_script = script
-            self.enable_post = True
-            self.post_path = "manual"
         else:
             self.script = script
             self.post_script = ""
@@ -182,3 +181,7 @@ class GithubActionScript(GithubAction):
     @property
     def git_fetch_url(self):
         return None
+
+    @property
+    def post_script_path(self):
+        return self.enable_post
