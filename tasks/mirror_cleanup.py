@@ -56,8 +56,18 @@ def create_mirror_cleanup_task():
             ),
         )
         .with_script("ssh root@pahkat.uit.no systemctl stop pahkat-reposrv", as_gha=True)
-        .with_script("cd /root/index && git pull origin main", as_gha=True)
-        .with_script("ssh root@pahkat.uit.no systemctl start pahkat-reposrv", as_gha=True)
+        .with_gha("nuke_nighlies", GithubActionScript(
+            """
+            cd /root/index
+            git pull origin main
+            /root/pahkat/target/release/repomgr nuke package nightlies -k 5 -r ./main
+            /root/pahkat/target/release/repomgr nuke package nightlies -k 5 -r ./tools
+            /root/pahkat/target/release/repomgr nuke package nightlies -k 5 -r ./divvun-installer
+            /root/pahkat/target/release/repomgr nuke package nightlies -k 5 -r ./devtools
+            git commit -a -m "[CI] Cleanup old nightlies"
+            git push origin main
+            """
+        ))
         .with_script("ssh root@pahkat.uit.no \"cd /pahkat-index && sudo -u pahkat-reposrv git pull\"", as_gha=True)
         .with_script("ssh root@pahkat.uit.no systemctl start pahkat-reposrv", as_gha=True)
         .with_gha("restart", GithubActionScript("sleep 2 && ssh root@pahkat.uit.no systemctl restart pahkat-reposrv", is_post=True))
