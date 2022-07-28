@@ -1,6 +1,6 @@
 from decisionlib import CONFIG
 from gha import GithubAction, GithubActionScript
-from .common import (
+from ..common import (
     linux_build_task,
     gha_setup,
     gha_pahkat,
