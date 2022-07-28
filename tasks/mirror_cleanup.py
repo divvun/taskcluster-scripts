@@ -15,10 +15,6 @@ def create_mirror_cleanup_task():
     return (
         linux_build_task("Cleanup pahkat mirrors", clone_self=False)
         .with_scopes("secrets:get:divvun-deploy")
-        .with_gha("setup_git", GithubActionScript("""
-            git config user.email "feedback@divvun.no"
-            git config user.name "divvunbot"
-        """))
         .with_script(
             "cd ~/ && `python3 ${HOME}/tasks/${TASK_ID}/ci/setup_ansible_secrets.py divvun-deploy`"
         )
@@ -34,6 +30,10 @@ def create_mirror_cleanup_task():
             "Set CWD",
             GithubActionScript(f"echo ::set-cwd::$HOME/tasks/$TASK_ID/pahkat"),
         )
+        .with_gha("setup_git", GithubActionScript("""
+            git config user.email "feedback@divvun.no"
+            git config user.name "divvunbot"
+        """))
         .with_gha(
             "install_rust",
             GithubAction(
