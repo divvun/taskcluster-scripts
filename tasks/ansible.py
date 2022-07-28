@@ -17,7 +17,7 @@ def create_ansible_task(roles: List[str], depends_on=None):
         )
         .with_script("cd playbooks")
         .with_script(
-            "`python3 ${HOME}/tasks/${TASK_ID}/ci/setup_ansible_secrets.py divvun-deploy`"
+            "`python3 ${HOME}/tasks/${TASK_ID}/ci/scripts/setup_ansible_secrets.py divvun-deploy`"
         )
         .with_script("chmod 700 tmp/id_ed25519")
         .with_script("apt-get install -y ansible")

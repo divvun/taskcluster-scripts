@@ -16,7 +16,7 @@ def create_mirror_cleanup_task():
         linux_build_task("Cleanup pahkat mirrors", clone_self=False)
         .with_scopes("secrets:get:divvun-deploy")
         .with_script(
-            "cd ~/ && `python3 ${HOME}/tasks/${TASK_ID}/ci/setup_ansible_secrets.py divvun-deploy`"
+            "cd ~/ && `python3 ${HOME}/tasks/${TASK_ID}/ci/scripts/setup_ansible_secrets.py divvun-deploy`"
         )
         .with_script("mkdir ~/.ssh && chmod 700 ~/.ssh && mv tmp/id_ed25519 ~/.ssh && chmod 600 ~/.ssh/id_ed25519")
         .with_script("ssh-keyscan github.com pahkat.uit.no > ~/.ssh/known_hosts")
