@@ -168,6 +168,7 @@ class GithubActionScript(GithubAction):
             self.script = ""
             self.post_script = script
             self.enable_post = True
+            self.post_path = "manual"
         else:
             self.script = script
             self.post_script = ""
