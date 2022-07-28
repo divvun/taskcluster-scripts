@@ -62,7 +62,7 @@ def create_mirror_cleanup_task():
             /root/pahkat/target/release/repomgr nuke package nightlies -k 5 -r ./tools
             /root/pahkat/target/release/repomgr nuke package nightlies -k 5 -r ./divvun-installer
             /root/pahkat/target/release/repomgr nuke package nightlies -k 5 -r ./devtools
-            git commit -a -m "[CI] Cleanup old nightlies"
+            git commit -a -m "[CI] Cleanup old nightlies" || exit 0
             git push origin main
             """, post_script="sleep 2 && ssh root@pahkat.uit.no systemctl restart pahkat-reposrv"
         ))
