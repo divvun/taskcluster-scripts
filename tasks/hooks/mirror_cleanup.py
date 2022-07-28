@@ -72,6 +72,6 @@ def create_mirror_cleanup_task():
             pip3 install boto3 toml
             cd /root/index
             python3 /root/tasks/${TASK_ID}/ci/scripts/clean_pahkat_repos.py
-        """).with_env("S3_REGION", "ams3").with_env("S3_ENDPOINT", "https://https://ams3.digitaloceanspaces.com").with_env("S3_ACCESS_KEY", "${{ secrets.divvun-deploy.S3_ACCESS_KEY }}").with_env("S3_SECRET_KEY", "${{ secrets.divvun-deploy.S3_SECRET_KEY }}"))
+        """).with_env("S3_REGION", "ams3").with_env("S3_ENDPOINT", "https://ams3.digitaloceanspaces.com").with_env("S3_ACCESS_KEY", "${{ secrets.divvun-deploy.S3_ACCESS_KEY }}").with_env("S3_SECRET_KEY", "${{ secrets.divvun-deploy.S3_SECRET_KEY }}"))
         .find_or_create(f"cleanup.pahkat.uit.no.{CONFIG.index_path}")
     )
