@@ -19,13 +19,13 @@ def create_mirror_cleanup_task():
             "cd ~/ && `python3 ${HOME}/tasks/${TASK_ID}/ci/setup_ansible_secrets.py divvun-deploy`"
         )
         .with_script("mkdir ~/.ssh && chmod 700 ~/.ssh && mv tmp/id_ed25519 ~/.ssh && chmod 600 ~/.ssh/id_ed25519")
+        .with_script("ssh-keyscan github.com pahkat.uit.no > ~/.ssh/known_hosts")
         .with_additional_repo(
             "https://github.com/divvun/pahkat", "pahkat"
         )
         .with_additional_repo(
             "git@github.com:divvun/pahkat.uit.no-index", "index"
         )
-        .with_script("ssh-keyscan github.com pahkat.uit.no > ~/.ssh/known_hosts")
         .with_gha(
             "Set CWD",
             GithubActionScript(f"echo ::set-cwd::$HOME/pahkat"),
