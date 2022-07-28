@@ -30,10 +30,6 @@ def create_mirror_cleanup_task():
             "Set CWD",
             GithubActionScript(f"echo ::set-cwd::$HOME/pahkat"),
         )
-        .with_gha("setup_git", GithubActionScript("""
-            git config user.email "feedback@divvun.no"
-            git config user.name "divvunbot"
-        """))
         .with_gha(
             "install_rust",
             GithubAction(
@@ -59,6 +55,8 @@ def create_mirror_cleanup_task():
         .with_gha("nuke_nighlies", GithubActionScript(
             """
             cd /root/index
+            git config user.email "feedback@divvun.no"
+            git config user.name "divvunbot"
             git pull origin main
             /root/pahkat/target/release/repomgr nuke package nightlies -k 5 -r ./main
             /root/pahkat/target/release/repomgr nuke package nightlies -k 5 -r ./tools
