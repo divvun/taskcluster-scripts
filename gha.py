@@ -167,6 +167,7 @@ class GithubActionScript(GithubAction):
         if is_post:
             self.script = ""
             self.post_script = script
+            self.post_script_path = "manual" # This needs to be non Falsey
         else:
             self.script = script
             self.post_script = ""
