@@ -28,7 +28,7 @@ def create_mirror_cleanup_task():
         )
         .with_gha(
             "Set CWD",
-            GithubActionScript(f"echo ::set-cwd::$HOME/tasks/$TASK_ID/pahkat"),
+            GithubActionScript(f"echo ::set-cwd::$HOME/pahkat"),
         )
         .with_gha("setup_git", GithubActionScript("""
             git config user.email "feedback@divvun.no"
