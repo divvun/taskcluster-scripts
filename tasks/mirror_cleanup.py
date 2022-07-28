@@ -22,10 +22,10 @@ def create_mirror_cleanup_task():
         .with_additional_repo(
             "https://github.com/divvun/pahkat", "pahkat"
         )
-        .with_script("ssh-keyscan github.com pahkat.uit.no > ~/.ssh/known_hosts")
         .with_additional_repo(
             "git@github.com:divvun/pahkat.uit.no-index", "index"
         )
+        .with_script("ssh-keyscan github.com pahkat.uit.no > ~/.ssh/known_hosts")
         .with_gha(
             "Set CWD",
             GithubActionScript(f"echo ::set-cwd::$HOME/pahkat"),
@@ -56,10 +56,10 @@ def create_mirror_cleanup_task():
             ),
         )
         .with_script("ssh root@pahkat.uit.no systemctl stop pahkat-reposrv", as_gha=True)
-        .with_script("cd index && git pull origin main", as_gha=True)
+        .with_script("cd /root/index && git pull origin main", as_gha=True)
         .with_script("ssh root@pahkat.uit.no systemctl start pahkat-reposrv", as_gha=True)
-        .with_script("ssh root@pahkat.uit.no cd /pahkat-index && sudo -u pahkat-reposrv git pull", as_gha=True)
+        .with_script("ssh root@pahkat.uit.no \"cd /pahkat-index && sudo -u pahkat-reposrv git pull\"", as_gha=True)
         .with_script("ssh root@pahkat.uit.no systemctl start pahkat-reposrv", as_gha=True)
-        .with_script("sleep 2 && ssh root@pahkat.uit.no systemctl restart pahkat-reposrv", as_gha=True)
+        .with_gha("restart", GithubActionScript("sleep 2 && ssh root@pahkat.uit.no systemctl restart pahkat-reposrv", is_post=True))
         .find_or_create(f"cleanup.pahkat.uit.no.{CONFIG.index_path}")
     )

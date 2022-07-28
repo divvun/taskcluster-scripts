@@ -162,12 +162,20 @@ class GithubAction:
 
 
 class GithubActionScript(GithubAction):
-    def __init__(self, script, *, run_if=None):
+    def __init__(self, script, *, run_if=None, is_post=False):
         super().__init__(None, {}, run_if=run_if)
-        self.script = script
+        if is_post:
+            self.script = ""
+            self.post_script = script
+        else:
+            self.script = script
+            self.post_script = ""
 
     def gen_script(self, _platform):
         return re.sub("\n +", "\n ", self.script).strip()
+
+    def gen_post_script(self, _platform):
+        return re.sub("\n +", "\n ", self.post_script).strip()
 
     @property
     def git_fetch_url(self):
