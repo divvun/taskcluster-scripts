@@ -19,3 +19,4 @@ from .mso_resources import create_mso_resources_tasks, create_mso_patch_gen_task
 from .divvunspell import create_divvunspell_tasks
 from .omegat import create_omegat_tasks
 from .hooks.mirror_cleanup import create_mirror_cleanup_task
+from .macdivvun import create_macdivvun_task
