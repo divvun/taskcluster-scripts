@@ -20,17 +20,6 @@ def create_macdivvun_task():
         )
         .with_gha("pahkat", gha_pahkat(["pahkat-uploader", "xcnotary"]))
         .with_gha(
-            "version",
-            GithubAction(
-                "Eijebong/divvun-actions/version",
-                {
-                    "xcode": "macdivvun-service",
-                    "stable-channel": "beta",
-                    "nightly-channel": NIGHTLY_CHANNEL,
-                },
-            ).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN"),
-        )
-        .with_gha(
             "build_macdivvun",
             GithubActionScript(
                 """
