@@ -810,6 +810,10 @@ class WindowsGenericWorkerTask(GenericWorkerTask):
             path="curl",
         )
 
+    def with_protoc(self):
+        return (self.with_path_from_homedir("protoc\\bin")
+            .with_directory_mount("https://github.com/protocolbuffers/protobuf/releases/download/v21.7/protoc-21.7-win64.zip", path="protoc"))
+
     def with_rustup(self):
         """
         Download rustup.rs and make it available to task commands,

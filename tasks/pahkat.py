@@ -168,6 +168,7 @@ def create_pahkat_service_windows_task():
         windows_task("Pahkat service (Windows)")
         .with_cmake()
         .with_rustup()
+        .with_protoc()
         .with_gha("setup", gha_setup())
         .with_gha(
             "version",
