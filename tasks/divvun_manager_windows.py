@@ -22,12 +22,7 @@ def create_divvun_manager_windows_tasks():
                 "GITHUB_ENV", "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\_temp\\github_env"
             ),
         )
-        .with_gha(
-            "install_rustup",
-            GithubActionScript(
-                "choco install -y --force rustup.install && echo ::add-path::${HOME}/.cargo/bin"
-            ),
-        )
+        .with_rustup()
         .with_gha(
             "rustup_setup",
             GithubAction(

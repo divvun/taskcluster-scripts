@@ -220,12 +220,7 @@ def rust_task_for_os(os_):
         return lambda name: (
             windows_task(name)
             .with_cmake()
-            .with_gha(
-                "install_rustup",
-                GithubActionScript(
-                    "choco install -y --force rustup.install && echo ::add-path::${HOME}/.cargo/bin"
-                ),
-            )
+            .with_rustup()
             .with_gha("install_rust", install_rust)
             .with_gha("install_rust64", install_rust64, enabled=(os_ == "windows_3264"))
         )
