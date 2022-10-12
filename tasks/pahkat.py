@@ -167,6 +167,7 @@ def create_pahkat_service_windows_task():
     return (
         windows_task("Pahkat service (Windows)")
         .with_cmake()
+        .with_rustup()
         .with_gha("setup", gha_setup())
         .with_gha(
             "version",
@@ -180,13 +181,6 @@ def create_pahkat_service_windows_task():
             ).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN"),
         )
         .with_gha("pahkat_setup", gha_pahkat(["pahkat-uploader"]))
-        # The actions-rs action is broken on windows
-        .with_gha(
-            "install_rustup",
-            GithubActionScript(
-                "choco install -y --force rustup.install && echo ::add-path::${HOME}/.cargo/bin"
-            ),
-        )
         .with_gha(
             "install_rust",
             GithubAction(
