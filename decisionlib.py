@@ -99,7 +99,7 @@ class Config:
         else:
             index = self.git_sha
 
-        return index.replace("+", "_")
+        return index.replace("+", "_").replace("/", "_")
 
     @property
     def commit_message(self):
