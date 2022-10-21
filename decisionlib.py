@@ -788,6 +788,7 @@ class WindowsGenericWorkerTask(GenericWorkerTask):
                 "https://github.com/git-for-windows/git/releases/download/v2.34.1.windows.1/Git-2.34.1-64-bit.tar.bz2",
                 path="git",
             )
+            .with_script("git config --global core.protectNTFS false")
         )
 
     def with_cmake(self):
