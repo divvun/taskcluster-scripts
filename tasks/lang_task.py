@@ -1,4 +1,5 @@
 import os.path
+import yaml
 
 from gha import GithubAction, GithubActionScript
 from decisionlib import CONFIG
@@ -36,8 +37,15 @@ def create_lang_tasks(repo_name):
 
 
 def create_lang_task(with_apertium):
+    should_make_check = False
     if os.path.isfile(".build-config.yml"):
         print("Found config file, do something with it now")
+
+        f = open("./build-config.yml")
+        config = yaml.load(open("./.build-config.yml"), Loader=yaml.FullLoader)
+        should_make_check = config.get('lang', {}).get('check', False)
+
+
 
     return (
         linux_build_task("Lang build", bundle_dest="lang")
@@ -74,6 +82,9 @@ def create_lang_task(with_apertium):
         )
         .with_gha(
             "build", GithubAction("Eijebong/divvun-actions/lang/build", {"fst": "hfst"})
+        )
+        .with_gha(
+            "check", GithubAction("Eijebong/divvun-actions/lang/check", {"fst": "hfst"}), enabled=should_make_check
         )
         .with_named_artifacts(
             "spellers",
