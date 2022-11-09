@@ -38,12 +38,7 @@ def create_lang_tasks(repo_name):
 
 def create_lang_task(with_apertium):
     should_make_check = False
-    if os.path.isfile(".build-config.yml"):
-        print("Found config file, do something with it now")
-
-        f = open("./build-config.yml")
-        config = yaml.load(open("./.build-config.yml"), Loader=yaml.FullLoader)
-        should_make_check = config.get('lang', {}).get('check', False)
+    should_make_check = CONFIG.tc_config.get('lang', {}).get('check', False)
 
 
 

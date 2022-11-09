@@ -27,6 +27,7 @@ from typing import Dict, List, Set, Optional, Tuple
 import taskcluster
 import gha
 import utils
+import yaml
 
 
 # Public API
@@ -74,6 +75,7 @@ class Config:
         self.default_provisioner_id = "divvun"
         self._tree_hash = None
         self._commit_message = None
+        self._tc_config = None
 
     def tree_hash(self) -> str:
         if self._tree_hash is None:
@@ -116,6 +118,20 @@ class Config:
             print(self._commit_message)
         return self._commit_message
 
+    @property
+    def tc_config(self):
+        if self._tc_config is None:
+            try:
+                config = requests.get(f"https://raw.githubusercontent.com/{os.environ['REPO_FULL_NAME']}/{self.git_sha}/.taskcluster.yml").text
+                self._tc_config = yaml.load(config, Loader=yaml.FullLoader)
+            except yaml.YAMLError:
+                raise
+            except:
+                self._tc_config = {}
+
+        print(f"Config: {self._tc_config}")
+
+        return self._tc_config
 
 class Shared:
     """
