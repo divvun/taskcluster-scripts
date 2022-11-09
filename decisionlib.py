@@ -122,7 +122,7 @@ class Config:
     def tc_config(self):
         if self._tc_config is None:
             try:
-                config = requests.get(f"https://raw.githubusercontent.com/{os.environ['REPO_FULL_NAME']}/{self.git_sha}/.taskcluster.yml").text
+                config = requests.get(f"https://raw.githubusercontent.com/{os.environ['REPO_FULL_NAME']}/{self.git_sha}/.build-config.yml").text
                 self._tc_config = yaml.load(config, Loader=yaml.FullLoader)
             except yaml.YAMLError:
                 raise
