@@ -43,7 +43,7 @@ def create_kbd_task(os_name):
                 gha_pahkat(
                     [
                         "pahkat-uploader",
-                        "kbdgen@2.0.0-nightly.20210622T210632Z",
+                        "kbdgen",
                         "xcnotary",
                     ]
                 ),
