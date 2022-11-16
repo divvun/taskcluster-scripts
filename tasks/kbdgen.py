@@ -16,9 +16,9 @@ def create_kbdgen_deploy_tasks():
     setup_uploader = lambda _: gha_pahkat(["pahkat-uploader"])
 
     return generic_rust_build_upload_task(
-        "Kbdgen2 build",
+        "Kbdgen build",
         "Cargo.toml",
-        package_id="kbdgen2",
+        package_id="kbdgen",
         target_dir="target",
         bin_name="kbdgen",
         env=RUST_ENV,
