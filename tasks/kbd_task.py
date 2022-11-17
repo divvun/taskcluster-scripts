@@ -1,7 +1,25 @@
 from gha import GithubAction
 from decisionlib import CONFIG
 from .common import macos_task, windows_task, gha_setup, gha_pahkat, NIGHTLY_CHANNEL
+import subprocess
+import os
 
+
+def create_kbd_tasks():
+    print(subprocess.check_output("git init repo && cd repo && git fetch --depth 1 {} {} && git reset --hard FETCH_HEAD".format(CONFIG.git_url, CONFIG.git_ref)))
+    has_windows_target = False
+    has_macos_target = False
+
+    for f in os.listdir('repo'):
+        if f.endswith('.kbdgen'):
+            bundle_path = os.path.join("repo", f)
+            has_macos_target = os.path.isfile(os.path.join(bundle_path, "targets", "macos.yaml"))
+            has_windows_target = os.path.isfile(os.path.join(bundle_path, "targets", "windows.yaml"))
+
+    if has_macos_target:
+        create_kbd_task("macos-latest")
+    if has_windows_target:
+        create_kbd_task("windows-latest")
 
 def create_kbd_task(os_name):
     if os_name == "windows-latest":

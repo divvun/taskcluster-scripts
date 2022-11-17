@@ -1,5 +1,5 @@
 from .lang_task import create_lang_tasks
-from .kbd_task import create_kbd_task
+from .kbd_task import create_kbd_tasks
 from .pahkat import create_pahkat_tasks
 from .pahkat_reposrv import (
     create_pahkat_reposrv_task,

@@ -56,8 +56,7 @@ def tasks(task_for: str):
 
     # Keyboard repositories common tasks
     if repo_name.startswith("keyboard-"):
-        for os_ in {"windows-latest", "macos-latest"}:
-            create_kbd_task(os_)
+        create_kbd_tasks()
 
     # pahkat-reposrv tasks
     if repo_name == "pahkat-reposrv":
