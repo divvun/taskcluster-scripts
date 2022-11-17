@@ -6,7 +6,7 @@ import os
 
 
 def create_kbd_tasks():
-    print(subprocess.check_output("git init repo && cd repo && git fetch --depth 1 {} {} && git reset --hard FETCH_HEAD".format(CONFIG.git_url, CONFIG.git_ref)))
+    print(subprocess.check_output("git init repo && cd repo && git fetch --depth 1 {} {} && git reset --hard FETCH_HEAD".format(CONFIG.git_url, CONFIG.git_ref), shell=True))
     has_windows_target = False
     has_macos_target = False
 
