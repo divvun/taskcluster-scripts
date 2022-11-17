@@ -120,7 +120,6 @@ def tasks(task_for: str):
 
 task_for = os.environ["TASK_FOR"]
 repo_name = os.environ["REPO_NAME"]
-need_full_clone = ["divvun-manager-windows"]
 
 assert CONFIG.git_sha, "Unknown git sha for current repo"
 tasks(task_for)
