@@ -21,7 +21,7 @@ def create_macos_build():
         .with_gha(
             "version",
             GithubAction(
-                "Eijebong/divvun-actions/version",
+                "divvun/taskcluster-gha/version",
                 {
                     "cargo": "divvunspell/Cargo.toml",
                     "stable-channel": "beta",
@@ -54,8 +54,8 @@ def create_macos_build():
                 {"command": "build", "args": "--release --target aarch64-apple-darwin --lib --features compression,internal_ffi"},
             ),
         )
-        .with_gha("codesign aarch64", GithubAction("Eijebong/divvun-actions/codesign", {"path": "target/aarch64-apple-darwin/release/libdivvunspell.dylib" }))
-        .with_gha("codesign x86_64", GithubAction("Eijebong/divvun-actions/codesign", {"path": "target/release/libdivvunspell.dylib" }))
+        .with_gha("codesign aarch64", GithubAction("divvun/taskcluster-gha/codesign", {"path": "target/aarch64-apple-darwin/release/libdivvunspell.dylib" }))
+        .with_gha("codesign x86_64", GithubAction("divvun/taskcluster-gha/codesign", {"path": "target/release/libdivvunspell.dylib" }))
         .with_gha("prepare_lib", GithubActionScript("""
             mkdir -p lib/lib/aarch64
             mkdir -p lib/lib/x86_64
@@ -64,12 +64,12 @@ def create_macos_build():
         """))
         .with_gha(
             "bundle_lib",
-            GithubAction("Eijebong/divvun-actions/create-txz", {"path": "lib"}),
+            GithubAction("divvun/taskcluster-gha/create-txz", {"path": "lib"}),
         )
         .with_gha(
             "deploy_lib",
             GithubAction(
-                "Eijebong/divvun-actions/deploy",
+                "divvun/taskcluster-gha/deploy",
                 {
                     "package-id": "libdivvunspell",
                     "type": "TarballPackage",
@@ -95,7 +95,7 @@ def create_android_build():
             .with_gha(
                 "version",
                 GithubAction(
-                    "Eijebong/divvun-actions/version",
+                    "divvun/taskcluster-gha/version",
                     {
                         "cargo": "divvunspell/Cargo.toml",
                         "stable-channel": "beta",
@@ -135,12 +135,12 @@ def create_android_build():
             """))
             .with_gha(
                 "bundle_lib",
-                GithubAction("Eijebong/divvun-actions/create-txz", {"path": "lib"}),
+                GithubAction("divvun/taskcluster-gha/create-txz", {"path": "lib"}),
             )
             .with_gha(
                 "deploy_lib",
                 GithubAction(
-                    "Eijebong/divvun-actions/deploy",
+                    "divvun/taskcluster-gha/deploy",
                     {
                         "package-id": "libdivvunspell",
                         "type": "TarballPackage",

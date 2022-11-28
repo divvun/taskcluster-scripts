@@ -10,7 +10,7 @@ def create_macdivvun_task():
         .with_gha(
             "version",
             GithubAction(
-                "Eijebong/divvun-actions/version",
+                "divvun/taskcluster-gha/version",
                 {
                     "xcode": ".",
                     "stable-channel": "beta",
@@ -37,7 +37,7 @@ def create_macdivvun_task():
         .with_gha(
             "deploy",
             GithubAction(
-                "Eijebong/divvun-actions/deploy",
+                "divvun/taskcluster-gha/deploy",
                 {
                     "platform": "macos",
                     "package-id": "macdivvun",

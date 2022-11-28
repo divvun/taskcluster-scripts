@@ -71,15 +71,15 @@ def create_lang_task(with_apertium):
         .with_gha(
             "deps",
             GithubAction(
-                "Eijebong/divvun-actions/lang/install-deps",
+                "divvun/taskcluster-gha/lang/install-deps",
                 {"sudo": "false", "apertium": with_apertium},
             ),
         )
         .with_gha(
-            "build", GithubAction("Eijebong/divvun-actions/lang/build", {"fst": "hfst"})
+            "build", GithubAction("divvun/taskcluster-gha/lang/build", {"fst": "hfst"})
         )
         .with_gha(
-            "check", GithubAction("Eijebong/divvun-actions/lang/check", {"fst": "hfst"}), enabled=should_make_check
+            "check", GithubAction("divvun/taskcluster-gha/lang/check", {"fst": "hfst"}), enabled=should_make_check
         )
         .with_named_artifacts(
             "spellers",
@@ -100,7 +100,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
             .with_gha(
                 "init",
                 GithubAction(
-                    "Eijebong/divvun-actions/pahkat/init",
+                    "divvun/taskcluster-gha/pahkat/init",
                     {
                         "repo": "https://pahkat.uit.no/devtools/",
                         "channel": NIGHTLY_CHANNEL,
@@ -112,7 +112,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
             .with_gha(
                 "version",
                 GithubAction(
-                    "Eijebong/divvun-actions/version",
+                    "divvun/taskcluster-gha/version",
                     {
                         "speller-manifest": True,
                         "nightly-channel": NIGHTLY_CHANNEL,
@@ -123,7 +123,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
             .with_gha(
                 "bundler",
                 GithubAction(
-                    "Eijebong/divvun-actions/speller/bundle",
+                    "divvun/taskcluster-gha/speller/bundle",
                     {
                         "speller-type": type_,
                         "speller-manifest-path": "manifest.toml",
@@ -135,7 +135,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
             .with_gha(
                 "deploy",
                 GithubAction(
-                    "Eijebong/divvun-actions/speller/deploy",
+                    "divvun/taskcluster-gha/speller/deploy",
                     {
                         "speller-type": type_,
                         "speller-manifest-path": "manifest.toml",
@@ -159,7 +159,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
             .with_gha(
                 "init",
                 GithubAction(
-                    "Eijebong/divvun-actions/pahkat/init",
+                    "divvun/taskcluster-gha/pahkat/init",
                     {
                         "repo": "https://pahkat.uit.no/devtools/",
                         "channel": NIGHTLY_CHANNEL,
@@ -169,14 +169,14 @@ def create_bundle_task(os_name, type_, lang_task_id):
             )
             .with_gha(
                 "setup",
-                GithubAction("Eijebong/divvun-actions/setup", {}).with_secret_input(
+                GithubAction("divvun/taskcluster-gha/setup", {}).with_secret_input(
                     "key", "divvun", "DIVVUN_KEY"
                 ),
             )
             .with_gha(
                 "version",
                 GithubAction(
-                    "Eijebong/divvun-actions/version",
+                    "divvun/taskcluster-gha/version",
                     {
                         "speller-manifest": True,
                         "nightly-channel": NIGHTLY_CHANNEL,
@@ -187,7 +187,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
             .with_gha(
                 "bundler",
                 GithubAction(
-                    "Eijebong/divvun-actions/speller/bundle",
+                    "divvun/taskcluster-gha/speller/bundle",
                     {
                         "speller-type": type_,
                         "speller-manifest-path": "manifest.toml",
@@ -199,7 +199,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
             .with_gha(
                 "deploy",
                 GithubAction(
-                    "Eijebong/divvun-actions/speller/deploy",
+                    "divvun/taskcluster-gha/speller/deploy",
                     {
                         "speller-type": type_,
                         "speller-manifest-path": "manifest.toml",

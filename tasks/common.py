@@ -180,14 +180,14 @@ def windows_task(name, clone_self=True):
 
 
 def gha_setup():
-    return GithubAction("Eijebong/divvun-actions/setup", {}).with_secret_input(
+    return GithubAction("divvun/taskcluster-gha/setup", {}).with_secret_input(
         "key", "divvun", "DIVVUN_KEY"
     )
 
 
 def gha_pahkat(packages: List[str]):
     return GithubAction(
-        "Eijebong/divvun-actions/pahkat/init",
+        "divvun/taskcluster-gha/pahkat/init",
         {
             "repo": "https://pahkat.uit.no/devtools/",
             "channel": NIGHTLY_CHANNEL,
@@ -299,7 +299,7 @@ def _generic_rust_build_upload_task(
             (
                 "sign",
                 GithubAction(
-                    "Eijebong/divvun-actions/codesign",
+                    "divvun/taskcluster-gha/codesign",
                     {"path": f"dist/bin/{rename_binary}.exe"},
                 ),
             )
@@ -330,14 +330,14 @@ def _generic_rust_build_upload_task(
                 (
                     "sign32",
                     GithubAction(
-                        "Eijebong/divvun-actions/codesign",
+                        "divvun/taskcluster-gha/codesign",
                         {"path": f"dist/bin/{rename_binary}-x64.exe"},
                     ),
                 )
             )
 
         deploy = GithubAction(
-            "Eijebong/divvun-actions/deploy",
+            "divvun/taskcluster-gha/deploy",
             {
                 "package-id": package_id,
                 "type": "TarballPackage",
@@ -374,13 +374,13 @@ def _generic_rust_build_upload_task(
             (
                 "sign",
                 GithubAction(
-                    "Eijebong/divvun-actions/codesign",
+                    "divvun/taskcluster-gha/codesign",
                     {"path": f"dist/bin/{rename_binary}"},
                 ),
             )
         ]
         deploy = GithubAction(
-            "Eijebong/divvun-actions/deploy",
+            "divvun/taskcluster-gha/deploy",
             {
                 "package-id": package_id,
                 "type": "TarballPackage",
@@ -415,7 +415,7 @@ def _generic_rust_build_upload_task(
         ]
         sign = [("sign", GithubActionScript('echo "No code signing on linux"'))]
         deploy = GithubAction(
-            "Eijebong/divvun-actions/deploy",
+            "divvun/taskcluster-gha/deploy",
             {
                 "package-id": package_id,
                 "type": "TarballPackage",
@@ -446,7 +446,7 @@ def _generic_rust_build_upload_task(
         .with_ghas(sign)
         .with_gha(
             "tarball",
-            GithubAction("Eijebong/divvun-actions/create-txz", {"path": "dist"}),
+            GithubAction("divvun/taskcluster-gha/create-txz", {"path": "dist"}),
         )
         .with_gha("setup_uploader", setup_uploader)
         .with_gha(
@@ -480,7 +480,7 @@ def generic_rust_build_upload_task(
         rename_binary = bin_name
     if version_action is None:
         version_action = GithubAction(
-            "Eijebong/divvun-actions/version",
+            "divvun/taskcluster-gha/version",
             {"cargo": cargo_toml_path, "nightly-channel": NIGHTLY_CHANNEL},
         ).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN")
     if only_os is None:

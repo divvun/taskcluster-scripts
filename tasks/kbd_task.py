@@ -31,7 +31,7 @@ def create_kbd_task(os_name):
             .with_gha(
                 "build",
                 GithubAction(
-                    "Eijebong/divvun-actions/keyboard/build",
+                    "divvun/taskcluster-gha/keyboard/build",
                     {
                         "keyboard-type": "keyboard-windows",
                         "nightly-channel": NIGHTLY_CHANNEL,
@@ -41,7 +41,7 @@ def create_kbd_task(os_name):
             .with_gha(
                 "upload",
                 GithubAction(
-                    "Eijebong/divvun-actions/keyboard/deploy",
+                    "divvun/taskcluster-gha/keyboard/deploy",
                     {
                         "keyboard-type": "keyboard-windows",
                         "payload-path": "${{ steps.build.outputs['payload-path'] }}",
@@ -69,7 +69,7 @@ def create_kbd_task(os_name):
             .with_gha(
                 "build",
                 GithubAction(
-                    "Eijebong/divvun-actions/keyboard/build",
+                    "divvun/taskcluster-gha/keyboard/build",
                     {
                         "keyboard-type": "keyboard-macos",
                         "nightly-channel": NIGHTLY_CHANNEL,
@@ -79,7 +79,7 @@ def create_kbd_task(os_name):
             .with_gha(
                 "upload",
                 GithubAction(
-                    "Eijebong/divvun-actions/keyboard/deploy",
+                    "divvun/taskcluster-gha/keyboard/deploy",
                     {
                         "keyboard-type": "keyboard-macos",
                         "payload-path": "${{ steps.build.outputs['payload-path'] }}",

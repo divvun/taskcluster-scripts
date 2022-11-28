@@ -29,7 +29,7 @@ def create_pahkat_android_client_task():
             .with_gha(
                 "version",
                 GithubAction(
-                    "Eijebong/divvun-actions/version",
+                    "divvun/taskcluster-gha/version",
                     {
                         "cargo": "pahkat-client-core/Cargo.toml",
                         "stable-channel": "beta",
@@ -69,12 +69,12 @@ def create_pahkat_android_client_task():
             """))
             .with_gha(
                 "bundle_lib",
-                GithubAction("Eijebong/divvun-actions/create-txz", {"path": "pahkat-client-core/lib"}),
+                GithubAction("divvun/taskcluster-gha/create-txz", {"path": "pahkat-client-core/lib"}),
             )
             .with_gha(
                 "deploy_lib",
                 GithubAction(
-                    "Eijebong/divvun-actions/deploy",
+                    "divvun/taskcluster-gha/deploy",
                     {
                         "package-id": "libpahkat_client",
                         "type": "TarballPackage",
@@ -172,7 +172,7 @@ def create_pahkat_service_windows_task():
         .with_gha(
             "version",
             GithubAction(
-                "Eijebong/divvun-actions/version",
+                "divvun/taskcluster-gha/version",
                 {
                     "cargo": "pahkat-rpc/Cargo.toml",
                     "stable-channel": "beta",
@@ -252,19 +252,19 @@ def create_pahkat_service_windows_task():
         .with_gha(
             "sign_code_server",
             GithubAction(
-                "Eijebong/divvun-actions/codesign", {"path": "dist/pahkat-service.exe"}
+                "divvun/taskcluster-gha/codesign", {"path": "dist/pahkat-service.exe"}
             ),
         )
         .with_gha(
             "sign_code_client",
             GithubAction(
-                "Eijebong/divvun-actions/codesign", {"path": "dist/pahkatc.exe"}
+                "divvun/taskcluster-gha/codesign", {"path": "dist/pahkatc.exe"}
             ),
         )
         .with_gha(
             "create_installer",
             GithubAction(
-                "Eijebong/divvun-actions/inno-setup",
+                "divvun/taskcluster-gha/inno-setup",
                 {
                     "path": "pahkat-rpc/resources/install.iss",
                     "defines": "Version=${{ steps.version.outputs.version }}",
@@ -273,12 +273,12 @@ def create_pahkat_service_windows_task():
         )
         .with_gha(
             "bundle_dll",
-            GithubAction("Eijebong/divvun-actions/create-txz", {"path": "dist-lib"}),
+            GithubAction("divvun/taskcluster-gha/create-txz", {"path": "dist-lib"}),
         )
         .with_gha(
             "deploy_lib",
             GithubAction(
-                "Eijebong/divvun-actions/deploy",
+                "divvun/taskcluster-gha/deploy",
                 {
                     "package-id": "libpahkat_rpc",
                     "type": "TarballPackage",
@@ -294,7 +294,7 @@ def create_pahkat_service_windows_task():
         .with_gha(
             "deploy_installer",
             GithubAction(
-                "Eijebong/divvun-actions/deploy",
+                "divvun/taskcluster-gha/deploy",
                 {
                     "package-id": "pahkat-service",
                     "type": "TarballPackage",

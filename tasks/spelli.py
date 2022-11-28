@@ -25,7 +25,7 @@ def create_spelli_task():
         .with_gha(
             "version",
             GithubAction(
-                "Eijebong/divvun-actions/version",
+                "divvun/taskcluster-gha/version",
                 {"cargo": "true", "nightly-channel": NIGHTLY_CHANNEL},
             ).with_secret_input("GITHUB_TOKEN", "divvun", "GITHUB_TOKEN"),
         )
@@ -76,18 +76,18 @@ def create_spelli_task():
         .with_gha(
             "sign_spelli",
             GithubAction(
-                "Eijebong/divvun-actions/codesign",
+                "divvun/taskcluster-gha/codesign",
                 {"path": "dist/bin/spelli.exe"},
             ),
         )
         .with_gha(
             "tarball",
-            GithubAction("Eijebong/divvun-actions/create-txz", {"path": "dist"}),
+            GithubAction("divvun/taskcluster-gha/create-txz", {"path": "dist"}),
         )
         .with_gha(
             "deploy",
             GithubAction(
-                "Eijebong/divvun-actions/deploy",
+                "divvun/taskcluster-gha/deploy",
                 {
                     "package-id": "spelli",
                     "type": "TarballPackage",

@@ -17,7 +17,7 @@ def create_android_keyboard_task(bundle):
         .with_gha(
             "build",
             GithubAction(
-                "Eijebong/divvun-actions/keyboard/build-meta",
+                "divvun/taskcluster-gha/keyboard/build-meta",
                 {"keyboard-type": "keyboard-android", "bundle-path": bundle},
             ),
         )
@@ -49,7 +49,7 @@ def create_ios_keyboard_task(bundle, is_dev):
         .with_gha(
             "build",
             GithubAction(
-                "Eijebong/divvun-actions/keyboard/build-meta",
+                "divvun/taskcluster-gha/keyboard/build-meta",
                 {"keyboard-type": "keyboard-ios", "bundle-path": bundle},
             ),
         )

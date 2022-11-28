@@ -37,7 +37,7 @@ def create_windivvun_tasks():
         .with_gha(
             "version",
             GithubAction(
-                "Eijebong/divvun-actions/version",
+                "divvun/taskcluster-gha/version",
                 {
                     "cargo": "true",
                     "nightly-channel": NIGHTLY_CHANNEL,
@@ -74,7 +74,7 @@ def create_windivvun_tasks():
         .with_gha(
             "installer",
             GithubAction(
-                "Eijebong/divvun-actions/inno-setup",
+                "divvun/taskcluster-gha/inno-setup",
                 {
                     "path": "install.iss",
                     "defines": "Version=${{ steps.version.outputs.version }}",
@@ -84,7 +84,7 @@ def create_windivvun_tasks():
         .with_gha(
             "deploy",
             GithubAction(
-                "Eijebong/divvun-actions/deploy",
+                "divvun/taskcluster-gha/deploy",
                 {
                     "package-id": "windivvun",
                     "platform": "windows",
@@ -156,7 +156,7 @@ def create_mso_build_tasks():
                 .with_gha(
                     "sign",
                     GithubAction(
-                        "Eijebong/divvun-actions/codesign",
+                        "divvun/taskcluster-gha/codesign",
                         {"path": f"target/{triple}/release/divvunspellmso.dll"},
                     ),
                 )
@@ -212,7 +212,7 @@ def create_windivvun_build_tasks():
                 .with_gha(
                     "sign",
                     GithubAction(
-                        "Eijebong/divvun-actions/codesign",
+                        "divvun/taskcluster-gha/codesign",
                         {"path": f"target/{triple}/release/windivvun.dll"},
                     ),
                 )

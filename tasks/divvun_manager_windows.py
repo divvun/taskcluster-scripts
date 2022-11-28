@@ -44,7 +44,7 @@ def create_divvun_manager_windows_tasks():
         .with_gha(
             "version",
             GithubAction(
-                "Eijebong/divvun-actions/version",
+                "divvun/taskcluster-gha/version",
                 {
                     "csharp": "true",
                     "stable-channel": "beta",
@@ -134,7 +134,7 @@ def create_divvun_manager_windows_tasks():
         .with_gha(
             "sign_divvun_manager",
             GithubAction(
-                "Eijebong/divvun-actions/codesign",
+                "divvun/taskcluster-gha/codesign",
                 {
                     "path": "Divvun.Installer/bin/x86/Release/net5.0-windows10.0.18362.0/win-x86/DivvunManager.exe"
                 },
@@ -143,7 +143,7 @@ def create_divvun_manager_windows_tasks():
         .with_gha(
             "sign_oneclick",
             GithubAction(
-                "Eijebong/divvun-actions/codesign",
+                "divvun/taskcluster-gha/codesign",
                 {
                     "path": "../oneclick-bundler/target/dist/Divvun.Installer.OneClick.exe"
                 },
@@ -152,7 +152,7 @@ def create_divvun_manager_windows_tasks():
         .with_gha(
             "sign_dll",
             GithubAction(
-                "Eijebong/divvun-actions/codesign",
+                "divvun/taskcluster-gha/codesign",
                 {
                     "path": "Divvun.Installer/bin/x86/Release/net5.0-windows10.0.18362.0/win-x86/Pahkat.Sdk.dll"
                 },
@@ -161,7 +161,7 @@ def create_divvun_manager_windows_tasks():
         .with_gha(
             "sign_dll_rpc",
             GithubAction(
-                "Eijebong/divvun-actions/codesign",
+                "divvun/taskcluster-gha/codesign",
                 {
                     "path": "Divvun.Installer/bin/x86/Release/net5.0-windows10.0.18362.0/win-x86/Pahkat.Sdk.Rpc.dll"
                 },
@@ -170,7 +170,7 @@ def create_divvun_manager_windows_tasks():
         .with_gha(
             "installer",
             GithubAction(
-                "Eijebong/divvun-actions/inno-setup",
+                "divvun/taskcluster-gha/inno-setup",
                 {
                     "path": "setup.iss",
                     "defines": "Version=${{ steps.version.outputs.version }}",
@@ -180,7 +180,7 @@ def create_divvun_manager_windows_tasks():
         .with_gha(
             "deploy_manager",
             GithubAction(
-                "Eijebong/divvun-actions/deploy",
+                "divvun/taskcluster-gha/deploy",
                 {
                     "package-id": "divvun-installer",
                     "platform": "windows",
@@ -196,7 +196,7 @@ def create_divvun_manager_windows_tasks():
         .with_gha(
             "deploy_installer",
             GithubAction(
-                "Eijebong/divvun-actions/deploy",
+                "divvun/taskcluster-gha/deploy",
                 {
                     "package-id": "divvun-installer-oneclick",
                     "platform": "windows",

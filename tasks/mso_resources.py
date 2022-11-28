@@ -70,7 +70,7 @@ def create_mso_patch_gen_task():
         .with_gha(
             "version",
             GithubAction(
-                "Eijebong/divvun-actions/version",
+                "divvun/taskcluster-gha/version",
                 {
                     "cargo": "divvunspell-mso/Cargo.toml",
                     "nightly-channel": NIGHTLY_CHANNEL,

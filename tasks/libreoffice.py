@@ -26,14 +26,14 @@ def create_libreoffice_tasks():
         .with_gha("setup_pahkat", gha_pahkat(["pahkat-uploader", "xcnotary"]))
         .with_gha(
             "setup",
-            GithubAction("Eijebong/divvun-actions/setup", {}).with_secret_input(
+            GithubAction("divvun/taskcluster-gha/setup", {}).with_secret_input(
                 "key", "divvun", "DIVVUN_KEY"
             ),
         )
         .with_gha(
             "version",
             GithubAction(
-                "Eijebong/divvun-actions/version",
+                "divvun/taskcluster-gha/version",
                 {"filepath": "src/VERSION", "nightly-channel": NIGHTLY_CHANNEL},
             ),
         )
@@ -56,7 +56,7 @@ def create_libreoffice_tasks():
         .with_gha(
             "deploy",
             GithubAction(
-                "Eijebong/divvun-actions/deploy",
+                "divvun/taskcluster-gha/deploy",
                 {
                     "package-id": "divvunspell-libreoffice-oxt",
                     "type": "TarballPackage",
@@ -100,7 +100,7 @@ def create_libreoffice_tasks():
         .with_gha(
             "deploy_macos",
             GithubAction(
-                "Eijebong/divvun-actions/deploy",
+                "divvun/taskcluster-gha/deploy",
                 {
                     "package-id": "divvunspell-libreoffice-oxt",
                     "type": "TarballPackage",
@@ -120,11 +120,11 @@ def create_libreoffice_tasks():
                 ./build.sh
             """)
         )
-        .with_gha("codesign macos installer", GithubAction("Eijebong/divvun-actions/codesign", {"path": "macos/LibreOfficeOXT.pkg", "isInstaller": "true" }))
+        .with_gha("codesign macos installer", GithubAction("divvun/taskcluster-gha/codesign", {"path": "macos/LibreOfficeOXT.pkg", "isInstaller": "true" }))
         .with_gha(
             "deploy_macos_installer",
             GithubAction(
-                "Eijebong/divvun-actions/deploy",
+                "divvun/taskcluster-gha/deploy",
                 {
                     "package-id": "divvunspell-libreoffice",
                     "type": "MacOSPackage",
