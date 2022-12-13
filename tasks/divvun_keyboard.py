@@ -38,10 +38,8 @@ def create_android_keyboard_task(bundle):
     )
 
 
-def create_ios_keyboard_task(bundle, is_dev):
-    ipa_name = "Divvun Keyboards.ipa"
-    if is_dev:
-        ipa_name = "Divvun Dev Keyboards.ipa"
+def create_ios_keyboard_task(bundle, _is_dev):
+    ipa_name = "HostingApp.ipa"
     return (
         macos_task(f"Build keyboard: IOS")
         .with_gha("setup", gha_setup())
