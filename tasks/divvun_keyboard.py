@@ -61,7 +61,6 @@ def create_ios_keyboard_task(bundle, _is_dev):
             )
             .with_env("SPACESHIP_SKIP_2FA_UPGRADE", 1)
             .with_env("LANG", "en_US.UTF-8")
-            .with_env("ITMSTRANSPORTER_FORCE_ITMS_PACKAGE_UPLOAD", "true"),
             enabled=(CONFIG.git_ref == "refs/heads/main"),
         )
         .find_or_create(f"keyboard-build.ios.{CONFIG.index_path}")
