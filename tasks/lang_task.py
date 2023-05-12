@@ -71,15 +71,15 @@ def create_lang_task(with_apertium):
         .with_gha(
             "deps",
             GithubAction(
-                "divvun/divvun-taskcluster-gha-test/lang/install-deps",
+                "technocreatives/divvun-taskcluster-gha-test/lang/install-deps",
                 {"sudo": "false", "apertium": with_apertium},
             ),
         )
         .with_gha(
-            "build", GithubAction("divvun/divvun-taskcluster-gha-test/lang/build", {"fst": "hfst"})
+            "build", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/build", {"fst": "hfst"})
         )
         .with_gha(
-            "check", GithubAction("divvun/divvun-taskcluster-gha-test/lang/check", {"fst": "hfst"}), enabled=should_make_check
+            "check", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {"fst": "hfst"}), enabled=should_make_check
         )
         .with_named_artifacts(
             "spellers",
