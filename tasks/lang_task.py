@@ -37,17 +37,12 @@ def create_lang_tasks(repo_name):
 
 
 def create_lang_task(with_apertium):
-    should_make_check = False
-    should_make_check = CONFIG.tc_config.get('lang', {}).get('check', False)
-
-#    should_build_spellers = False
-#    should_build_spellers = CONFIG.tc_config.get('lang', {}).get('spellers', False)
-#
-#    should_check_spellers = False
-#    should_check_spellers = CONFIG.tc_config.get('lang', {}).get('spellers', False)
-#
-#    should_build_grammar_checkers = False
-#    should_build_grammar_checkers = CONFIG.tc_config.get('lang', {}).get('grammar-checkers', False)
+    should_build_analyzers = CONFIG.tc_config.get('build', {}).get('analyzers', False)
+    should_build_spellers = CONFIG.tc_config.get('build', {}).get('spellers', False)
+    should_build_grammar_checkers = CONFIG.tc_config.get('build', {}).get('grammar-checkers', False)
+    should_check_analyzers = CONFIG.tc_config.get('check', {}).get('analyzers', False)
+    should_check_spellers = CONFIG.tc_config.get('check', {}).get('spellers', False)
+    should_check_grammar_checkers = CONFIG.tc_config.get('check', {}).get('grammar-checkers', False)
 
     return (
         linux_build_task("Lang build", bundle_dest="lang")
@@ -83,10 +78,22 @@ def create_lang_task(with_apertium):
             ),
         )
         .with_gha(
-            "build analyzers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/build", {"fst": "hfst", "spellers": "false"})
+            "build analyzers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/build", {"fst": "hfst", "analyzers": "true", "spellers": "false"}), enabled=should_build_analyzers
         )
         .with_gha(
-            "check analyzers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {"fst": "hfst"}), enabled=should_make_check
+            "check analyzers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {}), enabled=should_check_analyzers
+        )
+        .with_gha(
+            "build spellers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/build", {"fst": "hfst", "spellers": "true"}), enabled=should_build_analyzers
+        )
+        .with_gha(
+            "check spellers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {}), enabled=should_check_spellers
+        )
+        .with_gha(
+            "build grammar-checkers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/build", {"fst": "hfst", "grammar-checkers": "true"}), enabled=should_build_grammar-checkers
+        )
+        .with_gha(
+            "check grammar-checkers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {}), enabled=should_check_grammar-checkers
         )
         .with_named_artifacts(
             "spellers",
