@@ -37,10 +37,10 @@ def create_lang_tasks(repo_name):
 
 
 def create_lang_task(with_apertium):
-    should_build_analyzers = CONFIG.tc_config.get('build', {}).get('analyzers', False)
+    should_build_analysers = CONFIG.tc_config.get('build', {}).get('analysers', False)
     should_build_spellers = CONFIG.tc_config.get('build', {}).get('spellers', False)
     should_build_grammar_checkers = CONFIG.tc_config.get('build', {}).get('grammar-checkers', False)
-    should_check_analyzers = CONFIG.tc_config.get('check', {}).get('analyzers', False)
+    should_check_analysers = CONFIG.tc_config.get('check', {}).get('analysers', False)
     should_check_spellers = CONFIG.tc_config.get('check', {}).get('spellers', False)
     should_check_grammar_checkers = CONFIG.tc_config.get('check', {}).get('grammar-checkers', False)
 
@@ -78,13 +78,13 @@ def create_lang_task(with_apertium):
             ),
         )
         .with_gha(
-            "build analyzers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/build", {"fst": "hfst", "analyzers": "true", "spellers": "false"}), enabled=should_build_analyzers
+            "build analysers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/build", {"fst": "hfst", "analysers": "true", "spellers": "false"}), enabled=should_build_analysers
         )
         .with_gha(
-            "check analyzers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {}), enabled=should_check_analyzers
+            "check analysers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {}), enabled=should_check_analysers
         )
         .with_gha(
-            "build spellers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/build", {"fst": "hfst", "spellers": "true"}), enabled=should_build_analyzers
+            "build spellers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/build", {"fst": "hfst", "spellers": "true"}), enabled=should_build_analysers
         )
         .with_gha(
             "check spellers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {}), enabled=should_check_spellers
