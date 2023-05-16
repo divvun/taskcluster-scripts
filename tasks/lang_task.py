@@ -37,10 +37,12 @@ def create_lang_tasks(repo_name):
 
 
 def create_lang_task(with_apertium):
-    should_make_check = False
-    should_make_check = CONFIG.tc_config.get('lang', {}).get('check', False)
-
-
+    should_build_analysers = CONFIG.tc_config.get('build', {}).get('analysers', False)
+    should_build_spellers = CONFIG.tc_config.get('build', {}).get('spellers', False)
+    should_build_grammar_checkers = CONFIG.tc_config.get('build', {}).get('grammar-checkers', False)
+    should_check_analysers = CONFIG.tc_config.get('check', {}).get('analysers', False)
+    should_check_spellers = CONFIG.tc_config.get('check', {}).get('spellers', False)
+    should_check_grammar_checkers = CONFIG.tc_config.get('check', {}).get('grammar-checkers', False)
 
     return (
         linux_build_task("Lang build", bundle_dest="lang")
@@ -76,10 +78,22 @@ def create_lang_task(with_apertium):
             ),
         )
         .with_gha(
-            "build", GithubAction("divvun/taskcluster-gha/lang/build", {"fst": "hfst"})
+            "build analysers", GithubAction("divvun/taskcluster-gha/lang/build", {"fst": "hfst", "analysers": "true", "spellers": "false"}), enabled=should_build_analysers
         )
         .with_gha(
-            "check", GithubAction("divvun/taskcluster-gha/lang/check", {"fst": "hfst"}), enabled=should_make_check
+            "check analysers", GithubAction("divvun/taskcluster-gha/lang/check", {}), enabled=should_check_analysers
+        )
+        .with_gha(
+            "build spellers", GithubAction("divvun/taskcluster-gha/lang/build", {"fst": "hfst", "spellers": "true"}), enabled=should_build_spellers
+        )
+        .with_gha(
+            "check spellers", GithubAction("divvun/taskcluster-gha/lang/check", {}), enabled=should_check_spellers
+        )
+        .with_gha(
+            "build grammar-checkers", GithubAction("divvun/taskcluster-gha/lang/build", {"fst": "hfst", "grammar-checkers": "true"}), enabled=should_build_grammar_checkers
+        )
+        .with_gha(
+            "check grammar-checkers", GithubAction("divvun/taskcluster-gha/lang/check", {}), enabled=should_check_grammar_checkers
         )
         .with_named_artifacts(
             "spellers",
