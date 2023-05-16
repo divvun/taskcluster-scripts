@@ -40,7 +40,14 @@ def create_lang_task(with_apertium):
     should_make_check = False
     should_make_check = CONFIG.tc_config.get('lang', {}).get('check', False)
 
-
+#    should_build_spellers = False
+#    should_build_spellers = CONFIG.tc_config.get('lang', {}).get('spellers', False)
+#
+#    should_check_spellers = False
+#    should_check_spellers = CONFIG.tc_config.get('lang', {}).get('spellers', False)
+#
+#    should_build_grammar_checkers = False
+#    should_build_grammar_checkers = CONFIG.tc_config.get('lang', {}).get('grammar-checkers', False)
 
     return (
         linux_build_task("Lang build", bundle_dest="lang")
@@ -76,10 +83,10 @@ def create_lang_task(with_apertium):
             ),
         )
         .with_gha(
-            "build", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/build", {"fst": "hfst"})
+            "build analyzers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/build", {"fst": "hfst", "spellers": "false"})
         )
         .with_gha(
-            "check", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {"fst": "hfst"}), enabled=should_make_check
+            "check analyzers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {"fst": "hfst"}), enabled=should_make_check
         )
         .with_named_artifacts(
             "spellers",
