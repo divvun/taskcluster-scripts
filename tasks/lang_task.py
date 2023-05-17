@@ -73,27 +73,27 @@ def create_lang_task(with_apertium):
         .with_gha(
             "deps",
             GithubAction(
-                "divvun/taskcluster-gha/lang/install-deps",
+                "technocreatives/divvun-taskcluster-gha-test/lang/install-deps",
                 {"sudo": "false", "apertium": with_apertium},
             ),
         )
         .with_gha(
-            "build_analysers", GithubAction("divvun/taskcluster-gha/lang/build", {"fst": "hfst", "analysers": "true", "spellers": "false"}), enabled=should_build_analysers
+            "build_analysers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/build", {"fst": "hfst", "analysers": "true", "spellers": "false"}), enabled=should_build_analysers
         )
         .with_gha(
-            "check_analysers", GithubAction("divvun/taskcluster-gha/lang/check", {}), enabled=should_check_analysers
+            "check_analysers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {}), enabled=should_check_analysers
         )
         .with_gha(
-            "build_spellers", GithubAction("divvun/taskcluster-gha/lang/build", {"fst": "hfst", "spellers": "true"}), enabled=should_build_spellers
+            "build_spellers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/build", {"fst": "hfst", "spellers": "true"}), enabled=should_build_spellers
         )
         .with_gha(
-            "check_spellers", GithubAction("divvun/taskcluster-gha/lang/check", {}), enabled=should_check_spellers
+            "check_spellers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {}), enabled=should_check_spellers
         )
         .with_gha(
-            "build_grammar-checkers", GithubAction("divvun/taskcluster-gha/lang/build", {"fst": "hfst", "grammar-checkers": "true"}), enabled=should_build_grammar_checkers
+            "build_grammar-checkers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/build", {"fst": "hfst", "grammar-checkers": "true"}), enabled=should_build_grammar_checkers
         )
         .with_gha(
-            "check_grammar-checkers", GithubAction("divvun/taskcluster-gha/lang/check", {}), enabled=should_check_grammar_checkers
+            "check_grammar-checkers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {}), enabled=should_check_grammar_checkers
         )
         .with_named_artifacts(
             "spellers",
@@ -114,7 +114,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
             .with_gha(
                 "init",
                 GithubAction(
-                    "divvun/taskcluster-gha/pahkat/init",
+                    "technocreatives/divvun-taskcluster-gha-test/pahkat/init",
                     {
                         "repo": "https://pahkat.uit.no/devtools/",
                         "channel": NIGHTLY_CHANNEL,
@@ -126,7 +126,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
             .with_gha(
                 "version",
                 GithubAction(
-                    "divvun/taskcluster-gha/version",
+                    "technocreatives/divvun-taskcluster-gha-test/version",
                     {
                         "speller-manifest": True,
                         "nightly-channel": NIGHTLY_CHANNEL,
@@ -137,7 +137,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
             .with_gha(
                 "bundler",
                 GithubAction(
-                    "divvun/taskcluster-gha/speller/bundle",
+                    "technocreatives/divvun-taskcluster-gha-test/speller/bundle",
                     {
                         "speller-type": type_,
                         "speller-manifest-path": "manifest.toml",
@@ -149,7 +149,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
             .with_gha(
                 "deploy",
                 GithubAction(
-                    "divvun/taskcluster-gha/speller/deploy",
+                    "technocreatives/divvun-taskcluster-gha-test/speller/deploy",
                     {
                         "speller-type": type_,
                         "speller-manifest-path": "manifest.toml",
@@ -173,7 +173,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
             .with_gha(
                 "init",
                 GithubAction(
-                    "divvun/taskcluster-gha/pahkat/init",
+                    "technocreatives/divvun-taskcluster-gha-test/pahkat/init",
                     {
                         "repo": "https://pahkat.uit.no/devtools/",
                         "channel": NIGHTLY_CHANNEL,
@@ -183,14 +183,14 @@ def create_bundle_task(os_name, type_, lang_task_id):
             )
             .with_gha(
                 "setup",
-                GithubAction("divvun/taskcluster-gha/setup", {}).with_secret_input(
+                GithubAction("technocreatives/divvun-taskcluster-gha-test/setup", {}).with_secret_input(
                     "key", "divvun", "DIVVUN_KEY"
                 ),
             )
             .with_gha(
                 "version",
                 GithubAction(
-                    "divvun/taskcluster-gha/version",
+                    "technocreatives/divvun-taskcluster-gha-test/version",
                     {
                         "speller-manifest": True,
                         "nightly-channel": NIGHTLY_CHANNEL,
@@ -201,7 +201,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
             .with_gha(
                 "bundler",
                 GithubAction(
-                    "divvun/taskcluster-gha/speller/bundle",
+                    "technocreatives/divvun-taskcluster-gha-test/speller/bundle",
                     {
                         "speller-type": type_,
                         "speller-manifest-path": "manifest.toml",
@@ -213,7 +213,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
             .with_gha(
                 "deploy",
                 GithubAction(
-                    "divvun/taskcluster-gha/speller/deploy",
+                    "technocreatives/divvun-taskcluster-gha-test/speller/deploy",
                     {
                         "speller-type": type_,
                         "speller-manifest-path": "manifest.toml",
