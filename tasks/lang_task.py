@@ -21,7 +21,7 @@ def create_lang_tasks(repo_name):
 
     lang_task_id = create_lang_task(should_install_apertium)
 
-    create_test_task()
+    create_test_task(should_install_apertium)
 
     # index_read_only means this is a PR and shouldn't run deployment steps
     if repo_name[len("lang-") :] in NO_DEPLOY_LANG or CONFIG.index_read_only:
@@ -34,10 +34,42 @@ def create_lang_tasks(repo_name):
     ]:
         create_bundle_task(os_, type_, lang_task_id)
 
-def create_test_task():
+
+def create_test_task(with_apertium):
     print("RUNNING create_test_task")
     return (
         linux_build_task("Test speller build")
+        .with_additional_repo(
+            "https://github.com/giellalt/giella-core.git",
+            "${HOME}/tasks/${TASK_ID}/giella-core",
+        )
+        .with_additional_repo(
+            "https://github.com/giellalt/giella-shared.git",
+            "${HOME}/tasks/${TASK_ID}/giella-shared",
+        )
+        .with_additional_repo(
+            "https://github.com/giellalt/shared-eng",
+            "${HOME}/tasks/${TASK_ID}/shared-eng"
+        )
+        .with_additional_repo(
+            "https://github.com/giellalt/shared-urj-Cyrl",
+            "${HOME}/tasks/${TASK_ID}/shared-urj-Cyrl"
+        )
+        .with_additional_repo(
+            "https://github.com/giellalt/shared-smi",
+            "${HOME}/tasks/${TASK_ID}/shared-smi"
+        )
+        .with_additional_repo(
+            "https://github.com/giellalt/shared-mul",
+            "${HOME}/tasks/${TASK_ID}/shared-mul"
+        )
+        .with_gha(
+            "deps",
+            GithubAction(
+                "technocreatives/divvun-taskcluster-gha-test/lang/install-deps",
+                {"sudo": "false", "apertium": with_apertium},
+            ),
+        )
         .with_gha(
             "build_spellers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/build", {"fst": "hfst", "spellers": "true"})
         )
@@ -45,6 +77,7 @@ def create_test_task():
             "check_spellers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {})
         )
     )
+
 
 def create_lang_task(with_apertium):
     should_build_analysers = CONFIG.tc_config.get('build', {}).get('analysers', False)
