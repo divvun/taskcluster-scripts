@@ -6,7 +6,7 @@ from decisionlib import CONFIG
 from .common import linux_build_task, macos_task, windows_task, NIGHTLY_CHANNEL, gha_setup
 
 NO_DEPLOY_LANG = {
-    "zxx",  # No linguistic data
+    # "zxx",  # No linguistic data
     "est-x-plamk",
     "nno-x-ext-apertium",
 }
