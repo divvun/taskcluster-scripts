@@ -38,7 +38,7 @@ def create_lang_tasks(repo_name):
 def create_test_task(with_apertium):
     print("RUNNING create_test_task")
     return (
-        linux_build_task("Test speller build")
+        linux_build_task("Test speller build", bundle_dest="lang")
         .with_additional_repo(
             "https://github.com/giellalt/giella-core.git",
             "${HOME}/tasks/${TASK_ID}/giella-core",
