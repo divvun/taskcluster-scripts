@@ -24,6 +24,8 @@ def create_lang_tasks(repo_name):
 
     lang_task_id = create_lang_task(should_install_apertium)
 
+    create_test_task()
+
     # index_read_only means this is a PR and shouldn't run deployment steps
     if repo_name[len("lang-") :] in NO_DEPLOY_LANG or CONFIG.index_read_only:
         return
@@ -35,6 +37,17 @@ def create_lang_tasks(repo_name):
     ]:
         create_bundle_task(os_, type_, lang_task_id)
 
+def create_test_task():
+    print("RUNNING create_test_task")
+    return (
+        linux_build_task("Test speller build")
+        .with_gha(
+            "build_spellers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/build", {"fst": "hfst", "spellers": "true"})
+        )
+        .with_gha(
+            "check_spellers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {})
+        )
+    )
 
 def create_lang_task(with_apertium):
     should_build_analysers = CONFIG.tc_config.get('build', {}).get('analysers', False)
