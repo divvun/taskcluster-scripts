@@ -78,22 +78,22 @@ def create_lang_task(with_apertium):
             ),
         )
         .with_gha(
-            "build analysers", GithubAction("divvun/taskcluster-gha/lang/build", {"fst": "hfst", "analysers": "true", "spellers": "false"}), enabled=should_build_analysers
+            "build_analysers", GithubAction("divvun/taskcluster-gha/lang/build", {"fst": "hfst", "analysers": "true", "spellers": "false"}), enabled=should_build_analysers
         )
         .with_gha(
-            "check analysers", GithubAction("divvun/taskcluster-gha/lang/check", {}), enabled=should_check_analysers
+            "check_analysers", GithubAction("divvun/taskcluster-gha/lang/check", {}), enabled=should_check_analysers
         )
         .with_gha(
-            "build spellers", GithubAction("divvun/taskcluster-gha/lang/build", {"fst": "hfst", "spellers": "true"}), enabled=should_build_spellers
+            "build_spellers", GithubAction("divvun/taskcluster-gha/lang/build", {"fst": "hfst", "spellers": "true"}), enabled=should_build_spellers
         )
         .with_gha(
-            "check spellers", GithubAction("divvun/taskcluster-gha/lang/check", {}), enabled=should_check_spellers
+            "check_spellers", GithubAction("divvun/taskcluster-gha/lang/check", {}), enabled=should_check_spellers
         )
         .with_gha(
-            "build grammar-checkers", GithubAction("divvun/taskcluster-gha/lang/build", {"fst": "hfst", "grammar-checkers": "true"}), enabled=should_build_grammar_checkers
+            "build_grammar-checkers", GithubAction("divvun/taskcluster-gha/lang/build", {"fst": "hfst", "grammar-checkers": "true"}), enabled=should_build_grammar_checkers
         )
         .with_gha(
-            "check grammar-checkers", GithubAction("divvun/taskcluster-gha/lang/check", {}), enabled=should_check_grammar_checkers
+            "check_grammar-checkers", GithubAction("divvun/taskcluster-gha/lang/check", {}), enabled=should_check_grammar_checkers
         )
         .with_named_artifacts(
             "spellers",
@@ -141,7 +141,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
                     {
                         "speller-type": type_,
                         "speller-manifest-path": "manifest.toml",
-                        "speller-paths": "${{ steps.build.outputs['speller-paths'] }}",
+                        "speller-paths": "${{ steps.build_spellers.outputs['speller-paths'] }}",
                         "version": "${{ steps.version.outputs.version }}",
                     },
                 ).with_outputs_from(lang_task_id),
@@ -205,7 +205,7 @@ def create_bundle_task(os_name, type_, lang_task_id):
                     {
                         "speller-type": type_,
                         "speller-manifest-path": "manifest.toml",
-                        "speller-paths": "${{ steps.build.outputs['speller-paths'] }}",
+                        "speller-paths": "${{ steps.build_spellers.outputs['speller-paths'] }}",
                         "version": "${{ steps.version.outputs.version }}",
                     },
                 ).with_outputs_from(lang_task_id),
