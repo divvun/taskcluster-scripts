@@ -1,7 +1,4 @@
-import os.path
-import yaml
-
-from gha import GithubAction, GithubActionScript
+from gha import GithubAction
 from decisionlib import CONFIG
 from .common import linux_build_task, macos_task, windows_task, NIGHTLY_CHANNEL, gha_setup
 
