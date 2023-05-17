@@ -76,6 +76,7 @@ def create_test_task(with_apertium):
         .with_gha(
             "check_spellers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {})
         )
+        .find_or_create(f"build.linux_x64.{CONFIG.index_path}")
     )
 
 
