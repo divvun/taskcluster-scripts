@@ -49,7 +49,8 @@ def create_build_analysers_task(with_apertium):
     task_suffix = "-analysers-build"
 
     return (
-        base_lang_task(task_name, with_apertium)
+        # TODO: Test
+        linux_build_task(task_name, bundle_dest="lang")
         .with_gha(
             "build_analysers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/build", {"fst": "hfst", "analysers": "true", "spellers": "false"}), enabled=should_build_analysers
         )
