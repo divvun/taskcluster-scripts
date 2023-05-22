@@ -18,7 +18,7 @@ def create_divvun_manager_windows_tasks():
         .with_script("echo $null >> ${HOME}/${TASK_ID}/_temp/github_env", as_gha=True)
         .with_gha(
             "nerdbank_version",
-            GithubAction("dotnet/nbgv", {"setCommonVars": "true"}).with_env(
+            GithubAction("dotnet/nbgv", {"setCommonVars": "true", "toolVersion": "3.5.119"}).with_env(
                 "GITHUB_ENV", "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\_temp\\github_env"
             ),
         )
