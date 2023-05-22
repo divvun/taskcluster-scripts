@@ -44,6 +44,63 @@ def create_analysers_task(with_apertium):
     task_suffix = "-analysers"
 
     return (
+        base_lang_task(task_name, with_apertium)
+        .with_gha(
+            "build_analysers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/build", {"fst": "hfst", "analysers": "true", "spellers": "false"}), enabled=should_build_analysers
+        )
+        .with_gha(
+            "check_analysers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {}), enabled=should_check_analysers
+        )
+        .find_or_create(f"build.linux_x64.{CONFIG.index_path}{task_suffix}")
+    )
+
+
+def create_spellers_task():
+    should_build_spellers = CONFIG.tc_config.get(
+        'build', {}).get('spellers', False)
+    should_check_spellers = CONFIG.tc_config.get(
+        'check', {}).get('spellers', False)
+    task_name = "Build spellers"
+    task_suiffix = "-spellers"
+
+    return (
+        base_lang_task(task_name)
+        .with_gha(
+            "build_spellers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/build", {"fst": "hfst", "spellers": "true"}), enabled=should_build_spellers
+        )
+        .with_gha(
+            "check_spellers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {}), enabled=should_check_spellers
+        )
+        .with_named_artifacts(
+            "spellers",
+            "${home}/tasks/${task_id}/lang/build/tools/spellcheckers/*.zhfst",
+        )
+        .find_or_create(f"build.linux_x64.{CONFIG.index_path}{task_suiffix}")
+    )
+
+
+def create_grammar_checkers_task():
+    should_check_grammar_checkers = CONFIG.tc_config.get(
+        'check', {}).get('grammar-checkers', False)
+    should_build_grammar_checkers = CONFIG.tc_config.get(
+        'build', {}).get('grammar-checkers', False)
+    task_name = "Build grammar checkers"
+    task_suffix = "-grammar-checkers"
+
+    return (
+        base_lang_task(task_name)
+        .with_gha(
+            "build_grammar-checkers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/build", {"fst": "hfst", "grammar-checkers": "true"}), enabled=should_build_grammar_checkers
+        )
+        .with_gha(
+            "check_grammar-checkers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {}), enabled=should_check_grammar_checkers
+        )
+        .find_or_create(f"build.linux_x64.{CONFIG.index_path}{task_suffix}")
+    )
+
+
+def base_lang_task(task_name, with_apertium=False):
+    return (
         linux_build_task(task_name, bundle_dest="lang")
         .with_additional_repo(
             "https://github.com/giellalt/giella-core.git",
@@ -76,57 +133,6 @@ def create_analysers_task(with_apertium):
                 {"sudo": "false", "apertium": with_apertium},
             ),
         )
-        .with_gha(
-            "build_analysers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/build", {"fst": "hfst", "analysers": "true", "spellers": "false"}), enabled=should_build_analysers
-        )
-        .with_gha(
-            "check_analysers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {}), enabled=should_check_analysers
-        )
-        .find_or_create(f"build.linux_x64.{CONFIG.index_path}{task_suffix}")
-    )
-
-
-def create_spellers_task():
-    should_build_spellers = CONFIG.tc_config.get(
-        'build', {}).get('spellers', False)
-    should_check_spellers = CONFIG.tc_config.get(
-        'check', {}).get('spellers', False)
-    task_name = "Build spellers"
-    task_suiffix = "-spellers"
-
-    return (
-        linux_build_task(task_name, bundle_dest="lang")
-        .with_gha(
-            "build_spellers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/build", {"fst": "hfst", "spellers": "true"}), enabled=should_build_spellers
-        )
-        .with_gha(
-            "check_spellers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {}), enabled=should_check_spellers
-        )
-        .with_named_artifacts(
-            "spellers",
-            "${home}/tasks/${task_id}/lang/build/tools/spellcheckers/*.zhfst",
-        )
-        .find_or_create(f"build.linux_x64.{CONFIG.index_path}{task_suiffix}")
-    )
-
-
-def create_grammar_checkers_task():
-    should_check_grammar_checkers = CONFIG.tc_config.get(
-        'check', {}).get('grammar-checkers', False)
-    should_build_grammar_checkers = CONFIG.tc_config.get(
-        'build', {}).get('grammar-checkers', False)
-    task_name = "Build grammar checkers"
-    task_suffix = "-grammar-checkers"
-
-    return (
-        linux_build_task(task_name, bundle_dest="lang")
-        .with_gha(
-            "build_grammar-checkers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/build", {"fst": "hfst", "grammar-checkers": "true"}), enabled=should_build_grammar_checkers
-        )
-        .with_gha(
-            "check_grammar-checkers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {}), enabled=should_check_grammar_checkers
-        )
-        .find_or_create(f"build.linux_x64.{CONFIG.index_path}{task_suffix}")
     )
 
 
