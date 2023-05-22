@@ -104,7 +104,7 @@ def literal_copy_of_create_lang_task(with_apertium):
             "spellers",
             "${HOME}/tasks/${TASK_ID}/lang/build/tools/spellcheckers/*.zhfst",
         )
-        .find_or_create(f"build.linux_x64.{CONFIG.index_path}")
+        .find_or_create(f"build.linux_x64.{CONFIG.index_path}-test")
     )
 
 
