@@ -64,7 +64,6 @@ def create_check_analysers_task(dependent_task_id):
     task_suffix = "-analysers-check"
 
     return (
-        # TODO: this be a test
         linux_build_task(task_name, bundle_dest="lang")
         .with_dependencies(dependent_task_id)
         .with_gha(
@@ -81,7 +80,7 @@ def create_build_spellers_task(dependent_task_id):
     task_suiffix = "-spellers-build"
 
     return (
-        base_lang_task(task_name)
+        linux_build_task(task_name, bundle_dest="lang")
         .with_dependencies(dependent_task_id)
         .with_gha(
             "build_spellers",
@@ -106,7 +105,7 @@ def create_check_spellers_task(dependent_task_id):
     task_suiffix = "-spellers-check"
 
     return (
-        base_lang_task(task_name)
+        linux_build_task(task_name, bundle_dest="lang")
         .with_dependencies(dependent_task_id)
         .with_gha(
             "check_spellers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {}), enabled=should_check_spellers
@@ -122,7 +121,7 @@ def create_build_grammar_checkers_task(dependent_task_id):
     task_suffix = "-grammar-checkers-build"
 
     return (
-        base_lang_task(task_name)
+        linux_build_task(task_name, bundle_dest="lang")
         .with_dependencies(dependent_task_id)
         .with_gha(
             "build_grammar-checkers",
@@ -143,7 +142,7 @@ def create_check_grammar_checkers_task(dependent_task_id):
     task_suffix = "-grammar-checkers-check"
 
     return (
-        base_lang_task(task_name)
+        linux_build_task(task_name, bundle_dest="lang")
         .with_dependencies(dependent_task_id)
         .with_gha(
             "check_grammar-checkers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {}), enabled=should_check_grammar_checkers
