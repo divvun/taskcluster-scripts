@@ -100,16 +100,11 @@ def create_grammar_checkers_task(spellers_task_id):
             GithubAction(
                 "technocreatives/divvun-taskcluster-gha-test/lang/build",
                 {"fst": "hfst", "grammar-checkers": "true"}
-            )
-            .with_outputs_from(spellers_task_id),
+            ).with_outputs_from(spellers_task_id),
             enabled=should_build_grammar_checkers
         )
         .with_gha(
-            "check_grammar-checkers",
-            GithubAction(
-                "technocreatives/divvun-taskcluster-gha-test/lang/check", {}
-            ).with_outputs_from(spellers_task_id),
-            enabled=should_check_grammar_checkers
+            "check_grammar-checkers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {}), enabled=should_check_grammar_checkers
         )
         .find_or_create(f"build.linux_x64.{CONFIG.index_path}{task_suffix}")
     )
