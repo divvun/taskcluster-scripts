@@ -19,9 +19,16 @@ def create_lang_tasks(repo_name):
         or repo_name[len("lang-"):] in INSTALL_APERTIUM_LANG
     )
 
-    analysers_task_id = create_analysers_task(should_install_apertium)
-    spellers_task_id = create_spellers_task(analysers_task_id)
-    create_grammar_checkers_task(spellers_task_id)
+    build_analysers_task_id = create_build_analysers_task(
+        should_install_apertium)
+    check_analysers_task_id = create_check_analysers_task(
+        build_analysers_task_id)
+    build_spellers_task_id = create_build_spellers_task(
+        check_analysers_task_id)
+    check_spellers_task_id = create_check_spellers_task(build_spellers_task_id)
+    build_grammar_checkers_task_id = create_build_grammar_checkers_task(
+        check_spellers_task_id)
+    create_check_grammar_checkers_task(build_grammar_checkers_task_id)
 
     # index_read_only means this is a PR and shouldn't run deployment steps
     if repo_name[len("lang-"):] in NO_DEPLOY_LANG or CONFIG.index_read_only:
@@ -32,22 +39,33 @@ def create_lang_tasks(repo_name):
         ("macos-latest", "speller-mobile"),
         ("windows-latest", "speller-windows"),
     ]:
-        create_bundle_task(os_, type_, spellers_task_id)
+        create_bundle_task(os_, type_, check_spellers_task_id)
 
 
-def create_analysers_task(with_apertium):
+def create_build_analysers_task(with_apertium):
     should_build_analysers = CONFIG.tc_config.get(
         'build', {}).get('analysers', False)
-    should_check_analysers = CONFIG.tc_config.get(
-        'check', {}).get('analysers', False)
-    task_name = "Build & check analysers"
-    task_suffix = "-analysers"
+    task_name = "Build analysers"
+    task_suffix = "-analysers-build"
 
     return (
         base_lang_task(task_name, with_apertium)
         .with_gha(
             "build_analysers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/build", {"fst": "hfst", "analysers": "true", "spellers": "false"}), enabled=should_build_analysers
         )
+        .find_or_create(f"build.linux_x64.{CONFIG.index_path}{task_suffix}")
+    )
+
+
+def create_check_analysers_task(dependent_task_id):
+    should_check_analysers = CONFIG.tc_config.get(
+        'check', {}).get('analysers', False)
+    task_name = "Check analysers"
+    task_suffix = "-analysers-check"
+
+    return (
+        base_lang_task(task_name)
+        .with_dependencies(dependent_task_id)
         .with_gha(
             "check_analysers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {}), enabled=should_check_analysers
         )
@@ -55,17 +73,15 @@ def create_analysers_task(with_apertium):
     )
 
 
-def create_spellers_task(analysers_task_id):
+def create_build_spellers_task(dependent_task_id):
     should_build_spellers = CONFIG.tc_config.get(
         'build', {}).get('spellers', False)
-    should_check_spellers = CONFIG.tc_config.get(
-        'check', {}).get('spellers', False)
-    task_name = "Build & check spellers"
-    task_suiffix = "-spellers"
+    task_name = "Build spellers"
+    task_suiffix = "-spellers-build"
 
     return (
         base_lang_task(task_name)
-        .with_dependencies(analysers_task_id)
+        .with_dependencies(dependent_task_id)
         .with_gha(
             "build_spellers",
             GithubAction(
@@ -73,9 +89,6 @@ def create_spellers_task(analysers_task_id):
                 {"fst": "hfst", "spellers": "true"}
             ),
             enabled=should_build_spellers
-        )
-        .with_gha(
-            "check_spellers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {}), enabled=should_check_spellers
         )
         .with_named_artifacts(
             "spellers",
@@ -85,17 +98,31 @@ def create_spellers_task(analysers_task_id):
     )
 
 
-def create_grammar_checkers_task(spellers_task_id):
-    should_check_grammar_checkers = CONFIG.tc_config.get(
-        'check', {}).get('grammar-checkers', False)
-    should_build_grammar_checkers = CONFIG.tc_config.get(
-        'build', {}).get('grammar-checkers', False)
-    task_name = "Build & check grammar checkers"
-    task_suffix = "-grammar-checkers"
+def create_check_spellers_task(dependent_task_id):
+    should_check_spellers = CONFIG.tc_config.get(
+        'check', {}).get('spellers', False)
+    task_name = "Check spellers"
+    task_suiffix = "-spellers-check"
 
     return (
         base_lang_task(task_name)
-        .with_dependencies(spellers_task_id)
+        .with_dependencies(dependent_task_id)
+        .with_gha(
+            "check_spellers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {}), enabled=should_check_spellers
+        )
+        .find_or_create(f"build.linux_x64.{CONFIG.index_path}{task_suiffix}")
+    )
+
+
+def create_build_grammar_checkers_task(dependent_task_id):
+    should_build_grammar_checkers = CONFIG.tc_config.get(
+        'build', {}).get('grammar-checkers', False)
+    task_name = "Build grammar checkers"
+    task_suffix = "-grammar-checkers-build"
+
+    return (
+        base_lang_task(task_name)
+        .with_dependencies(dependent_task_id)
         .with_gha(
             "build_grammar-checkers",
             GithubAction(
@@ -104,6 +131,19 @@ def create_grammar_checkers_task(spellers_task_id):
             ),
             enabled=should_build_grammar_checkers
         )
+        .find_or_create(f"build.linux_x64.{CONFIG.index_path}{task_suffix}")
+    )
+
+
+def create_check_grammar_checkers_task(dependent_task_id):
+    should_check_grammar_checkers = CONFIG.tc_config.get(
+        'check', {}).get('grammar-checkers', False)
+    task_name = "Check grammar checkers"
+    task_suffix = "-grammar-checkers-check"
+
+    return (
+        base_lang_task(task_name)
+        .with_dependencies(dependent_task_id)
         .with_gha(
             "check_grammar-checkers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {}), enabled=should_check_grammar_checkers
         )
