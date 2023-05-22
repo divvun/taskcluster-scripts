@@ -19,8 +19,8 @@ def create_lang_tasks(repo_name):
         or repo_name[len("lang-"):] in INSTALL_APERTIUM_LANG
     )
 
-    create_analysers_task()
-    spellers_task_id = create_spellers_task(should_install_apertium)
+    create_analysers_task(should_install_apertium)
+    spellers_task_id = create_spellers_task()
     create_grammar_checkers_task()
 
     # index_read_only means this is a PR and shouldn't run deployment steps
