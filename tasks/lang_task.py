@@ -40,7 +40,7 @@ def create_analysers_task(with_apertium):
         'build', {}).get('analysers', False)
     should_check_analysers = CONFIG.tc_config.get(
         'check', {}).get('analysers', False)
-    task_name = "Build analysers"
+    task_name = "Build & check analysers"
     task_suffix = "-analysers"
 
     return (
@@ -60,7 +60,7 @@ def create_spellers_task(analysers_task_id):
         'build', {}).get('spellers', False)
     should_check_spellers = CONFIG.tc_config.get(
         'check', {}).get('spellers', False)
-    task_name = "Build spellers"
+    task_name = "Build & check spellers"
     task_suiffix = "-spellers"
 
     return (
@@ -90,7 +90,7 @@ def create_grammar_checkers_task(spellers_task_id):
         'check', {}).get('grammar-checkers', False)
     should_build_grammar_checkers = CONFIG.tc_config.get(
         'build', {}).get('grammar-checkers', False)
-    task_name = "Build grammar checkers"
+    task_name = "Build & check grammar checkers"
     task_suffix = "-grammar-checkers"
 
     return (
