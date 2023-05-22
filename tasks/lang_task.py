@@ -21,7 +21,7 @@ def create_lang_tasks(repo_name):
 
     lang_task_id = create_lang_task(should_install_apertium)
 
-    literal_copy_of_create_lang_task(should_install_apertium)
+    lang_task_id_2 = literal_copy_of_create_lang_task(should_install_apertium)
 
     # index_read_only means this is a PR and shouldn't run deployment steps
     if repo_name[len("lang-"):] in NO_DEPLOY_LANG or CONFIG.index_read_only:
@@ -50,7 +50,7 @@ def literal_copy_of_create_lang_task(with_apertium):
         'check', {}).get('grammar-checkers', False)
 
     return (
-        linux_build_task("Lang build", bundle_dest="lang")
+        linux_build_task("Lang build TEST", bundle_dest="lang")
         .with_additional_repo(
             "https://github.com/giellalt/giella-core.git",
             "${HOME}/tasks/${TASK_ID}/giella-core",
