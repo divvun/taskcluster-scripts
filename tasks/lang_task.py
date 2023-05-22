@@ -16,7 +16,7 @@ INSTALL_APERTIUM_LANG = {
 def create_lang_tasks(repo_name):
     should_install_apertium = (
         repo_name.endswith("apertium")
-        or repo_name[len("lang-") :] in INSTALL_APERTIUM_LANG
+        or repo_name[len("lang-"):] in INSTALL_APERTIUM_LANG
     )
 
     lang_task_id = create_lang_task(should_install_apertium)
@@ -24,7 +24,7 @@ def create_lang_tasks(repo_name):
     literal_copy_of_create_lang_task(should_install_apertium)
 
     # index_read_only means this is a PR and shouldn't run deployment steps
-    if repo_name[len("lang-") :] in NO_DEPLOY_LANG or CONFIG.index_read_only:
+    if repo_name[len("lang-"):] in NO_DEPLOY_LANG or CONFIG.index_read_only:
         return
 
     for os_, type_ in [
@@ -36,12 +36,18 @@ def create_lang_tasks(repo_name):
 
 
 def literal_copy_of_create_lang_task(with_apertium):
-    should_build_analysers = CONFIG.tc_config.get('build', {}).get('analysers', False)
-    should_build_spellers = CONFIG.tc_config.get('build', {}).get('spellers', False)
-    should_build_grammar_checkers = CONFIG.tc_config.get('build', {}).get('grammar-checkers', False)
-    should_check_analysers = CONFIG.tc_config.get('check', {}).get('analysers', False)
-    should_check_spellers = CONFIG.tc_config.get('check', {}).get('spellers', False)
-    should_check_grammar_checkers = CONFIG.tc_config.get('check', {}).get('grammar-checkers', False)
+    should_build_analysers = CONFIG.tc_config.get(
+        'build', {}).get('analysers', False)
+    should_build_spellers = CONFIG.tc_config.get(
+        'build', {}).get('spellers', False)
+    should_build_grammar_checkers = CONFIG.tc_config.get(
+        'build', {}).get('grammar-checkers', False)
+    should_check_analysers = CONFIG.tc_config.get(
+        'check', {}).get('analysers', False)
+    should_check_spellers = CONFIG.tc_config.get(
+        'check', {}).get('spellers', False)
+    should_check_grammar_checkers = CONFIG.tc_config.get(
+        'check', {}).get('grammar-checkers', False)
 
     return (
         linux_build_task("Lang build", bundle_dest="lang")
@@ -103,12 +109,18 @@ def literal_copy_of_create_lang_task(with_apertium):
 
 
 def create_lang_task(with_apertium):
-    should_build_analysers = CONFIG.tc_config.get('build', {}).get('analysers', False)
-    should_build_spellers = CONFIG.tc_config.get('build', {}).get('spellers', False)
-    should_build_grammar_checkers = CONFIG.tc_config.get('build', {}).get('grammar-checkers', False)
-    should_check_analysers = CONFIG.tc_config.get('check', {}).get('analysers', False)
-    should_check_spellers = CONFIG.tc_config.get('check', {}).get('spellers', False)
-    should_check_grammar_checkers = CONFIG.tc_config.get('check', {}).get('grammar-checkers', False)
+    should_build_analysers = CONFIG.tc_config.get(
+        'build', {}).get('analysers', False)
+    should_build_spellers = CONFIG.tc_config.get(
+        'build', {}).get('spellers', False)
+    should_build_grammar_checkers = CONFIG.tc_config.get(
+        'build', {}).get('grammar-checkers', False)
+    should_check_analysers = CONFIG.tc_config.get(
+        'check', {}).get('analysers', False)
+    should_check_spellers = CONFIG.tc_config.get(
+        'check', {}).get('spellers', False)
+    should_check_grammar_checkers = CONFIG.tc_config.get(
+        'check', {}).get('grammar-checkers', False)
 
     return (
         linux_build_task("Lang build", bundle_dest="lang")
