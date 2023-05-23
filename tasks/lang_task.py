@@ -80,7 +80,7 @@ def create_build_spellers_task(dependent_task_id):
     task_suiffix = "-spellers-build"
 
     return (
-        linux_build_task(task_name, bundle_dest="lang")
+        base_lang_task(task_name)
         .with_dependencies(dependent_task_id)
         .with_gha(
             "build_spellers",
