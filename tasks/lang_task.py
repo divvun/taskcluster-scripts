@@ -92,7 +92,7 @@ def create_build_spellers_task(dependent_task_id):
         )
         .with_named_artifacts(
             "spellers",
-            "${HOME}/tasks/${task_id}/lang/build/tools/spellcheckers/*.zhfst",
+            "${HOME}/tasks/${TASK_ID}/lang/build/tools/spellcheckers/*.zhfst",
         )
         .find_or_create(f"build.linux_x64.{CONFIG.index_path}{task_suiffix}")
     )
