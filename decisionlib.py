@@ -236,6 +236,7 @@ class Task:
     with_priority = chaining(setattr, "priority")
 
     with_dependencies = chaining(append_to_attr, "dependencies")
+    with_requires = chaining(append_to_attr, "requires")
     with_routes = chaining(append_to_attr, "routes")
 
     with_extra = chaining(update_attr, "extra")
