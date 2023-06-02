@@ -207,6 +207,7 @@ class Task:
         self.expires_in = "1 year"
         self.index_and_artifacts_expire_in = self.expires_in
         self.dependencies: List[str] = []
+        self.requires: List[str] = []
         self.scopes: List[str] = []
         self.routes: List[str] = []
         self.extra: Dict[str, Dict[str, str]] = {}
