@@ -95,9 +95,9 @@ class Config:
     @property
     def index_path(self):
         if self.git_ref.startswith("refs/tags/"):
-            index = CONFIG.git_ref[len("refs/tags/") :]
+            index = CONFIG.git_ref[len("refs/tags/"):]
         elif self.git_ref.startswith("refs/heads/"):
-            index = CONFIG.git_ref[len("refs/heads/") :]
+            index = CONFIG.git_ref[len("refs/heads/"):]
         else:
             index = self.git_sha
 
@@ -122,7 +122,8 @@ class Config:
     def tc_config(self):
         if self._tc_config is None:
             try:
-                config = requests.get(f"https://raw.githubusercontent.com/{os.environ['REPO_FULL_NAME']}/{self.git_sha}/.build-config.yml").text
+                config = requests.get(
+                    f"https://raw.githubusercontent.com/{os.environ['REPO_FULL_NAME']}/{self.git_sha}/.build-config.yml").text
                 self._tc_config = yaml.load(config, Loader=yaml.FullLoader)
             except yaml.YAMLError:
                 raise
@@ -132,6 +133,7 @@ class Config:
         print(f"Config: {self._tc_config}")
 
         return self._tc_config
+
 
 class Shared:
     """
@@ -289,7 +291,8 @@ class Task:
         """
         for path in paths:
             if (type, path) in self.artifacts:
-                raise ValueError("Duplicate artifact: " + path)  # pragma: no cover
+                raise ValueError("Duplicate artifact: " +
+                                 path)  # pragma: no cover
             self.artifacts.append((type, path))
         return self
 
@@ -493,7 +496,8 @@ class Task:
         if gha.git_fetch_url and gha.git_fetch_url not in self.action_paths:
             self.with_additional_repo(
                 gha.git_fetch_url,
-                os.path.join(SHARED.task_root_for(self.platform()), gha.repo_name),
+                os.path.join(SHARED.task_root_for(
+                    self.platform()), gha.repo_name),
             )
             self.action_paths.add(gha.git_fetch_url)
 
@@ -709,8 +713,10 @@ class WindowsGenericWorkerTask(GenericWorkerTask):
         )
 
     def build_worker_payload(self):
-        self.scopes.append("generic-worker:os-group:divvun/windows/Administrators")
-        self.scopes.append("generic-worker:run-as-administrator:divvun/windows")
+        self.scopes.append(
+            "generic-worker:os-group:divvun/windows/Administrators")
+        self.scopes.append(
+            "generic-worker:run-as-administrator:divvun/windows")
         self.with_features("runAsAdministrator")
         return dict_update_if_truthy(
             super().build_worker_payload(),
@@ -930,7 +936,8 @@ class MacOsGenericWorkerTask(UnixTaskMixin, GenericWorkerTask):
                 "-o",
                 "pipefail",
                 "-c",
-                "{}".format(deindent("\n".join(self.scripts + self.late_scripts))),
+                "{}".format(
+                    deindent("\n".join(self.scripts + self.late_scripts))),
             ]
         ]
 
@@ -1035,7 +1042,8 @@ class DockerWorkerTask(UnixTaskMixin, Task):
                 "-o",
                 "pipefail",
                 "-c",
-                "{}".format(deindent("\n".join(self.scripts + self.late_scripts))),
+                "{}".format(
+                    deindent("\n".join(self.scripts + self.late_scripts))),
             ],
         }
         return dict_update_if_truthy(
@@ -1128,7 +1136,8 @@ def make_repo_bundle(path: str, bundle_name: str, sha: str, *, shallow=True):
     os.chdir(path)
     if shallow:
         subprocess.check_call(["git", "config", "user.name", "Decision task"])
-        subprocess.check_call(["git", "config", "user.email", "nobody@divvun.no"])
+        subprocess.check_call(
+            ["git", "config", "user.email", "nobody@divvun.no"])
         tree = subprocess.check_output(
             ["git", "show", sha, "--pretty=%T", "--no-patch"]
         )
@@ -1150,7 +1159,8 @@ def make_repo_bundle(path: str, bundle_name: str, sha: str, *, shallow=True):
         ]
     else:
         subprocess.check_call(["git", "fetch", "--unshallow", CONFIG.git_url])
-        subprocess.check_call(["git", "update-ref", CONFIG.git_bundle_shallow_ref, sha])
+        subprocess.check_call(
+            ["git", "update-ref", CONFIG.git_bundle_shallow_ref, sha])
         create = ["git", "bundle", "create", f"../{bundle_name}", "--all"]
 
     with subprocess.Popen(create) as p:
