@@ -69,7 +69,7 @@ def create_check_analysers_task(dependent_task_id):
         # .with_requires(dependent_task_id)
         # .with_early_script("mv $HOME/tasks/%s/* $HOME/tasks/$TASK_ID" % dependent_task_id)
         # .with_early_script("cd $HOME/tasks/{dependent_task_id}/; for file in `ls`; mv $file $HOME/tasks/$TASK_ID")
-        .with_early_script("for file in `ls $HOME/tasks/{dependent_task_id}` && mv $HOME/tasks/{dependent_task_id}/$file $HOME/tasks/$TASK_ID")
+        .with_early_script(f"ls $HOME/tasks/{dependent_task_id}")
         .with_gha(
             "check_analysers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {}), enabled=should_check_analysers
         )
@@ -399,3 +399,4 @@ def create_bundle_task(os_name, type_, lang_task_id):
         )
 
     raise NotImplementedError
+
