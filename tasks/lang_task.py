@@ -67,7 +67,7 @@ def create_check_analysers_task(dependent_task_id):
         linux_build_task(task_name, bundle_dest="lang")
         .with_dependencies(dependent_task_id)
         # .with_requires(dependent_task_id)
-        .with_early_script("mv $HOME/tasks/"+dependent_task_id+"/* $HOME/tasks/$TASK_ID")
+        .with_early_script("mv '$HOME/tasks/"+dependent_task_id+"/*' $HOME/tasks/$TASK_ID")
         .with_gha(
             "check_analysers", GithubAction("technocreatives/divvun-taskcluster-gha-test/lang/check", {}), enabled=should_check_analysers
         )
