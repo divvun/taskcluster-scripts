@@ -69,7 +69,7 @@ def create_check_analysers_task(dependent_task_id):
         # .with_requires(dependent_task_id)
         .with_caches(
             **{
-                "divvun-lang-task-cache": "$HOME/tasks/$TASK_ID",
+                "divvun-lang-task-cache": "${HOME}/tasks/${TASK_ID}",
             }
         )
         .with_gha(
@@ -91,7 +91,7 @@ def create_build_spellers_task(dependent_task_id):
         # .with_requires(dependent_task_id)
         .with_caches(
             **{
-                "divvun-lang-task-cache": "$HOME/tasks/$TASK_ID",
+                "divvun-lang-task-cache": "${HOME}/tasks/${TASK_ID}",
             }
         )
         .with_gha(
@@ -121,7 +121,7 @@ def create_check_spellers_task(dependent_task_id):
         .with_dependencies(dependent_task_id)
         .with_caches(
             **{
-                "divvun-lang-task-cache": "$HOME/tasks/$TASK_ID",
+                "divvun-lang-task-cache": "${HOME}/tasks/${TASK_ID}",
             }
         )
         .with_gha(
@@ -143,7 +143,7 @@ def create_build_grammar_checkers_task(dependent_task_id):
         # .with_requires(dependent_task_id)
         .with_caches(
             **{
-                "divvun-lang-task-cache": "$HOME/tasks/$TASK_ID",
+                "divvun-lang-task-cache": "${HOME}/tasks/${TASK_ID}",
             }
         )
         .with_gha(
@@ -170,7 +170,7 @@ def create_check_grammar_checkers_task(dependent_task_id):
         # .with_requires(dependent_task_id)
         .with_caches(
             **{
-                "divvun-lang-task-cache": "$HOME/tasks/$TASK_ID",
+                "divvun-lang-task-cache": "${HOME}/tasks/${TASK_ID}",
             }
         )
         .with_gha(
@@ -185,7 +185,7 @@ def base_lang_task(task_name, with_apertium=False):
         linux_build_task(task_name, bundle_dest="lang")
         .with_caches(
             **{
-                "divvun-lang-task-cache": "$HOME/tasks/$TASK_ID",
+                "divvun-lang-task-cache": "${HOME}/tasks/${TASK_ID}",
             }
         )
         .with_additional_repo(
