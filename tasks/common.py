@@ -24,7 +24,7 @@ def linux_build_task(name, bundle_dest="repo", with_secrets=True, clone_self=Tru
         decisionlib.DockerWorkerTask(name)
         .with_worker_type("linux")
         .with_provisioner_id("divvun")
-        .with_docker_image("ubuntu:22.04")
+        .with_docker_image("steffenernst/divvun-builder:latest")
         # https://docs.taskcluster.net/docs/reference/workers/docker-worker/docs/caches
         .with_scopes("docker-worker:cache:divvun-*")
         .with_scopes("queue:get-artifact:private/*")
@@ -43,11 +43,11 @@ def linux_build_task(name, bundle_dest="repo", with_secrets=True, clone_self=Tru
         .with_max_run_time_minutes(60)
         .with_script("mkdir -p $HOME/tasks/$TASK_ID")
         .with_script("mkdir -p $HOME/tasks/$TASK_ID/_temp")
-        .with_apt_update()
-        .with_apt_install("curl", "git", "python3", "python3-pip", "lsb-release")
-        .with_pip_install("taskcluster", "pyYAML")
-        .with_apt_install("wget", "nodejs", "awscli")
-        .with_apt_install("pkg-config", "libssl-dev")
+        # .with_apt_update()
+        # .with_apt_install("curl", "git", "python3", "python3-pip", "lsb-release")
+        # .with_pip_install("taskcluster", "pyYAML")
+        # .with_apt_install("wget", "nodejs", "awscli")
+        # .with_apt_install("pkg-config", "libssl-dev")
         .with_additional_repo(
             os.environ["CI_REPO_URL"],
             "${HOME}/tasks/${TASK_ID}/ci",
