@@ -70,6 +70,9 @@ def create_check_analysers_task(dependent_task_id):
         .with_caches(
             **{
                 "divvun-lang-task-cache": f"${{HOME}}/tasks/${{TASK_ID}}",
+                "divvun-cargo-registry": "/root/.cargo/registry",
+                "divvun-cargo-git": "/root/.cargo/git",
+                "divvun-rustup": "/root/.rustup",
             }
         )
         .with_gha(
@@ -89,7 +92,6 @@ def create_build_spellers_task(dependent_task_id):
         base_lang_task(task_name)
         .with_dependencies(dependent_task_id)
         # .with_requires(dependent_task_id)
-        .with_caches()
         .with_gha(
             "build_spellers",
             GithubAction(
@@ -118,6 +120,9 @@ def create_check_spellers_task(dependent_task_id):
         .with_caches(
             **{
                 "divvun-lang-task-cache": f"${{HOME}}/tasks/${{TASK_ID}}",
+                "divvun-cargo-registry": "/root/.cargo/registry",
+                "divvun-cargo-git": "/root/.cargo/git",
+                "divvun-rustup": "/root/.rustup",
             }
         )
         .with_gha(
@@ -140,6 +145,9 @@ def create_build_grammar_checkers_task(dependent_task_id):
         .with_caches(
             **{
                 "divvun-lang-task-cache": f"${{HOME}}/tasks/${{TASK_ID}}",
+                "divvun-cargo-registry": "/root/.cargo/registry",
+                "divvun-cargo-git": "/root/.cargo/git",
+                "divvun-rustup": "/root/.rustup",
             }
         )
         .with_gha(
@@ -167,6 +175,9 @@ def create_check_grammar_checkers_task(dependent_task_id):
         .with_caches(
             **{
                 "divvun-lang-task-cache": f"${{HOME}}/tasks/${{TASK_ID}}",
+                "divvun-cargo-registry": "/root/.cargo/registry",
+                "divvun-cargo-git": "/root/.cargo/git",
+                "divvun-rustup": "/root/.rustup",
             }
         )
         .with_gha(
@@ -182,6 +193,9 @@ def base_lang_task(task_name, with_apertium=False):
         .with_caches(
             **{
                 "divvun-lang-task-cache": f"${{HOME}}/tasks/${{TASK_ID}}",
+                "divvun-cargo-registry": "/root/.cargo/registry",
+                "divvun-cargo-git": "/root/.cargo/git",
+                "divvun-rustup": "/root/.rustup",
             }
         )
         .with_additional_repo(
