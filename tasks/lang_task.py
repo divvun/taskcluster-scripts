@@ -124,7 +124,7 @@ def create_grammar_checkers_task(dependent_task_id):
     task_suffix = "-grammar-checkers"
 
     return (
-        linux_build_task(task_name, bundle_dest="lang")
+        base_lang_task(task_name)
         .with_dependencies(dependent_task_id)
         # .with_requires(dependent_task_id)
         .with_gha(
