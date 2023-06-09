@@ -147,11 +147,6 @@ def create_grammar_checkers_task(dependent_task_id):
 def base_lang_task(task_name, with_apertium=False):
     return (
         linux_build_task(task_name, bundle_dest="lang")
-        .with_caches(
-            **{
-                "divvun-lang-task-cache": "/root/tasks/${TASK_ID}",
-            }
-        )
         .with_additional_repo(
             "https://github.com/giellalt/giella-core.git",
             "${HOME}/tasks/${TASK_ID}/giella-core",
