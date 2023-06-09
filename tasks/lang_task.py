@@ -93,7 +93,6 @@ def create_spellers_task(dependent_task_id):
     return (
         base_lang_task(task_name)
         .with_dependencies(dependent_task_id)
-        # .with_requires(dependent_task_id)
         .with_gha(
             "build_spellers",
             GithubAction(
@@ -126,7 +125,6 @@ def create_grammar_checkers_task(dependent_task_id):
     return (
         base_lang_task(task_name)
         .with_dependencies(dependent_task_id)
-        # .with_requires(dependent_task_id)
         .with_gha(
             "build_grammar-checkers",
             GithubAction(
