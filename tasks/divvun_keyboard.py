@@ -26,7 +26,7 @@ def create_android_keyboard_task(bundle):
             GithubActionScript(
                 """
                 echo "IN CREATE ANDROID TASK"
-                set
+                pwd
                 source ${DIVVUN_CI_CONFIG}/enc/env.sh
                 cd -
                 pushd output/deps/giella-ime
