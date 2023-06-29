@@ -27,6 +27,7 @@ def create_android_keyboard_task(bundle):
                 """
                 echo "IN CREATE ANDROID TASK"
                 source ${DIVVUN_CI_CONFIG}/enc/env.sh
+                cd -
                 pushd output/deps/giella-ime
                 ./gradlew publishApk
                 echo "PUBLISH APK DONE"
