@@ -25,9 +25,12 @@ def create_android_keyboard_task(bundle):
             "publish",
             GithubActionScript(
                 """
+                echo "IN CREATE ANDROID TASK"
                 source ${DIVVUN_CI_CONFIG}/enc/env.sh
-                cd output/deps/giella-ime
+                pushd output/deps/giella-ime
                 ./gradlew publishApk
+                echo "PUBLISH APK DONE"
+                popd
             """
             )
             .with_env("SPACESHIP_SKIP_2FA_UPGRADE", 1)
@@ -41,7 +44,7 @@ def create_android_keyboard_task(bundle):
 def create_ios_keyboard_task(bundle, _is_dev):
     ipa_name = "HostingApp.ipa"
     return (
-        macos_task(f"Build keyboard: IOS")
+        macos_task(f"Build keyboard: iOS")
         .with_gha("setup", gha_setup())
         .with_gha("init", gha_pahkat(["kbdgen"]))
         .with_gha(
