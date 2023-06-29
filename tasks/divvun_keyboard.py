@@ -26,9 +26,9 @@ def create_android_keyboard_task(bundle):
             GithubActionScript(
                 """
                 echo "IN CREATE ANDROID TASK"
-                pwd
+                REPO_PATH=`pwd`
                 source ${DIVVUN_CI_CONFIG}/enc/env.sh
-                cd -
+                cd $REPO_PATH
                 pushd output/deps/giella-ime
                 ./gradlew publishApk
                 echo "PUBLISH APK DONE"
