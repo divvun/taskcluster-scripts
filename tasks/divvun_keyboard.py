@@ -56,6 +56,7 @@ def create_ios_keyboard_task(bundle, _is_dev):
             "publish",
             GithubActionScript(
                 """
+                pwd
             bundle exec fastlane match
             bundle exec fastlane pilot upload --api_key_path "${DIVVUN_CI_CONFIG}/enc/creds/macos/appstore-key.json" --skip_submission --skip_waiting_for_build_processing --ipa "output/ipa/%s"
             """
