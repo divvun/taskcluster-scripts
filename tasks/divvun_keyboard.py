@@ -26,14 +26,11 @@ def create_android_keyboard_task(bundle):
             GithubActionScript(
                 """
                 echo "IN CREATE ANDROID TASK"
-                ls -R
                 REPO_PATH=`pwd`
                 source ${DIVVUN_CI_CONFIG}/enc/env.sh
-                cd $REPO_PATH
-                pushd output/deps/giella-ime
+                cd $REPO_PATH/output/repo
                 ./gradlew publishApk
                 echo "PUBLISH APK DONE"
-                popd
             """
             )
             .with_env("SPACESHIP_SKIP_2FA_UPGRADE", 1)
