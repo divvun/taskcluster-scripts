@@ -25,12 +25,10 @@ def create_android_keyboard_task(bundle):
             "publish",
             GithubActionScript(
                 """
-                echo "IN CREATE ANDROID TASK"
                 REPO_PATH=`pwd`
                 source ${DIVVUN_CI_CONFIG}/enc/env.sh
                 cd $REPO_PATH/output/repo
                 ./gradlew publishApk
-                echo "PUBLISH APK DONE"
             """
             )
             .with_env("SPACESHIP_SKIP_2FA_UPGRADE", 1)
