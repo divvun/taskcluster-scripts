@@ -26,6 +26,7 @@ def create_android_keyboard_task(bundle):
             GithubActionScript(
                 """
                 echo "IN CREATE ANDROID TASK"
+                ls -R
                 REPO_PATH=`pwd`
                 source ${DIVVUN_CI_CONFIG}/enc/env.sh
                 cd $REPO_PATH
