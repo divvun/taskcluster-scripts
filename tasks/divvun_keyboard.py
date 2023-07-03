@@ -46,19 +46,22 @@ def create_ios_keyboard_task(bundle, _is_dev):
         .with_gha("setup", gha_setup())
         .with_gha("init", gha_pahkat(["kbdgen"]))
         .with_gha(
-            "test stuff",
-            GithubActionScript(
-                """
-                pwd
-                """
-            ),
-        )
-        .with_gha(
             "build",
             GithubAction(
                 "divvun/taskcluster-gha/keyboard/build-meta",
                 {"keyboard-type": "keyboard-ios", "bundle-path": bundle},
             ),
+        )
+        .with_gha(
+            "nuke certs",
+            GithubActionScript(
+                """
+                bundle exec fastlane match nuke distribution
+                """
+                % ipa_name
+            )
+            .with_env("SPACESHIP_SKIP_2FA_UPGRADE", 1)
+            .with_env("LANG", "en_US.UTF-8"),
         )
         .with_gha(
             "publish",
