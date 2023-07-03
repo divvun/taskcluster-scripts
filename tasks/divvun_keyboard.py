@@ -50,7 +50,6 @@ def create_ios_keyboard_task(bundle, _is_dev):
             GithubActionScript(
                 """
                 pwd
-                bundle exec fastlane match
                 """
             ),
         )
