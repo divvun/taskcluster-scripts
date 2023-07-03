@@ -58,10 +58,9 @@ def create_ios_keyboard_task(bundle, _is_dev):
                 """
                 bundle exec fastlane match nuke distribution
                 """
-                % ipa_name
             )
             .with_env("SPACESHIP_SKIP_2FA_UPGRADE", 1)
-            .with_env("LANG", "en_US.UTF-8"),
+            .with_env("LANG", "en_US.UTF-8")
         )
         .with_gha(
             "publish",
