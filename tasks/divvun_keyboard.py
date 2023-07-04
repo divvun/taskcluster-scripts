@@ -53,16 +53,6 @@ def create_ios_keyboard_task(bundle, _is_dev):
             ),
         )
         .with_gha(
-            "nuke certs",
-            GithubActionScript(
-                """
-                bundle exec fastlane match nuke distribution
-                """
-            )
-            .with_env("SPACESHIP_SKIP_2FA_UPGRADE", 1)
-            .with_env("LANG", "en_US.UTF-8")
-        )
-        .with_gha(
             "publish",
             GithubActionScript(
                 """
