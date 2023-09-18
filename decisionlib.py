@@ -827,9 +827,9 @@ class WindowsGenericWorkerTask(GenericWorkerTask):
 
     def with_curl(self):
         return self.with_path_from_homedir(
-            "curl\\curl-7.81.0-win64-mingw\\bin"
+            "curl\\curl-8.3.0_1-win64-mingw\\bin"
         ).with_directory_mount(
-            "https://curl.se/windows/dl-7.81.0/curl-7.81.0-win64-mingw.zip",
+            "https://curl.se/windows/dl-8.3.0_1/curl-8.3.0_1-win64-mingw.zip",
             path="curl",
         )
 
