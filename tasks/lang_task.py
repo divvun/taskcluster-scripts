@@ -27,12 +27,14 @@ def create_lang_tasks(repo_name):
         'build', {}).get('grammar-checkers', False)
 
     previous_task_id = None
+    speller_task_id = None
 
     if should_build_analysers:
         previous_task_id = create_analysers_task(should_install_apertium)
 
     if should_build_spellers:
         previous_task_id = create_spellers_task(previous_task_id)
+        speller_task_id = previous_task_id
 
     if should_build_grammar_checkers:
         previous_task_id = create_grammar_checkers_task(previous_task_id)
@@ -46,7 +48,7 @@ def create_lang_tasks(repo_name):
         ("macos-latest", "speller-mobile"),
         ("windows-latest", "speller-windows"),
     ]:
-        create_bundle_task(os_, type_, previous_task_id)
+        create_bundle_task(os_, type_, speller_task_id)
 
 
 def create_analysers_task(with_apertium):
