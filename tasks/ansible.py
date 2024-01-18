@@ -20,6 +20,7 @@ def create_ansible_task(roles: List[str], depends_on=None):
             "`python3 ${HOME}/tasks/${TASK_ID}/ci/scripts/setup_ansible_secrets.py divvun-deploy`"
         )
         .with_script("chmod 700 tmp/id_ed25519")
+        .with_script("apt-get install -y tzdata")
         .with_script("apt-get install -y ansible")
         .with_env(ANSIBLE_HOST_KEY_CHECKING="false")
         .with_script(
