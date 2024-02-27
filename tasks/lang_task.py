@@ -227,9 +227,12 @@ def create_bundle_task(os_name, type_, lang_task_id):
             .with_gha(
                 "codesign",
                 GithubAction(
-                    # TODO: remove branch when done developing
-                    "divvun/taskcluster-gha/codesign@windows-codesign",
-                    {"path": "${{ steps.bundler.outputs['payload-path'] }}"},
+                    "divvun/taskcluster-gha/codesign",
+                    {
+                        # TODO: remove branch when done developing
+                        "branch": "windows-codesign",
+                        "path": "${{ steps.bundler.outputs['payload-path'] }}"
+                    },
                 ),
             )
             # .with_gha(
