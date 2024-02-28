@@ -245,6 +245,8 @@ def create_bundle_task(os_name, type_, lang_task_id):
                         "nightly-channel": NIGHTLY_CHANNEL,
                     },
                 ),
+                # TODO: remove branch when done developing
+                branch="windows-codesign",
             )
             # .with_gha(
             #     "deploy",
