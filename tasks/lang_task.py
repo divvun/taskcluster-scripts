@@ -289,6 +289,8 @@ def create_bundle_task(os_name, type_, lang_task_id):
                         "packages": "pahkat-uploader, divvun-bundler, thfst-tools, xcnotary",
                     },
                 ),
+                # TODO: remove branch when done developing
+                branch="windows-codesign",
             )
             .with_gha(
                 "setup",
