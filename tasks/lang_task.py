@@ -247,24 +247,29 @@ def create_bundle_task(os_name, type_, lang_task_id):
                         "nightly-channel": NIGHTLY_CHANNEL,
                     },
                 ),
-                # TODO: remove branch when done developing
-                branch="windows-codesign",
             )
             # .with_gha(
-            #     "deploy",
+            #     "codesign",
             #     GithubAction(
-            #         "divvun/taskcluster-gha/speller/deploy",
-            #         {
-            #             "speller-type": type_,
-            #             "speller-manifest-path": "manifest.toml",
-            #             "payload-path": "${{ steps.codesign.outputs['payload-path'] }}",
-            #             "version": "${{ steps.version.outputs.version }}",
-            #             "channel": "${{ steps.version.outputs.channel }}",
-            #             "repo": "https://pahkat.uit.no/main/",
-            #             "nightly-channel": NIGHTLY_CHANNEL,
-            #         },
+            #         "divvun/taskcluster-gha/codesign",
+            #         { "path": "${{ steps.bundler.outputs['payload-path'] }}" },
             #     ),
             # )
+            .with_gha(
+                "deploy",
+                GithubAction(
+                    "divvun/taskcluster-gha/speller/deploy",
+                    {
+                        "speller-type": type_,
+                        "speller-manifest-path": "manifest.toml",
+                        "payload-path": "${{ steps.bundler.outputs['payload-path'] }}",
+                        "version": "${{ steps.version.outputs.version }}",
+                        "channel": "${{ steps.version.outputs.channel }}",
+                        "repo": "https://pahkat.uit.no/main/",
+                        "nightly-channel": NIGHTLY_CHANNEL,
+                    },
+                ),
+            )
             .find_or_create(f"bundle.{os_name}_x64_{type_}.{CONFIG.index_path}")
         )
 
