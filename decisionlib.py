@@ -482,9 +482,9 @@ class Task:
             **kwargs,
         )
 
-    def with_ghas(self, actions: List[Tuple[str, gha.GithubAction]], enabled=True):
+    def with_ghas(self, actions: List[Tuple[str, gha.GithubAction]], branch=None, enabled=True):
         for name, action in actions:
-            self.with_gha(name, action, enabled)
+            self.with_gha(name, action, branch, enabled)
         return self
 
     def with_gha(self, name: str, gha: gha.GithubAction, branch=None, enabled=True):
@@ -492,13 +492,19 @@ class Task:
             return self
 
         if gha.git_fetch_url and gha.git_fetch_url not in self.action_paths:
+            target = f"{gha.repo_name}-{branch}" if branch else gha.repo_name
+            print(f"target: {target}")
+
             self.with_additional_repo(
                 gha.git_fetch_url,
                 os.path.join(SHARED.task_root_for(
-                    self.platform()), gha.repo_name),
+                    self.platform()), target),
                 branch=branch
             )
-            self.action_paths.add(gha.git_fetch_url)
+
+            action_path = f"{gha.git_fetch_url}-{branch}" if branch else gha.git_fetch_url
+            print(f"action_path: {action_path}")
+            self.action_paths.add(action_path)
 
         if not any(
             CONFIG.git_ref == "refs/heads/%s" % branch for branch in DEPLOY_BRANCHES
