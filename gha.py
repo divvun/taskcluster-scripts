@@ -6,7 +6,7 @@ import os
 
 
 class GithubAction:
-    def __init__(self, path, args, *, run_if=None, npm_install=False, enable_post=True):
+    def __init__(self, path, args, *, branch=None, run_if=None, npm_install=False, enable_post=True):
         """
         Path here is the github path to an actions which is {org}/{repo}/{action_path_in_repo}
         Args will all be put in the env as INPUT_{key} = {value}
@@ -18,6 +18,7 @@ class GithubAction:
             self.path = path
             self.version = "master"
         self.args = {}
+        self.branch = branch
         self.post_path = None
         self.run_path = "index.js"
         self.parse_config()
@@ -95,6 +96,13 @@ class GithubAction:
         return "/".join(parts[2:])
 
     @property
+    def repo_clone_path(self):
+        if not self.branch:
+            return self.repo_name
+        
+        return f"{self.repo_name}@{self.branch}"
+
+    @property
     def git_fetch_url(self):
         return f"https://github.com/{self.repo_name}"
 
@@ -120,21 +128,23 @@ class GithubAction:
 
     def gen_script(self, platform):
         task_root = self.task_root(platform)
+        repo_path = f"{task_root}{self.repo_clone_path}"
 
         out = ""
         if self.npm_install:
-            out += f"npm install {task_root}{self.repo_name}\n"
-            self.env["NODE_PATH"] = f"{task_root}{self.repo_name}/node_modules"
-        return out + f"node {task_root}{self.repo_name}/{self.script_path}"
+            out += f"npm install {repo_path}\n"
+            self.env["NODE_PATH"] = f"{repo_path}/node_modules"
+        return out + f"node {repo_path}/{self.script_path}"
 
     def gen_post_script(self, platform):
         task_root = self.task_root(platform)
+        repo_path = f"{task_root}{self.repo_clone_path}"
 
         out = ""
         if self.npm_install:
-            out += f"npm install {task_root}{self.repo_name}\n"
-            self.env["NODE_PATH"] = f"{task_root}{self.repo_name}/node_modules"
-        return out + f"node {task_root}{self.repo_name}/{self.post_script_path}"
+            out += f"npm install {repo_path}\n"
+            self.env["NODE_PATH"] = f"{repo_path}/node_modules"
+        return out + f"node {repo_path}/{self.post_script_path}"
 
     def with_outputs_from(self, task_id):
         self.outputs_from.add(task_id)
