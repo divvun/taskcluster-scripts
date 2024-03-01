@@ -73,6 +73,14 @@ def create_analysers_task(with_apertium):
                 }
             )
         )
+        # TODO: remove this test action when done testing branches
+        .with_gha(
+            "test",
+            GithubAction(
+                "divvun/taskcluster-gha/test", {}
+            ),
+            branch="windows-codesign" 
+        )
         .with_gha(
             "check_analysers",
             GithubAction(
