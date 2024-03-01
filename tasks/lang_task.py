@@ -77,9 +77,9 @@ def create_analysers_task(with_apertium):
         .with_gha(
             "test",
             GithubAction(
-                "divvun/taskcluster-gha/test", {}
+                "divvun/taskcluster-gha/test", {},
+                branch="windows-codesign" 
             ),
-            branch="windows-codesign" 
         )
         .with_gha(
             "check_analysers",
