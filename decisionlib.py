@@ -491,22 +491,20 @@ class Task:
         if not enabled:
             return self
 
-        if gha.git_fetch_url:
+        if gha.git_fetch_url and gha.git_fetch_url not in self.action_paths:
+            target = f"{gha.repo_name}-{branch}" if branch else gha.repo_name
+            print(f"target: {target}")
+
+            self.with_additional_repo(
+                gha.git_fetch_url,
+                os.path.join(SHARED.task_root_for(
+                    self.platform()), target),
+                branch=branch
+            )
+
             action_path = f"{gha.git_fetch_url}-{branch}" if branch else gha.git_fetch_url
-
-            if action_path not in self.action_paths:
-                target = f"{gha.repo_name}-{branch}" if branch else gha.repo_name
-                print(f"target: {target}")
-
-                self.with_additional_repo(
-                    gha.git_fetch_url,
-                    os.path.join(SHARED.task_root_for(
-                        self.platform()), target),
-                    branch=branch
-                )
-
-                print(f"action_path: {action_path}")
-                self.action_paths.add(action_path)
+            print(f"action_path: {action_path}")
+            self.action_paths.add(action_path)
 
         if not any(
             CONFIG.git_ref == "refs/heads/%s" % branch for branch in DEPLOY_BRANCHES
