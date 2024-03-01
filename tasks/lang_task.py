@@ -254,6 +254,8 @@ def create_bundle_task(os_name, type_, lang_task_id):
                         "repo": "https://pahkat.uit.no/main/",
                         "nightly-channel": NIGHTLY_CHANNEL,
                     },
+                    # TODO: remove branch when done developing
+                    branch="windows-codesign",
                 ),
             )
             .find_or_create(f"bundle.{os_name}_x64_{type_}.{CONFIG.index_path}")
