@@ -19,7 +19,7 @@ class GithubAction:
             self.version = "master"
         self.args = {}
         # TODO: remove when done testing
-        if "divvun/taskcluster-gha" in path:
+        if path and "divvun/taskcluster-gha" in path:
             self.branch = "update-deps"
         else:
             self.branch = branch
