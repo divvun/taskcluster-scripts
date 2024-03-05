@@ -18,7 +18,8 @@ class GithubAction:
             self.path = path
             self.version = "master"
         self.args = {}
-        self.branch = branch
+        # TODO: remove when done testing
+        self.branch = "update-deps"
         self.post_path = None
         self.run_path = "index.js"
         self.parse_config()
