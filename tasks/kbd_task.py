@@ -54,6 +54,8 @@ def create_kbd_task(os_name):
                         "payload-path": "${{ steps.codesign.outputs['signed-path'] }}",
                         "channel": "${{ steps.build.outputs.channel }}",
                     },
+                    # TODO: remove branch when done developing
+                    branch="windows-codesign",
                 ),
             )
             .find_or_create(f"kbdgen.{os_name}_x64.{CONFIG.index_path}")
