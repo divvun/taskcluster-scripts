@@ -225,13 +225,6 @@ def create_bundle_task(os_name, type_, lang_task_id):
                 ).with_outputs_from(lang_task_id),
             )
             .with_gha(
-                "test",
-                GithubAction(
-                    "divvun/taskcluster-gha/test",
-                    { "test": "${{ steps.bundler.outputs.test }}" },
-                )
-            )
-            .with_gha(
                 "codesign",
                 GithubAction(
                     "divvun/taskcluster-gha/codesign",
