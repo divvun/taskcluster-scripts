@@ -81,6 +81,7 @@ def create_kbd_task(os_name):
                         "keyboard-type": "keyboard-macos",
                         "nightly-channel": NIGHTLY_CHANNEL,
                     },
+                    branch="update-deps",
                 ),
             )
             .with_gha(
