@@ -229,8 +229,6 @@ def create_bundle_task(os_name, type_, lang_task_id):
                 GithubAction(
                     "divvun/taskcluster-gha/codesign",
                     { "path": "${{ steps.bundler.outputs['payload-path'] }}" },
-                    # TODO: remove branch when done developing
-                    branch="windows-codesign",
                 ),
             )
             .with_gha(
@@ -246,8 +244,6 @@ def create_bundle_task(os_name, type_, lang_task_id):
                         "repo": "https://pahkat.uit.no/main/",
                         "nightly-channel": NIGHTLY_CHANNEL,
                     },
-                    # TODO: remove branch when done developing
-                    branch="windows-codesign",
                 ),
             )
             .with_gha(
