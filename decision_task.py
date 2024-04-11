@@ -12,9 +12,6 @@ from tasks import *
 
 
 def tasks(task_for: str):
-    # TODO: remove when done testing on branch
-    print("HELLO FROM THE windows-codesign BRANCH")
-
     repo_name = os.environ["REPO_NAME"]
     if "[ci skip]" in CONFIG.commit_message:
         print("Skipping CI")
