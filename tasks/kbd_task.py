@@ -39,12 +39,19 @@ def create_kbd_task(os_name):
                 ),
             )
             .with_gha(
+                "codesign",
+                GithubAction(
+                    "divvun/taskcluster-gha/codesign",
+                    { "path": "${{ steps.build.outputs['payload-path'] }}" },
+                ),
+            )
+            .with_gha(
                 "upload",
                 GithubAction(
                     "divvun/taskcluster-gha/keyboard/deploy",
                     {
                         "keyboard-type": "keyboard-windows",
-                        "payload-path": "${{ steps.build.outputs['payload-path'] }}",
+                        "payload-path": "${{ steps.codesign.outputs['signed-path'] }}",
                         "channel": "${{ steps.build.outputs.channel }}",
                     },
                 ),
