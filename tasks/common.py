@@ -56,7 +56,7 @@ def linux_build_task(name, bundle_dest="repo", with_secrets=True, clone_self=Tru
         .with_gha(
             "clone",
             GithubAction(
-                "actions/checkout@v4.1.3",
+                "actions/checkout@4.1.3",
                 {
                     "repository": os.environ["REPO_FULL_NAME"],
                     "path": bundle_dest,
