@@ -17,14 +17,8 @@ class GithubAction:
         else:
             self.path = path
             self.version = "master"
-
         self.args = {}
         self.branch = branch
-
-        # FIXME: temporary hack to attempt fixing the checkout action
-        if path and path == "actions/checkout":
-            self.branch = "releases/v4.0.0"
-            
         self.post_path = None
         self.run_path = "index.js"
         self.parse_config()
