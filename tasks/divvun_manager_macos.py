@@ -63,7 +63,7 @@ def create_divvun_manager_macos_task():
                 },
             ),
         )
-        .with_gha("pahkat", gha_pahkat(["pahkat-uploader", "xcnotary"]))
+        .with_gha("pahkat", gha_pahkat(["pahkat-uploader"]))
         .with_gha(
             "build_service_x86",
             GithubAction(
