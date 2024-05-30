@@ -19,11 +19,15 @@ class GithubAction:
             self.version = "master"
 
         self.args = {}
-        self.branch = "fix-divvun-manager-windows"
+        self.branch = branch
 
         # FIXME: temporary hack to attempt fixing the checkout action
         if path and path == "actions/checkout":
             self.branch = "releases/v4.0.0"
+
+        # TODO: remove this when done testing
+        if path and "taskcluster-gha" in path:
+            self.branch = "fix-divvun-manager-windows"
             
         self.post_path = None
         self.run_path = "index.js"
