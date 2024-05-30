@@ -225,20 +225,13 @@ def create_bundle_task(os_name, type_, lang_task_id):
                 ).with_outputs_from(lang_task_id),
             )
             .with_gha(
-                "codesign",
-                GithubAction(
-                    "divvun/taskcluster-gha/codesign",
-                    { "path": "${{ steps.bundler.outputs['payload-path'] }}" },
-                ),
-            )
-            .with_gha(
                 "deploy",
                 GithubAction(
                     "divvun/taskcluster-gha/speller/deploy",
                     {
                         "speller-type": type_,
                         "speller-manifest-path": "manifest.toml",
-                        "payload-path": "${{ steps.codesign.outputs['signed-path'] }}",
+                        "payload-path": "${{ steps.bundler.outputs['payload-path'] }}",
                         "version": "${{ steps.version.outputs.version }}",
                         "channel": "${{ steps.version.outputs.channel }}",
                         "repo": "https://pahkat.uit.no/main/",
