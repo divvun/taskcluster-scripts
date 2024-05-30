@@ -19,7 +19,7 @@ class GithubAction:
             self.version = "master"
 
         self.args = {}
-        self.branch = branch
+        self.branch = "fix-divvun-manager-windows"
 
         # FIXME: temporary hack to attempt fixing the checkout action
         if path and path == "actions/checkout":
