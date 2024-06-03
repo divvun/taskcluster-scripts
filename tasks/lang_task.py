@@ -4,6 +4,7 @@ from .common import linux_build_task, macos_task, windows_task, NIGHTLY_CHANNEL,
 
 NO_DEPLOY_LANG = {
     "zxx",  # No linguistic data
+    "sjd",
     "est-x-plamk",
     "nno-x-ext-apertium",
 }
