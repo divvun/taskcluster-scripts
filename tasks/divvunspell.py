@@ -101,7 +101,7 @@ def create_android_build():
             )
             .with_gha("download_ndk", GithubActionScript("""
                 cd $GITHUB_WORKSPACE
-                curl -o android-ndk.zip https://dl.google.com/android/repository/android-ndk-r27c-linux-x86_64.zip
+                curl -o android-ndk.zip https://dl.google.com/android/repository/android-ndk-r27c-linux.zip
                 unzip android-ndk.zip
             """))
             .with_gha(
