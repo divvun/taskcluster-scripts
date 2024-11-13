@@ -1,13 +1,9 @@
 from decisionlib import CONFIG
 from gha import GithubAction, GithubActionScript
-from .common import (
-    linux_build_task,
-    macos_task,
-    gha_pahkat,
-    gha_setup,
-    PAHKAT_REPO,
-    NIGHTLY_CHANNEL,
-)
+
+from .common import (NIGHTLY_CHANNEL, PAHKAT_REPO, gha_pahkat, gha_setup,
+                     linux_build_task, macos_task)
+
 
 def create_divvunspell_tasks():
     create_android_build()
@@ -105,7 +101,7 @@ def create_android_build():
             )
             .with_gha("download_ndk", GithubActionScript("""
                 cd $GITHUB_WORKSPACE
-                curl -o android-ndk.zip https://dl.google.com/android/repository/android-ndk-r21e-linux-x86_64.zip
+                curl -o android-ndk.zip https://dl.google.com/android/repository/android-ndk-r27c-linux-x86_64.zip
                 unzip android-ndk.zip
             """))
             .with_gha(
@@ -128,7 +124,7 @@ def create_android_build():
             .with_gha("build", GithubAction("actions-rs/cargo", {
                 "command": "ndk",
                 "args": "-t armeabi-v7a -t arm64-v8a -o ./lib build -vv --lib --release --features internal_ffi",
-            }).with_env("ANDROID_NDK_HOME", "$GITHUB_WORKSPACE/android-ndk-r21e"))
+            }).with_env("ANDROID_NDK_HOME", "$GITHUB_WORKSPACE/android-ndk-r27c"))
             .with_gha("prepare_lib", GithubActionScript("""
                 mkdir -p lib/lib
                 mv lib/arm* lib/lib
