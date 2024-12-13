@@ -4,14 +4,16 @@ creating all of the other tasks for a repository's CI. It should always be the
 only thing called from a `.taskcluster.yml`, if you need new tasks, add them
 here in the right section.
 """
+
+from runner import gather_secrets
+gather_secrets()
+
 import os
 import os.path
 import decisionlib
 from decisionlib import CONFIG
 from tasks import *
-from runner import gather_secrets
 
-gather_secrets()
 
 def tasks(task_for: str):
     print("ON BRANCH: private-repos") # TODO: remove when done testing
