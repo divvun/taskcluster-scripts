@@ -10,9 +10,9 @@ import os.path
 import decisionlib
 from decisionlib import CONFIG
 from tasks import *
+from typing import Set, Any
+from taskcluster import helper
 
-import runner
-runner.gather_secrets()
 
 def tasks(task_for: str):
     print("ON BRANCH: private-repos") # TODO: remove when done testing
@@ -120,6 +120,77 @@ def tasks(task_for: str):
     if repo_name == "macdivvun-service":
         create_macdivvun_task()
 
+
+SECRETS: Set[str] = set()
+_ORIG_PRINT = print
+
+def filtered_print(*args):
+    """
+    This function is designed to replace the original print function to avoid
+    accidental secret leaks. It'll replace all secrets contained in the
+    `SECRETS` global variable with `[*******]`.
+    """
+    filtered = []
+    for arg in args:
+        for secret in SECRETS:
+            arg = str(arg).replace(secret, "[******]")
+        filtered.append(arg)
+    try:
+        _ORIG_PRINT(*filtered)
+    except UnicodeEncodeError:
+        _ORIG_PRINT("[Unicode decode error]")
+
+
+print = filtered_print
+
+
+def gather_secrets():
+    """
+    Gather all available secrets from taskcluster and put them into the global
+    `SECRETS` variable. This should be called quite early to avoid accidental
+    secrets leaking.
+    """
+    secrets_service = helper.TaskclusterConfig().get_service("secrets")
+    secret_names: Set[str] = set()
+
+    def get_values_from_json(obj: Any) -> Set[str]:
+        """
+        Returns a list of values contained in a JSON object by recursively traversing it.
+        """
+        out = set()
+
+        def flatten(x):
+            if isinstance(x, dict):
+                for value in x.values():
+                    flatten(value)
+            elif isinstance(x, list):
+                for value in x:
+                    flatten(value)
+            else:
+                out.add(x)
+
+        flatten(obj)
+        return out
+
+    continuation = None
+    while True:
+        res = secrets_service.list(continuationToken=continuation)
+        secret_names.update(set(res["secrets"]))
+        if not res.get("continuationToken"):
+            break
+        continuation = res["continuationToken"]
+
+    for name in secret_names:
+        try:
+            res = secrets_service.get(name)
+            SECRETS.update(get_values_from_json(res["secret"]))
+        except:
+            # This happens when we're not allowed to read the secret. Unfortunately
+            # there's no way of filtering out secrets we can't read from the
+            # listing so we have to try to get them all.
+            pass
+
+gather_secrets()
 
 task_for = os.environ["TASK_FOR"]
 repo_name = os.environ["REPO_NAME"]
