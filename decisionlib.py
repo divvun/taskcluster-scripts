@@ -142,7 +142,7 @@ def get_secret():
         "rootUrl": os.environ["TASKCLUSTER_PROXY_URL"] 
     })
     secrets = client.get("divvun")
-    loadedSecrets = secrets.secret
+    loadedSecrets = secrets["secret"]
     secret = loadedSecrets["TEST_SECRET"]
     return secret
 
