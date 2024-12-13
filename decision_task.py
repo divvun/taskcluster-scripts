@@ -11,10 +11,8 @@ import decisionlib
 from decisionlib import CONFIG
 from tasks import *
 
-from runner import filtered_print
-from runner import gather_secrets
-print = filtered_print
-gather_secrets()
+import runner
+runner.gather_secrets()
 
 def tasks(task_for: str):
     print("ON BRANCH: private-repos") # TODO: remove when done testing
