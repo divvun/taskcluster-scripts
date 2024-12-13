@@ -138,7 +138,9 @@ class Config:
 
 
 def get_secret():
-    client = taskcluster.Secrets()
+    client = taskcluster.Secrets({
+        "rootUrl": os.environ["TASKCLUSTER_PROXY_URL"] 
+    })
     secret = client.get("divvun")["TEST_SECRET"]
     return secret
 
