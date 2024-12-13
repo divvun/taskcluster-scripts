@@ -141,7 +141,9 @@ def get_secret():
     client = taskcluster.Secrets({
         "rootUrl": os.environ["TASKCLUSTER_PROXY_URL"] 
     })
-    secret = client.get("divvun")["TEST_SECRET"]
+    secrets = client.get("divvun")
+    loadedSecrets = secrets.secret
+    secret = loadedSecrets["TEST_SECRET"]
     return secret
 
 class Shared:
