@@ -12,6 +12,7 @@ from tasks import *
 
 
 def tasks(task_for: str):
+    print("ON BRANCH: private-repos") # TODO: remove when done testing
     repo_name = os.environ["REPO_NAME"]
     if "[ci skip]" in CONFIG.commit_message:
         print("Skipping CI")
