@@ -9,9 +9,11 @@ import os.path
 import decisionlib
 from decisionlib import CONFIG
 from tasks import *
+from runner import gather_secrets
 
 
 def tasks(task_for: str):
+    gather_secrets()
     print("ON BRANCH: private-repos") # TODO: remove when done testing
     repo_name = os.environ["REPO_NAME"]
     if "[ci skip]" in CONFIG.commit_message:
