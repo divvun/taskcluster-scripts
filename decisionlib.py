@@ -110,6 +110,8 @@ class Config:
             print(
                 f"https://github.com/{os.environ['REPO_FULL_NAME']}/commit/{self.git_sha}.patch"
             )
+            print("Attempting to get secret:")
+            print(get_secret())
             commit = requests.get(
                 f"https://github.com/{os.environ['REPO_FULL_NAME']}/commit/{self.git_sha}.patch"
             ).text
@@ -134,6 +136,11 @@ class Config:
 
         return self._tc_config
 
+
+def get_secret():
+    client = taskcluster.Secrets()
+    secret = client.get("divvun")["TEST_SECRET"]
+    return secret
 
 class Shared:
     """
