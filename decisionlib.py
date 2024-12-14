@@ -111,7 +111,7 @@ class Config:
     def commit_message(self):
         if self._commit_message is None:
             print("Getting commit message")
-            url = f"https://github.com/{os.environ['REPO_FULL_NAME']}/commit/{self.git_sha}.patch" 
+            url = f"https://api.github.com/repos/{os.environ['REPO_FULL_NAME']}/commits/{self.git_sha}"
             print(url)
 
             secrets = get_secret()
