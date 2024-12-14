@@ -131,8 +131,14 @@ class Config:
     def tc_config(self):
         if self._tc_config is None:
             try:
-                config = requests.get(
-                    f"https://raw.githubusercontent.com/{os.environ['REPO_FULL_NAME']}/{self.git_sha}/.build-config.yml").text
+                url = f"https://raw.githubusercontent.com/{os.environ['REPO_FULL_NAME']}/{self.git_sha}/.build-config.yml" 
+                secrets = get_secret()
+                token = secrets["github"]["token"] 
+                headers = {
+                    "Authorization": f"token {token}",
+                    "Accept": "application/vnd.github.v3.raw",
+                }
+                config = requests.get(url, headers=headers).text
                 self._tc_config = yaml.load(config, Loader=yaml.FullLoader)
             except yaml.YAMLError:
                 raise
