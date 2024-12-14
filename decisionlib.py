@@ -32,6 +32,7 @@ import yaml
 # The decision task needs access to secrets in order to support private repos.
 # Replace standard print with filtered_print and gather_secrets (as in runner.py) 
 # to prevent accidental secrets leaking
+from utils import secrets
 from runner import filtered_print, gather_secrets
 print = filtered_print
 gather_secrets()
@@ -116,9 +117,10 @@ class Config:
             url = f"https://api.github.com/repos/{os.environ['REPO_FULL_NAME']}/commits/{self.git_sha}"
             print(url)
 
-            secrets = get_secret()
-            token = secrets["github"]["token"] 
-
+            sec = secrets()
+            token = sec["github"]["token"] 
+            print("TEST_SECRET:")
+            print(sec["TEST_SECRET"])
             headers = {
                 "Authorization": f"token {token}",
                 "Accept": "application/vnd.github.v3.patch",
@@ -134,7 +136,7 @@ class Config:
         if self._tc_config is None:
             try:
                 url = f"https://raw.githubusercontent.com/{os.environ['REPO_FULL_NAME']}/{self.git_sha}/.build-config.yml" 
-                secrets = get_secret()
+                sec = secrets()
                 token = secrets["github"]["token"] 
                 headers = {
                     "Authorization": f"token {token}",
@@ -151,14 +153,6 @@ class Config:
 
         return self._tc_config
 
-
-def get_secret():
-    client = taskcluster.Secrets({
-        "rootUrl": os.environ["TASKCLUSTER_PROXY_URL"] 
-    })
-    secrets = client.get("divvun")
-    loadedSecrets = secrets["secret"]
-    return loadedSecrets
 
 class Shared:
     """

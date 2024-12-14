@@ -69,3 +69,12 @@ def create_extra_artifact(path: str, content: bytes, public=False):
     result = loop.run_until_complete(coro)
     loop.close()
     return result
+
+
+def secrets():
+    client = taskcluster.Secrets({
+        "rootUrl": os.environ["TASKCLUSTER_PROXY_URL"] 
+    })
+    secrets = client.get("divvun")
+    loadedSecrets = secrets["secret"]
+    return loadedSecrets
