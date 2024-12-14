@@ -114,7 +114,8 @@ class Config:
             url = f"https://github.com/{os.environ['REPO_FULL_NAME']}/commit/{self.git_sha}.patch" 
             print(url)
 
-            token = get_secret("github.token")
+            secrets = get_secret()
+            token = secrets["github"]["token"] 
 
             headers = {
                 "Authorization": f"token {token}",
@@ -143,14 +144,13 @@ class Config:
         return self._tc_config
 
 
-def get_secret(key):
+def get_secret():
     client = taskcluster.Secrets({
         "rootUrl": os.environ["TASKCLUSTER_PROXY_URL"] 
     })
     secrets = client.get("divvun")
     loadedSecrets = secrets["secret"]
-    secret = loadedSecrets[key]
-    return secret
+    return loadedSecrets
 
 class Shared:
     """
