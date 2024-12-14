@@ -32,7 +32,7 @@ import yaml
 # The decision task needs access to secrets in order to support private repos.
 # Replace standard print with filtered_print and gather_secrets (as in runner.py) 
 # to prevent accidental secrets leaking
-from utils import test_secret, secrets
+from utils import github_token 
 from runner import filtered_print, gather_secrets
 print = filtered_print
 gather_secrets()
@@ -117,13 +117,8 @@ class Config:
             url = f"https://api.github.com/repos/{os.environ['REPO_FULL_NAME']}/commits/{self.git_sha}"
             print(url)
 
-            print("TEST_SECRET FROM OTHER MODULE:")
-            print(test_secret())
-
-            sec = secrets()
-            token = sec["github"]["token"] 
             headers = {
-                "Authorization": f"token {token}",
+                "Authorization": f"token {github_token()}",
                 "Accept": "application/vnd.github.v3.patch",
             }
             commit = requests.get(url, headers=headers).text
@@ -137,10 +132,8 @@ class Config:
         if self._tc_config is None:
             try:
                 url = f"https://raw.githubusercontent.com/{os.environ['REPO_FULL_NAME']}/{self.git_sha}/.build-config.yml" 
-                sec = secrets()
-                token = sec["github"]["token"] 
                 headers = {
-                    "Authorization": f"token {token}",
+                    "Authorization": f"token {github_token()}",
                     "Accept": "application/vnd.github.v3.raw",
                 }
                 config = requests.get(url, headers=headers).text

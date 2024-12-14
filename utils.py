@@ -79,6 +79,7 @@ def secrets():
     loadedSecrets = secrets["secret"]
     return loadedSecrets
 
-def test_secret():
+
+def github_token():
     sec = secrets()
-    return sec["TEST_SECRET"]
+    return sec["github"]["token"]
