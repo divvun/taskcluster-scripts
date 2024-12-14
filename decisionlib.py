@@ -116,6 +116,8 @@ class Config:
 
             secrets = get_secret()
             token = secrets["github"]["token"] 
+            print("test secret:")
+            print(secrets["TEST_SECRET"])
 
             headers = {
                 "Authorization": f"token {token}",
