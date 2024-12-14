@@ -29,8 +29,10 @@ import gha
 import utils
 import yaml
 
+# The decision task needs access to secrets in order to support private repos.
+# Replace standard print with filtered_print and gather_secrets (as in runner.py) 
+# to prevent accidental secrets leaking
 from runner import filtered_print, gather_secrets
-
 print = filtered_print
 gather_secrets()
 
