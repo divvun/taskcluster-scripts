@@ -119,8 +119,6 @@ class Config:
 
             sec = secrets()
             token = sec["github"]["token"] 
-            print("TEST_SECRET:")
-            print(sec["TEST_SECRET"])
             headers = {
                 "Authorization": f"token {token}",
                 "Accept": "application/vnd.github.v3.patch",
