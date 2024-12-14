@@ -78,3 +78,7 @@ def secrets():
     secrets = client.get("divvun")
     loadedSecrets = secrets["secret"]
     return loadedSecrets
+
+def test_secret():
+    sec = secrets()
+    return sec["TEST_SECRET"]
