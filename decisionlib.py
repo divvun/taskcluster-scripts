@@ -29,6 +29,13 @@ import gha
 import utils
 import yaml
 
+# The decision task needs access to secrets in order to support private repos.
+# Replace standard print with filtered_print and gather_secrets (as in runner.py) 
+# to prevent accidental secrets leaking
+from utils import github_token 
+from runner import filtered_print, gather_secrets
+print = filtered_print
+gather_secrets()
 
 # Public API
 __all__ = [
@@ -107,13 +114,15 @@ class Config:
     def commit_message(self):
         if self._commit_message is None:
             print("Getting commit message")
-            print(
-                f"https://github.com/{os.environ['REPO_FULL_NAME']}/commit/{self.git_sha}.patch"
-            )
-            commit = requests.get(
-                f"https://github.com/{os.environ['REPO_FULL_NAME']}/commit/{self.git_sha}.patch"
-            ).text
-            print(commit)
+            url = f"https://api.github.com/repos/{os.environ['REPO_FULL_NAME']}/commits/{self.git_sha}"
+            print(url)
+
+            headers = {
+                "Authorization": f"token {github_token()}",
+                "Accept": "application/vnd.github.v3.patch",
+            }
+            commit = requests.get(url, headers=headers).text
+            # print(commit)
             self._commit_message = commit.split("diff --git a/")[0]
             print(self._commit_message)
         return self._commit_message
@@ -122,8 +131,12 @@ class Config:
     def tc_config(self):
         if self._tc_config is None:
             try:
-                config = requests.get(
-                    f"https://raw.githubusercontent.com/{os.environ['REPO_FULL_NAME']}/{self.git_sha}/.build-config.yml").text
+                url = f"https://raw.githubusercontent.com/{os.environ['REPO_FULL_NAME']}/{self.git_sha}/.build-config.yml" 
+                headers = {
+                    "Authorization": f"token {github_token()}",
+                    "Accept": "application/vnd.github.v3.raw",
+                }
+                config = requests.get(url, headers=headers).text
                 self._tc_config = yaml.load(config, Loader=yaml.FullLoader)
             except yaml.YAMLError:
                 raise
