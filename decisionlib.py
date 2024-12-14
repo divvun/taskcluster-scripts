@@ -135,7 +135,7 @@ class Config:
             try:
                 url = f"https://raw.githubusercontent.com/{os.environ['REPO_FULL_NAME']}/{self.git_sha}/.build-config.yml" 
                 sec = secrets()
-                token = secrets["github"]["token"] 
+                token = sec["github"]["token"] 
                 headers = {
                     "Authorization": f"token {token}",
                     "Accept": "application/vnd.github.v3.raw",
