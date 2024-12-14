@@ -111,14 +111,16 @@ class Config:
     def commit_message(self):
         if self._commit_message is None:
             print("Getting commit message")
-            print(
-                f"https://github.com/{os.environ['REPO_FULL_NAME']}/commit/{self.git_sha}.patch"
-            )
-            print("Attempting to get secret:")
-            print(get_secret())
-            commit = requests.get(
-                f"https://github.com/{os.environ['REPO_FULL_NAME']}/commit/{self.git_sha}.patch"
-            ).text
+            url = f"https://github.com/{os.environ['REPO_FULL_NAME']}/commit/{self.git_sha}.patch" 
+            print(url)
+
+            token = get_secret("github.token")
+
+            headers = {
+                "Authorization": f"token {token}",
+                "Accept": "application/vnd.github.v3.patch",
+            }
+            commit = requests.get(url, headers=headers).text
             print(commit)
             self._commit_message = commit.split("diff --git a/")[0]
             print(self._commit_message)
@@ -141,13 +143,13 @@ class Config:
         return self._tc_config
 
 
-def get_secret():
+def get_secret(key):
     client = taskcluster.Secrets({
         "rootUrl": os.environ["TASKCLUSTER_PROXY_URL"] 
     })
     secrets = client.get("divvun")
     loadedSecrets = secrets["secret"]
-    secret = loadedSecrets["TEST_SECRET"]
+    secret = loadedSecrets[key]
     return secret
 
 class Shared:
