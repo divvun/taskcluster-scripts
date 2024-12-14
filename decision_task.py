@@ -11,9 +11,6 @@ import decisionlib
 from decisionlib import CONFIG
 from tasks import *
 
-import runner
-runner.gather_secrets()
-
 def tasks(task_for: str):
     print("ON BRANCH: private-repos") # TODO: remove when done testing
     repo_name = os.environ["REPO_NAME"]

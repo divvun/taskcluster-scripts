@@ -29,6 +29,10 @@ import gha
 import utils
 import yaml
 
+from runner import filtered_print, gather_secrets
+
+print = filtered_print
+gather_secrets()
 
 # Public API
 __all__ = [
