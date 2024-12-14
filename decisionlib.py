@@ -122,7 +122,7 @@ class Config:
                 "Accept": "application/vnd.github.v3.patch",
             }
             commit = requests.get(url, headers=headers).text
-            print(commit)
+            # print(commit)
             self._commit_message = commit.split("diff --git a/")[0]
             print(self._commit_message)
         return self._commit_message
