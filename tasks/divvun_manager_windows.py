@@ -10,7 +10,7 @@ def create_divvun_manager_windows_tasks():
             "https://github.com/divvun/oneclick-bundler",
             "%HOMEDRIVE%%HOMEPATH%\\%TASK_ID%\\oneclick-bundler",
             True,
-            "dotnet8"
+            "dotnet-8"
         )
         .with_gha("setup", gha_setup())
         .with_gha(
